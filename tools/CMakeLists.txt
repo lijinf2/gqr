@@ -11,6 +11,7 @@ SET(TOOLS
     itqlsh_test
     dbqlsh_test
     kdbqlsh_test
+    itq_to_text
 )
 
 FOREACH(TOOL ${TOOLS})
@@ -18,3 +19,6 @@ FOREACH(TOOL ${TOOLS})
 ENDFOREACH(TOOL)
 
 SET(EXECUTABLE_OUTPUT_PATH ${LSHBOX_BINARY_DIR}/bin/${SAVE_CLASS})
+# SET(EXECUTABLE_OUTPUT_PATH ${LSHBOX_BINARY_DIR}/bin)
+
+ADD_SUBDIRECTORY(probing)

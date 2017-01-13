@@ -257,9 +257,10 @@ public:
                 }
             }
         }
-        return float(matched + 1) / float(benchTops.size() + 1);
+        return float(matched - 1) / float(benchTops.size() - 1);
     }
     /**
+     * marked by JF: it is developed by author and it is wrong, denominator should be scanner.cnt
      * Calculate the precision vale with another heap.
      * @param  topk another TopK.
      */
@@ -279,7 +280,8 @@ public:
                 }
             }
         }
-        return float(matched + 1) / float(tops.size() + 1);
+        if (tops.size() == 1) return 0;
+        else return float(matched - 1) / float(tops.size() - 1);
     }
 };
 

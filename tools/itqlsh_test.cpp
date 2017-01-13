@@ -52,12 +52,12 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::itqLsh<DATATYPE>::Parameter param;
-        param.M = 521;
-        param.L = 5;
+        param.M = 521; // number of buckets in a table
+        param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 8;
-        param.S = 100;
-        param.I = 50;
+        param.N = 8;  // number of bits
+        param.S = 60000; // number of vectors
+        param.I = 20;
         mylsh.reset(param);
         mylsh.train(data);
         mylsh.hash(data);
