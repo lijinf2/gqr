@@ -2,6 +2,7 @@ PROJECT(PROBINGS)
 
 SET(PROBINGS
     newitqlsh_probing
+    maitqlsh_probing
 )
 
 FOREACH(PROBING ${PROBINGS})
