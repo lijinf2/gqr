@@ -38,11 +38,11 @@ public:
                 // if (hashFloats[i] >= 0) {
                 //     dst1 = (hashFloats[i] - meanAndSTD[1][i]) / meanAndSTD[3][i];
                 //     dst2 = (hashFloats[i] - meanAndSTD[0][i]) / meanAndSTD[2][i];
-                //     dst = abs(dst1) - abs(dst2);   
+                //     dst = fabs(dst1) - fabs(dst2);   
                 // } else {
                 //     dst1 = (hashFloats[i] - meanAndSTD[1][i]) / meanAndSTD[3][i];
                 //     dst2 = (hashFloats[i] - meanAndSTD[0][i]) / meanAndSTD[2][i];
-                //     dst = abs(dst2) - abs(dst1);   
+                //     dst = fabs(dst2) - fabs(dst1);   
                 // }
             }
             

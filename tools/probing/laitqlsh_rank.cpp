@@ -13,13 +13,14 @@
 //////////////////////////////////////////////////////////////////////////////
 
 /**
- * @file newitqlsh_test.cpp
+ * @file laitqlsh_test.cpp
  *
  * @brief Example of using Iterative Quantization LSH index for L2 distance.
  */
 #include <lshbox.h>
-#include <lshbox/lsh/newitqlsh.h>
+#include <lshbox/lsh/laitqlsh.h>
 #include <map>
+#include <fstream>
 
 int getMaxBucketSize(const std::map<unsigned, std::vector<unsigned> >& m){
     int max = 0;
@@ -35,7 +36,7 @@ int main(int argc, char const *argv[])
 {
     if (argc < 4)
     {
-        std::cerr << "Usage: ./newitqlsh_test data_file lsh_file benchmark_file" << std::endl;
+        std::cerr << "Usage: ./laitqlsh_test data_file lsh_file benchmark_file" << std::endl;
         return -1;
     }
     std::cout << "Example of using Iterative Quantization" << std::endl << std::endl;
@@ -57,14 +58,14 @@ int main(int argc, char const *argv[])
     }
     std::cout << "use_index: " << use_index << std::endl;
 
-    lshbox::newItqLsh<DATATYPE> mylsh;
+    lshbox::laItqLsh<DATATYPE> mylsh;
     if (use_index)
     {
         mylsh.load(file);
     }
     else
     {
-        lshbox::newItqLsh<DATATYPE>::Parameter param;
+        lshbox::laItqLsh<DATATYPE>::Parameter param;
         param.M = 1; // number of buckets in a table, useless in this example
         param.L = 1;  // number of tables
         param.D = data.getDim();
@@ -75,6 +76,7 @@ int main(int argc, char const *argv[])
         mylsh.train(data);
         mylsh.hash(data);
         mylsh.save(file);
+        return 0;
     }
     std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
     std::cout << "LOADING BENCHMARK ..." << std::endl;
@@ -94,73 +96,58 @@ int main(int argc, char const *argv[])
     std::cout << "RUNING QUERY ..." << std::endl;
     timer.restart();
 
-    // cost : retrieved items / total items
-    // recall: retrieved top-k answer / total top-k answer
-    // precision: retrieved top-k answer / total retrieved answer
-
-    // multiple-buckets probing
-    lshbox::Stat cost, recall, precision;
-    lshbox::progress_display pd(bench.getQ());
     int maxProbedBK = 16;
     if (argc >= 6)
         maxProbedBK = std::atoi(argv[5]);
 
-    // mylsh.setMeanAndSTD(data);
+    std::ofstream fout("result.csv");
+    fout << "probed buckets" << "," << "recall" << "," << "precision" << "," << "avg query time" << "\n";
+    for (int numBK = 1; numBK <= maxProbedBK; numBK *= 2) {
+        lshbox::Stat cost, recall, precision;
+        lshbox::progress_display pd(bench.getQ());
+        timer.restart();
+        for (unsigned i = 0; i != bench.getQ(); ++i)
+        {
+            scanner.reset(data[bench.getQuery(i)]);
 
-    // for query multi-assign
-    // mylsh.rehash(data, maxProbedBK);
-    for (unsigned i = 0; i != bench.getQ(); ++i)
-    {
-        scanner.reset(data[bench.getQuery(i)]);
+            mylsh.queryRankingByLoss(data[bench.getQuery(i)], scanner, numBK);
+            // mylsh.queryRanking(data[bench.getQuery(i)], scanner, numBK);
 
-        // mylsh.queryByLoss(data[bench.getQuery(i)], scanner, maxProbedBK, false); // multi-probe LSH
-        mylsh.queryRanking(data[bench.getQuery(i)], scanner, maxProbedBK);
+            // parameter order wrong: float thisRecall = bench.getAnswer(i).recall(scanner.topk());
+            // parameter order wrong: float thisPrecision = bench.getAnswer(i).precision(scanner.topk());
+            float thisRecall = scanner.topk().recall(bench.getAnswer(i));
 
+            // not true precision, library is wrong
+            // float thisPrecision = scanner.topk().precision(bench.getAnswer(i));
 
-        // multiple-assignment, together with rehash
-        // mylsh.queryRehash(data[bench.getQuery(i)], scanner); // multi-assighment LSH
+            // modified version
+            float matched = thisRecall * (K - 1); 
+            float thisPrecision;
+            assert(scanner.cnt() > 0);
+            if(scanner.cnt() == 1)
+                thisPrecision = 0;
+            else
+                thisPrecision = matched / (scanner.cnt() - 1);
+            float thisCost = float(scanner.cnt()) / float(data.getSize());
 
-        // parameter order wrong: float thisRecall = bench.getAnswer(i).recall(scanner.topk());
-        // parameter order wrong: float thisPrecision = bench.getAnswer(i).precision(scanner.topk());
-        float thisRecall = scanner.topk().recall(bench.getAnswer(i));
+            std::cout << "above is query " << i
+                << ", recall " << thisRecall
+                << ", precision " << thisPrecision
+                << ", cost " << thisCost << std::endl << std::endl;
+                
+            recall << thisRecall;
+            precision << thisPrecision;
+            cost << thisCost;
+            ++pd;
+        }
+        std::cout << "MEAN QUERY TIME: " << timer.elapsed() / bench.getQ() << "s." << std::endl;
+        std::cout << "RECALL   : " << recall.getAvg() << " +/- " << recall.getStd() << std::endl;
+        std::cout << "COST     : " << cost.getAvg() << " +/- " << cost.getStd() << std::endl;
+        std::cout << "PRECISION     : " << precision.getAvg() << " +/- " << precision.getStd() << std::endl;
+        std::cout << "HASH TABLE SIZE    : " << mylsh.getBuckets().size() << std::endl;
+        std::cout << "LARGEST BUCKET SIZE    : " << getMaxBucketSize(mylsh.getBuckets()) << std::endl;
 
-        // not true precision, library is wrong
-        // float thisPrecision = scanner.topk().precision(bench.getAnswer(i));
-
-        // modified version
-        float matched = thisRecall * (K - 1); 
-        float thisPrecision;
-        assert(scanner.cnt() > 0);
-        if(scanner.cnt() == 1)
-            thisPrecision = 0;
-        else
-            thisPrecision = matched / (scanner.cnt() - 1);
-        float thisCost = float(scanner.cnt()) / float(data.getSize());
-
-        std::cout << "above is query " << i
-            << ", recall " << thisRecall
-            << ", precision " << thisPrecision
-            << ", cost " << thisCost << std::endl << std::endl;
-            
-        recall << thisRecall;
-        precision << thisPrecision;
-        cost << thisCost;
-        ++pd;
+        fout << numBK << "," << recall.getAvg() << "," << precision.getAvg() << "," << timer.elapsed() / bench.getQ() << "\n" ;
     }
-    std::cout << "MEAN QUERY TIME: " << timer.elapsed() / bench.getQ() << "s." << std::endl;
-    std::cout << "RECALL   : " << recall.getAvg() << " +/- " << recall.getStd() << std::endl;
-    std::cout << "COST     : " << cost.getAvg() << " +/- " << cost.getStd() << std::endl;
-    std::cout << "PRECISION     : " << precision.getAvg() << " +/- " << precision.getStd() << std::endl;
-    std::cout << "HASH TABLE SIZE    : " << mylsh.getBuckets().size() << std::endl;
-    std::cout << "LARGEST BUCKET SIZE    : " << getMaxBucketSize(mylsh.getBuckets()) << std::endl;
-
-    // mylsh.getMeanAndSTD(data);
-
-    // mylsh.query(data[0], scanner);
-    // std::vector<std::pair<float, unsigned> > res = scanner.topk().getTopk();
-    // for (std::vector<std::pair<float, unsigned> >::iterator it = res.begin(); it != res.end(); ++it)
-    // {
-    //     std::cout << it->second << ": " << it->first << std::endl;
-    // }
-    // std::cout << "DISTANCE COMPARISON TIMES: " << scanner.cnt() << std::endl;
+    fout.close();
 }
