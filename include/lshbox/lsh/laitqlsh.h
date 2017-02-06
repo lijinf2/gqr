@@ -35,6 +35,7 @@
 #include <eigen/Eigen/Dense>
 #include <cmath>
 #include "probing.h"
+#include <lshbox/utils.h>
 
 namespace lshbox
 {
@@ -112,9 +113,10 @@ public:
      * @param t table to probe
      * @param bucketId bucket to probe
      * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
+     * @return number of item probed
      */
     template<typename SCANNER>
-    void probe(int t, unsigned bucketId, SCANNER &scanner);
+    int probe(int t, unsigned bucketId, SCANNER &scanner);
     /**
      * Query the approximate nearest neighborholds.
      *
@@ -185,8 +187,8 @@ public:
      * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
      * @param maxNumBuckets Maximum number of buckets to probe
      * */
-    template<typename SCANNER>
-    void queryRanking(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets);
+    template<typename PROBER>
+    void queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
     /**
      * ranking hash code to query the approximate nearest neighborholds by considering the query quantization error.
      *
@@ -204,7 +206,7 @@ public:
      * @param maxNumBuckets Maximum number of buckets to probe
      * */
     template<typename SCANNER>
-    void queryByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD = false);
+    void queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD = false);
 
     /**
      * re Hash the dataset to L buckets, by multi assignment.
@@ -220,12 +222,14 @@ public:
      */
     template<typename SCANNER>
     void queryRehash(const DATATYPE *domin, SCANNER &scanner);
-private:
+
     Parameter param;
+    std::vector<std::map<unsigned, std::vector<unsigned> > > tables;
+
+private:
     std::vector<std::vector<std::vector<float> > > pcsAll;
     std::vector<std::vector<std::vector<float> > > omegasAll;
     std::vector<std::vector<unsigned> > rndArray;
-    std::vector<std::map<unsigned, std::vector<unsigned> > > tables;
     std::vector<std::vector<float>> meanAndSTD;
 };
 }
@@ -372,16 +376,16 @@ std::vector<std::vector<float>> lshbox::laItqLsh<DATATYPE>::getMeanAndSTD(Matrix
         if(countNegative[i] != 0) sumNegative[i] /= countNegative[i];
     }
 
-    std::cout << "Positive mean: ";
-    for (int i = 0; i < param.N; ++i) {
-        std::cout << sumPositive[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "Negative mean: ";
-    for (int i = 0; i < param.N; ++i) {
-        std::cout << sumNegative[i] << " ";
-    }
-    std::cout << std::endl;
+    // std::cout << "Positive mean: ";
+    // for (int i = 0; i < param.N; ++i) {
+    //     std::cout << sumPositive[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Negative mean: ";
+    // for (int i = 0; i < param.N; ++i) {
+    //     std::cout << sumNegative[i] << " ";
+    // }
+    // std::cout << std::endl;
 
     // return std::pair<std::vector<float>, std::vector<float>>(sumPositive, sumNegative);
     // calculate STD
@@ -413,17 +417,17 @@ std::vector<std::vector<float>> lshbox::laItqLsh<DATATYPE>::getMeanAndSTD(Matrix
         assert(stdNegative[i] > 0);
     }
 
-    std::cout << "Positive std: ";
-    for (int i = 0; i < param.N; ++i) {
-        std::cout << stdPositive[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "Negative std: ";
-    for (int i = 0; i < param.N; ++i) {
-        std::cout << stdNegative[i] << " ";
-    }
-    std::cout << std::endl;
-
+    // std::cout << "Positive std: ";
+    // for (int i = 0; i < param.N; ++i) {
+    //     std::cout << stdPositive[i] << " ";
+    // }
+    // std::cout << std::endl;
+    // std::cout << "Negative std: ";
+    // for (int i = 0; i < param.N; ++i) {
+    //     std::cout << stdNegative[i] << " ";
+    // }
+    // std::cout << std::endl;
+    //
     std::vector<std::vector<float>> result;
     result.push_back(sumPositive);
     result.push_back(sumNegative);
@@ -457,11 +461,13 @@ void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
 }
 template<typename DATATYPE>
 template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, SCANNER &scanner)
+int lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, SCANNER &scanner)
 {
     assert(param.L == 1);
+    int numProbed = 0;
     if (tables[t].find(bucketId) != tables[t].end())
     {
+        numProbed = tables[t][bucketId].size();
         for (std::vector<unsigned>::iterator iter = tables[t][bucketId].begin(); iter != tables[t][bucketId].end(); ++iter)
         {
             scanner(*iter);
@@ -473,10 +479,8 @@ void lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, SCANNER &scanne
     thisScan.topk().genTopk();
     std::vector<std::pair<float, unsigned>> topk 
         = thisScan.topk().getTopk();
-    // for (int i = 0 ; i < topk.size(); ++i) {
-    //     std::cout << topk[i].second << " " << topk[i].first << ", ";
-    // }
-    // std::cout << std::endl;
+
+    return numProbed;
 }
 template<typename DATATYPE>
 template<typename SCANNER>
@@ -487,7 +491,7 @@ void lshbox::laItqLsh<DATATYPE>::query(const DATATYPE *domin, SCANNER &scanner)
     for (unsigned k = 0; k != param.L; ++k)
     {
         unsigned hashVal = getHashVal(k, domin);
-        std::cout << "hashVal " << hashVal << std::endl;
+        // std::cout << "hashVal " << hashVal << std::endl;
         probe(k, hashVal, scanner);
     }
     scanner.topk().genTopk();
@@ -658,8 +662,8 @@ std::vector<bool> lshbox::laItqLsh<DATATYPE>::unsignedToBools(unsigned num)
 }
 
 template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::queryRanking(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets)
+template<typename PROBER>
+void lshbox::laItqLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
 {
     scanner.reset(domin);
     assert(param.L == 1);
@@ -696,12 +700,13 @@ void lshbox::laItqLsh<DATATYPE>::queryRanking(const DATATYPE *domin, SCANNER &sc
                 proCol = 0;
                 proRow++;
             }
-            const int& probedBId = dstToBks[proRow][proCol++];
+            const unsigned& probedBId = dstToBks[proRow][proCol++];
             probe(k, probedBId, scanner);
         }
     }
     scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
 }
+
 template<typename DATATYPE>
 template<typename SCANNER>
 void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets)
@@ -735,7 +740,8 @@ void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, SCANN
             });
 
         for (int bId = 0; bId < dstToBks.size() && bId < maxNumBuckets; ++bId) {
-            int probedBId = dstToBks[bId].second;
+            unsigned probedBId = dstToBks[bId].second;
+
             probe(k, probedBId, scanner);
         }
     }
@@ -743,7 +749,7 @@ void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, SCANN
 }
 template<typename DATATYPE>
 template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::queryByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD)
+void lshbox::laItqLsh<DATATYPE>::queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD)
 {
     scanner.reset(domin);
     assert(param.L == 1);
@@ -757,13 +763,24 @@ void lshbox::laItqLsh<DATATYPE>::queryByLoss(const DATATYPE *domin, SCANNER &sca
         assert(hashFloats.size() == param.N);
 
         // query the first bucket
-        int probedBId = hashVal;
+        unsigned probedBId = hashVal;
         probe(0, probedBId, scanner);
 
         Probing pro(hashBits, hashFloats, false);
         // multi-probing
         for (int numBk = 1; numBk < maxNumBuckets; ++numBk) {
-            unsigned probedBId = pro.pop();
+            probedBId = pro.pop();
+            // std::cout << std::endl 
+            //     << "the second probed bucket is:" << probedBId
+            //     << std::endl;
+            // std::cout << "hashFloats: ";
+            // for(auto e : hashFloats)
+            //     std::cout<< e << ",";
+            // std::cout << std::endl;
+            // std::cout << "hashBits: ";
+            // for(auto e: hashBits)
+            //     std::cout<< e << ",";
+            // std::cout << std::endl;
             probe(0, probedBId, scanner);
         }
     }
@@ -796,7 +813,7 @@ void lshbox::laItqLsh<DATATYPE>::queryRehash(const DATATYPE *domin, SCANNER &sca
     scanner.reset(domin);
     assert(param.L == 1);
     unsigned hashVal = getHashVal(0, domin);
-    std::cout << "hashVal " << hashVal << std::endl;
+    // std::cout << "hashVal " << hashVal << std::endl;
     for (unsigned k = 0; k != tables.size(); ++k)
     {
         probe(k, hashVal, scanner);
