@@ -189,6 +189,7 @@ void lshbox::itqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
     std::uniform_int_distribution<unsigned> usBits(0, data.getSize() - 1);
     for (unsigned k = 0; k != param.L; ++k)
     {
+        std::cout << "start PCA " << std::endl;
         std::vector<unsigned> seqs;
         while (seqs.size() != param.S)
         {
@@ -224,8 +225,11 @@ void lshbox::itqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
         }
         Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
         R = svd.matrixU();
+        std::cout << "finish PCA " << std::endl;
+
         for (unsigned iter = 0; iter != param.I; ++iter)
         {
+            std::cout << "start iteration " << iter << std::endl;
             Eigen::MatrixXf Z = mat_c * R;
             Eigen::MatrixXf UX(Z.rows(), Z.cols());
             for (unsigned i = 0; i != Z.rows(); ++i)

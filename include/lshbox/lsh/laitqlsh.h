@@ -115,8 +115,8 @@ public:
      * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
      * @return number of item probed
      */
-    template<typename SCANNER>
-    int probe(int t, unsigned bucketId, SCANNER &scanner);
+    template<typename PROBER>
+    int probe(int t, unsigned bucketId, PROBER &prober);
     /**
      * Query the approximate nearest neighborholds.
      *
@@ -196,8 +196,8 @@ public:
      * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
      * @param maxNumBuckets Maximum number of buckets to probe
      * */
-    template<typename SCANNER>
-    void queryRankingByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets);
+    template<typename PROBER>
+    void queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
     /**
      * expand hash code by loss to query the approximate nearest neighborholds.
      *
@@ -262,6 +262,7 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
     std::uniform_int_distribution<unsigned> usBits(0, data.getSize() - 1);
     for (unsigned k = 0; k != param.L; ++k)
     {
+        std::cout << "start PCA " << std::endl;
         std::vector<unsigned> seqs;
         while (seqs.size() != param.S)
         {
@@ -297,8 +298,10 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
         }
         Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
         R = svd.matrixU();
+        std::cout << "finish PCA " << std::endl;
         for (unsigned iter = 0; iter != param.I; ++iter)
         {
+            std::cout << "start iteration: " << iter << std::endl;
             Eigen::MatrixXf Z = mat_c * R;
             Eigen::MatrixXf UX(Z.rows(), Z.cols());
             for (unsigned i = 0; i != Z.rows(); ++i)
@@ -460,26 +463,19 @@ void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
     }
 }
 template<typename DATATYPE>
-template<typename SCANNER>
-int lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, SCANNER &scanner)
+template<typename PROBER>
+int lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, PROBER& prober)
 {
-    assert(param.L == 1);
     int numProbed = 0;
     if (tables[t].find(bucketId) != tables[t].end())
     {
         numProbed = tables[t][bucketId].size();
         for (std::vector<unsigned>::iterator iter = tables[t][bucketId].begin(); iter != tables[t][bucketId].end(); ++iter)
         {
-            scanner(*iter);
+            prober(*iter);
         }
     }
     
-    // report probed items
-    SCANNER thisScan = scanner;
-    thisScan.topk().genTopk();
-    std::vector<std::pair<float, unsigned>> topk 
-        = thisScan.topk().getTopk();
-
     return numProbed;
 }
 template<typename DATATYPE>
@@ -665,87 +661,30 @@ template<typename DATATYPE>
 template<typename PROBER>
 void lshbox::laItqLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
 {
-    scanner.reset(domin);
     assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        
-        // ranking by linear sorting
-        std::vector<std::vector<unsigned>> dstToBks;
-        dstToBks.resize(param.N + 1); // maximum hamming dist is param.N
-        unsigned hamDist;
-        unsigned xorVal;
-        for ( std::map<unsigned, std::vector<unsigned> >::iterator it = tables[k].begin(); it != tables[k].end(); ++it) {
 
-            const int& bucketVal = it->first;
-            xorVal = hashVal ^ bucketVal;
+    for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
 
-            hamDist = 0;
-            // cal Number of bit
-            while(xorVal != 0){
-                hamDist++;
-                xorVal &= xorVal - 1;
-            }
-            assert(hamDist < dstToBks.size());
-            dstToBks[hamDist].push_back(bucketVal);
-        }
-
-        // dstToBks is a matrix
-        int proRow = 0; // probe from hamming dist 0
-        int proCol = 0; // probe from the first bucket
-
-        for (int bId = 0; bId < tables[k].size() && bId < maxNumBuckets; ++bId) {
-            while (proCol == dstToBks[proRow].size()) {
-                proCol = 0;
-                proRow++;
-            }
-            const unsigned& probedBId = dstToBks[proRow][proCol++];
-            probe(k, probedBId, scanner);
-        }
+        const unsigned& probedBId = prober.getNextBID();
+        probe(0, probedBId, prober);
     }
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
+
 }
 
 template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets)
+template<typename PROBER>
+void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
 {
-    scanner.reset(domin);
     assert(param.L == 1);
     for (unsigned k = 0; k != param.L; ++k)
     {
-        std::vector<bool> queryBits = getHashBits(k, domin);
-        std::vector<float> queryFloats = getHashFloats(k, domin);
-        
-        // ranking by std::sort, low efficiency
-        std::vector<std::pair<float, unsigned> > dstToBks;
-        for ( std::map<unsigned, std::vector<unsigned> >::iterator it = tables[k].begin(); it != tables[k].end(); ++it) {
 
-            std::vector<bool> bucketBits = unsignedToBools(it->first);
-            float dst = 0;
-            for (int bIdx = 0; bIdx < queryBits.size(); ++bIdx) {
-                if (queryBits[bIdx] != bucketBits[bIdx]){
-                    dst += fabs(queryFloats[bIdx]); 
-                }
-            }
-            dstToBks.push_back(std::pair<float, unsigned>(dst, it->first));
-        }
-        assert(dstToBks.size() == tables[k].size());
+        for (int bId = maxNumBuckets/2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
+            unsigned probedBId = prober.getNextBID();
 
-        std::sort(dstToBks.begin(), 
-            dstToBks.end(), 
-            [] (const std::pair<float, unsigned>& a, const std::pair<float, unsigned>& b ) {
-                return a.first < b.first;
-            });
-
-        for (int bId = 0; bId < dstToBks.size() && bId < maxNumBuckets; ++bId) {
-            unsigned probedBId = dstToBks[bId].second;
-
-            probe(k, probedBId, scanner);
+            probe(k, probedBId, prober);
         }
     }
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
 }
 template<typename DATATYPE>
 template<typename SCANNER>

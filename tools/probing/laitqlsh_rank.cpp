@@ -21,6 +21,8 @@
 #include <lshbox/lsh/laitqlsh.h>
 #include <map>
 #include <fstream>
+#include <lshbox/lsh/hammingranking.h>
+#include <lshbox/lsh/lossranking.h>
 
 int getMaxBucketSize(const std::map<unsigned, std::vector<unsigned> >& m){
     int max = 0;
@@ -69,13 +71,14 @@ int main(int argc, char const *argv[])
         param.M = 1; // number of buckets in a table, useless in this example
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 16;  // number of bits
-        param.S = 60000; // number of vectors
-        param.I = 20;
+        param.N = 256;  // number of bits
+        param.S = 1000000; // number of vectors
+        param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);
         mylsh.hash(data);
         mylsh.save(file);
+        std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
         return 0;
     }
     std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
@@ -87,9 +90,12 @@ int main(int argc, char const *argv[])
     std::string benchmark(argv[3]);
     bench.load(benchmark);
     unsigned K = bench.getK();
-    lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> scanner(
+
+    // initialize scanner
+    lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> initScanner(
         accessor,
         metric,
+
         K
     );
     std::cout << "LOADING TIME: " << timer.elapsed() << "s." << std::endl;
@@ -102,19 +108,41 @@ int main(int argc, char const *argv[])
 
     std::ofstream fout("result.csv");
     fout << "probed buckets" << "," << "recall" << "," << "precision" << "," << "avg query time" << "\n";
+
+    // initialize prober
+    typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+
+    void* raw_memory = operator new[]( 
+        sizeof(PROBER) * bench.getQ());
+    PROBER* probers = static_cast<PROBER*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) PROBER(
+            data[bench.getQuery(i)],
+            initScanner,
+            mylsh);
+    }
+
+    // probe
     for (int numBK = 1; numBK <= maxProbedBK; numBK *= 2) {
         lshbox::Stat cost, recall, precision;
         lshbox::progress_display pd(bench.getQ());
         timer.restart();
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
-            scanner.reset(data[bench.getQuery(i)]);
+            mylsh.queryRankingByLoss(data[bench.getQuery(i)], probers[i], numBK);
+            // mylsh.queryRankingByHamming(data[bench.getQuery(i)], probers[i], numBK);
 
-            mylsh.queryRankingByLoss(data[bench.getQuery(i)], scanner, numBK);
-            // mylsh.queryRanking(data[bench.getQuery(i)], scanner, numBK);
+            // scanner.reset(data[bench.getQuery(i)]);
+            // mylsh.queryProbeByLoss(data[bench.getQuery(i)], probers[i], numBK);
 
             // parameter order wrong: float thisRecall = bench.getAnswer(i).recall(scanner.topk());
             // parameter order wrong: float thisPrecision = bench.getAnswer(i).precision(scanner.topk());
+
+            lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> 
+                scanner = probers[i].getScanner();
+           // scanner = probers[i].getScanner();
+            scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
             float thisRecall = scanner.topk().recall(bench.getAnswer(i));
 
             // not true precision, library is wrong
@@ -130,10 +158,10 @@ int main(int argc, char const *argv[])
                 thisPrecision = matched / (scanner.cnt() - 1);
             float thisCost = float(scanner.cnt()) / float(data.getSize());
 
-            std::cout << "above is query " << i
-                << ", recall " << thisRecall
-                << ", precision " << thisPrecision
-                << ", cost " << thisCost << std::endl << std::endl;
+            // std::cout << "above is query " << i
+            //     << ", recall " << thisRecall
+            //     << ", precision " << thisPrecision
+            //     << ", cost " << thisCost << std::endl << std::endl;
                 
             recall << thisRecall;
             precision << thisPrecision;
@@ -150,4 +178,11 @@ int main(int argc, char const *argv[])
         fout << numBK << "," << recall.getAvg() << "," << precision.getAvg() << "," << timer.elapsed() / bench.getQ() << "\n" ;
     }
     fout.close();
+
+    // release memory of prober;
+    std::cout << "bench.getQ: " << bench.getQ() << std::endl;
+    for (unsigned i = bench.getQ() - 1; i !=0; --i) {
+        probers[i].~PROBER();
+    }
+    // operator delete[](raw_memory);
 }

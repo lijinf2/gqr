@@ -55,9 +55,9 @@ int main(int argc, char const *argv[])
         param.M = 521; // number of buckets in a table
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 8;  // number of bits
+        param.N = 16;  // number of bits
         param.S = 60000; // number of vectors
-        param.I = 20;
+        param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);
         mylsh.hash(data);
