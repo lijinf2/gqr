@@ -54,6 +54,7 @@ template<typename DATATYPE = float>
 class laItqLsh 
 {
 public:
+    typedef unsigned long long BIDTYPE;
     struct Parameter
     {
         /// Hash table size
@@ -116,7 +117,7 @@ public:
      * @return number of item probed
      */
     template<typename PROBER>
-    int probe(int t, unsigned bucketId, PROBER &prober);
+    int probe(int t, BIDTYPE bucketId, PROBER &prober);
     /**
      * Query the approximate nearest neighborholds.
      *
@@ -132,7 +133,7 @@ public:
      * @param domin The pointer to the vector
      * @return      The hash value
      */
-    unsigned getHashVal(unsigned k, const DATATYPE *domin);
+    BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
     /**
      * Load the index from binary file.
      *
@@ -175,7 +176,8 @@ public:
     /**
      * get all the buckets.
      */
-    const std::map<unsigned, std::vector<unsigned> >& getBuckets();
+    int getTableSize();
+    int getMaxBucketSize();
     /**
      * convert unsigned int to vector of boolbucketss.
      */
@@ -224,7 +226,8 @@ public:
     void queryRehash(const DATATYPE *domin, SCANNER &scanner);
 
     Parameter param;
-    std::vector<std::map<unsigned, std::vector<unsigned> > > tables;
+    // std::vector<std::map<unsigned, std::vector<unsigned> > > tables;
+    std::vector<std::map<BIDTYPE, std::vector<unsigned> > > tables;
 
 private:
     std::vector<std::vector<std::vector<float> > > pcsAll;
@@ -458,13 +461,13 @@ void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
 {
     for (unsigned k = 0; k != param.L; ++k)
     {
-        unsigned hashVal = getHashVal(k, domin);
+        BIDTYPE hashVal = getHashVal(k, domin);
         tables[k][hashVal].push_back(key);
     }
 }
 template<typename DATATYPE>
 template<typename PROBER>
-int lshbox::laItqLsh<DATATYPE>::probe(int t, unsigned bucketId, PROBER& prober)
+int lshbox::laItqLsh<DATATYPE>::probe(int t, BIDTYPE bucketId, PROBER& prober)
 {
     int numProbed = 0;
     if (tables[t].find(bucketId) != tables[t].end())
@@ -493,7 +496,7 @@ void lshbox::laItqLsh<DATATYPE>::query(const DATATYPE *domin, SCANNER &scanner)
     scanner.topk().genTopk();
 }
 template<typename DATATYPE>
-unsigned lshbox::laItqLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
+typename lshbox::laItqLsh<DATATYPE>::BIDTYPE lshbox::laItqLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
 {
     std::vector<float> domin_pc(pcsAll[k].size());
     for (unsigned i = 0; i != domin_pc.size(); ++i)
@@ -504,7 +507,7 @@ unsigned lshbox::laItqLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domi
         }
     }
 
-    unsigned hashVal = 0;
+    BIDTYPE hashVal = 0;
     for (unsigned i = 0; i != domin_pc.size(); ++i)
     {
         float product = 0;
@@ -512,7 +515,7 @@ unsigned lshbox::laItqLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domi
         {
             product += float(domin_pc[j] * omegasAll[k][i][j]);
         }
-        hashVal *= 2;
+        hashVal <<= 1; // hashVal *= 2
         if (product > 0)
         {
             hashVal += 1;
@@ -524,6 +527,10 @@ template<typename DATATYPE>
 void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
 {
     std::ifstream in(file, std::ios::binary);
+    if (!in) {
+        std::cout << "cannot open file" << file << std::endl;
+        exit(0);
+    }
     in.read((char *)&param.M, sizeof(unsigned));
     in.read((char *)&param.L, sizeof(unsigned));
     in.read((char *)&param.D, sizeof(unsigned));
@@ -541,8 +548,14 @@ void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
         in.read((char *)&count, sizeof(unsigned));
         for (unsigned j = 0; j != count; ++j)
         {
-            unsigned target;
-            in.read((char *)&target, sizeof(unsigned));
+            BIDTYPE target;
+            in.read((char *)&target, sizeof(BIDTYPE));
+
+            // unsigned fourByteTmp;
+            // in.read((char *)&fourByteTmp, sizeof(fourByteTmp));
+            // BIDTYPE target;
+            // target = fourByteTmp;
+
             unsigned length;
             in.read((char *)&length, sizeof(unsigned));
             tables[i][target].resize(length);
@@ -564,20 +577,20 @@ template<typename DATATYPE>
 void lshbox::laItqLsh<DATATYPE>::save(const std::string &file)
 {
     std::ofstream out(file, std::ios::binary);
-    out.write((char *)&param.M, sizeof(unsigned));
-    out.write((char *)&param.L, sizeof(unsigned));
-    out.write((char *)&param.D, sizeof(unsigned));
-    out.write((char *)&param.N, sizeof(unsigned));
-    out.write((char *)&param.S, sizeof(unsigned));
+    out.write((char *)&param.M, sizeof(unsigned)); // 4 bytes
+    out.write((char *)&param.L, sizeof(unsigned)); // 4 bytes
+    out.write((char *)&param.D, sizeof(unsigned)); // 4 bytes
+    out.write((char *)&param.N, sizeof(unsigned)); // 4 bytes
+    out.write((char *)&param.S, sizeof(unsigned)); // 4 bytes
     for (int i = 0; i != param.L; ++i)
     {
-        out.write((char *)&rndArray[i][0], sizeof(unsigned) * param.N);
+        out.write((char *)&rndArray[i][0], sizeof(unsigned) * param.N);  // 4 * N bytes
         unsigned count = unsigned(tables[i].size());
         out.write((char *)&count, sizeof(unsigned));
-        for (std::map<unsigned, std::vector<unsigned> >::iterator iter = tables[i].begin(); iter != tables[i].end(); ++iter)
+        for (std::map<BIDTYPE, std::vector<unsigned> >::iterator iter = tables[i].begin(); iter != tables[i].end(); ++iter)
         {
-            unsigned target = iter->first;
-            out.write((char *)&target, sizeof(unsigned));
+            BIDTYPE target = iter->first;
+            out.write((char *)&target, sizeof(BIDTYPE));
             unsigned length = unsigned(iter->second.size());
             out.write((char *)&length, sizeof(unsigned));
             out.write((char *) & ((iter->second)[0]), sizeof(unsigned) * length);
@@ -637,10 +650,23 @@ std::vector<bool> lshbox::laItqLsh<DATATYPE>::getHashBits(unsigned k, const DATA
     return hashBits;
 }
 template<typename DATATYPE>
-const std::map<unsigned, std::vector<unsigned> >& lshbox::laItqLsh<DATATYPE>::getBuckets()
+int lshbox::laItqLsh<DATATYPE>::getTableSize()
 {
     assert(param.L == 1);
-    return tables[0];
+    return tables[0].size();
+}
+template<typename DATATYPE>
+int lshbox::laItqLsh<DATATYPE>::getMaxBucketSize()
+{
+    assert(param.L == 1);
+    int max = 0;
+    std::map<BIDTYPE, std::vector<unsigned> >::const_iterator it;
+    for (it = tables[0].begin(); it != tables[0].end(); ++it) {
+        if (it->second.size() > max) {
+            max = it->second.size();
+        }
+    }
+    return max;
 }
 template<typename DATATYPE>
 std::vector<bool> lshbox::laItqLsh<DATATYPE>::unsignedToBools(unsigned num)
@@ -665,7 +691,7 @@ void lshbox::laItqLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PR
 
     for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
 
-        const unsigned& probedBId = prober.getNextBID();
+        const BIDTYPE& probedBId = prober.getNextBID();
         probe(0, probedBId, prober);
     }
 

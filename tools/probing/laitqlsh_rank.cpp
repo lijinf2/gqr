@@ -22,18 +22,8 @@
 #include <map>
 #include <fstream>
 #include <lshbox/lsh/hammingranking.h>
-#include <lshbox/lsh/lossranking.h>
+// #include <lshbox/lsh/lossranking.h>
 
-int getMaxBucketSize(const std::map<unsigned, std::vector<unsigned> >& m){
-    int max = 0;
-    std::map<unsigned, std::vector<unsigned> >::const_iterator it;
-    for (it = m.begin(); it != m.end(); ++it) {
-        if (it->second.size() > max) {
-            max = it->second.size();
-        }
-    }
-    return max;
-}
 int main(int argc, char const *argv[])
 {
     if (argc < 4)
@@ -71,7 +61,7 @@ int main(int argc, char const *argv[])
         param.M = 1; // number of buckets in a table, useless in this example
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 256;  // number of bits
+        param.N = 20;  // number of bits
         param.S = 1000000; // number of vectors
         param.I = 50;
         mylsh.reset(param);
@@ -110,8 +100,8 @@ int main(int argc, char const *argv[])
     fout << "probed buckets" << "," << "recall" << "," << "precision" << "," << "avg query time" << "\n";
 
     // initialize prober
-    typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
@@ -130,8 +120,8 @@ int main(int argc, char const *argv[])
         timer.restart();
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
-            mylsh.queryRankingByLoss(data[bench.getQuery(i)], probers[i], numBK);
-            // mylsh.queryRankingByHamming(data[bench.getQuery(i)], probers[i], numBK);
+            // mylsh.queryRankingByLoss(data[bench.getQuery(i)], probers[i], numBK);
+            mylsh.queryRankingByHamming(data[bench.getQuery(i)], probers[i], numBK);
 
             // scanner.reset(data[bench.getQuery(i)]);
             // mylsh.queryProbeByLoss(data[bench.getQuery(i)], probers[i], numBK);
@@ -158,11 +148,6 @@ int main(int argc, char const *argv[])
                 thisPrecision = matched / (scanner.cnt() - 1);
             float thisCost = float(scanner.cnt()) / float(data.getSize());
 
-            // std::cout << "above is query " << i
-            //     << ", recall " << thisRecall
-            //     << ", precision " << thisPrecision
-            //     << ", cost " << thisCost << std::endl << std::endl;
-                
             recall << thisRecall;
             precision << thisPrecision;
             cost << thisCost;
@@ -172,8 +157,8 @@ int main(int argc, char const *argv[])
         std::cout << "RECALL   : " << recall.getAvg() << " +/- " << recall.getStd() << std::endl;
         std::cout << "COST     : " << cost.getAvg() << " +/- " << cost.getStd() << std::endl;
         std::cout << "PRECISION     : " << precision.getAvg() << " +/- " << precision.getStd() << std::endl;
-        std::cout << "HASH TABLE SIZE    : " << mylsh.getBuckets().size() << std::endl;
-        std::cout << "LARGEST BUCKET SIZE    : " << getMaxBucketSize(mylsh.getBuckets()) << std::endl;
+        std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
+        std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
 
         fout << numBK << "," << recall.getAvg() << "," << precision.getAvg() << "," << timer.elapsed() / bench.getQ() << "\n" ;
     }
@@ -184,5 +169,7 @@ int main(int argc, char const *argv[])
     for (unsigned i = bench.getQ() - 1; i !=0; --i) {
         probers[i].~PROBER();
     }
+
+    std::cout << "end of program" << std::endl;
     // operator delete[](raw_memory);
 }
