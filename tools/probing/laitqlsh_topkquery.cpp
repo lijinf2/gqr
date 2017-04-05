@@ -24,6 +24,7 @@
 #include <lshbox/lsh/hammingranking.h>
 // #include <lshbox/lsh/lossranking.h>
 
+
 int main(int argc, char const *argv[])
 {
     if (argc < 4)
@@ -73,6 +74,7 @@ int main(int argc, char const *argv[])
     }
     std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
     std::cout << "LOADING BENCHMARK ..." << std::endl;
+
     timer.restart();
     lshbox::Matrix<DATATYPE>::Accessor accessor(data);
     lshbox::Metric<DATATYPE> metric(data.getDim(), L2_DIST);
@@ -85,7 +87,6 @@ int main(int argc, char const *argv[])
     lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> initScanner(
         accessor,
         metric,
-
         K
     );
     std::cout << "LOADING TIME: " << timer.elapsed() << "s." << std::endl;
@@ -97,7 +98,7 @@ int main(int argc, char const *argv[])
         maxProbedBK = std::atoi(argv[5]);
 
     std::ofstream fout("result.csv");
-    fout << "probed buckets" << "," << "recall" << "," << "precision" << "," << "avg query time" << "\n";
+    fout << "probed buckets" << "," << "overall query time" << "\n";
 
     // initialize prober
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
@@ -112,45 +113,18 @@ int main(int argc, char const *argv[])
             initScanner,
             mylsh);
     }
-
+    double initTime = timer.elapsed();
     // probe
-    for (int numBK = 1; numBK <= maxProbedBK; numBK *= 2) {
-        lshbox::Stat cost, recall, precision;
-        lshbox::progress_display pd(bench.getQ());
-        timer.restart();
+    timer.restart();
+    for (int numBK = 1; numBK <= maxProbedBK; numBK *= 2) { //  # of probed items must be the power of two
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
-            // mylsh.queryRankingByLoss(data[bench.getQuery(i)], probers[i], numBK);
-            mylsh.queryRankingByHamming(data[bench.getQuery(i)], probers[i], numBK);
-
-            lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> 
-                scanner = probers[i].getScanner();
-
-            scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
-            float thisRecall = scanner.topk().recall(bench.getAnswer(i));
-
-            float matched = thisRecall * (K - 1); 
-            float thisPrecision;
-            assert(scanner.cnt() > 0);
-            if(scanner.cnt() == 1)
-                thisPrecision = 0;
-            else
-                thisPrecision = matched / (scanner.cnt() - 1);
-            float thisCost = float(scanner.cnt()) / float(data.getSize());
-
-            recall << thisRecall;
-            precision << thisPrecision;
-            cost << thisCost;
-            ++pd;
+            // queries are applied incrementally, i.e. the result of this round depends on the last round
+            mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numBK);
         }
-        std::cout << "MEAN QUERY TIME: " << timer.elapsed() / bench.getQ() << "s." << std::endl;
-        std::cout << "RECALL   : " << recall.getAvg() << " +/- " << recall.getStd() << std::endl;
-        std::cout << "COST     : " << cost.getAvg() << " +/- " << cost.getStd() << std::endl;
-        std::cout << "PRECISION     : " << precision.getAvg() << " +/- " << precision.getStd() << std::endl;
-        std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
-        std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
-
-        fout << numBK << "," << recall.getAvg() << "," << precision.getAvg() << "," << timer.elapsed() / bench.getQ() << "\n" ;
+        double retTime = timer.elapsed();
+        fout << numBK << "," << (initTime + retTime) << "\n";
+        std::cout << numBK << ", " << (initTime + retTime) << "\n";
     }
     fout.close();
 

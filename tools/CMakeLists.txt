@@ -11,7 +11,6 @@ SET(TOOLS
     itqlsh_test
     dbqlsh_test
     kdbqlsh_test
-    itq_to_text
 )
 
 FOREACH(TOOL ${TOOLS})

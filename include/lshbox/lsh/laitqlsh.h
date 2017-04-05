@@ -191,6 +191,16 @@ public:
      * */
     template<typename PROBER>
     void queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
+
+    /**
+     * ranking hash code to query the approximate nearest neighborholds.
+     *
+     * @param domin   The pointer to the vector
+     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
+     * @param numItem number of buckets to return
+     * */
+    template<typename PROBER>
+    void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
     /**
      * ranking hash code to query the approximate nearest neighborholds by considering the query quantization error.
      *
@@ -689,12 +699,24 @@ void lshbox::laItqLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PR
 {
     assert(param.L == 1);
 
+    // noted that the prober will persist the last probed results, so probed maxNumBuckets/2 buckets more
     for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
 
         const BIDTYPE& probedBId = prober.getNextBID();
         probe(0, probedBId, prober);
     }
 
+}
+
+template<typename DATATYPE>
+template<typename PROBER>
+void lshbox::laItqLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
+    assert(param.L == 1);
+
+    while(prober.getNumBucketsProbed() < tables[0].size() && prober.getNumItemsProbed() < numItems) {
+        const BIDTYPE& probedBId = prober.getNextBID();
+        probe(0, probedBId, prober); 
+    }
 }
 
 template<typename DATATYPE>
