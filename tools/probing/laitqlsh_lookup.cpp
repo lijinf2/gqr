@@ -22,6 +22,7 @@
 #include <map>
 #include <fstream>
 #include <lshbox/lsh/hammingranking.h>
+#include <lshbox/lsh/hashlookup.h>
 // #include <lshbox/lsh/lossranking.h>
 
 int main(int argc, char const *argv[])
@@ -61,8 +62,8 @@ int main(int argc, char const *argv[])
         param.M = 1; // number of buckets in a table, useless in this example
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 64;  // number of bits
-        param.S = 60000; // number of vectors
+        param.N = 40;  // number of bits
+        param.S = 1000000; // number of vectors
         param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);
@@ -121,14 +122,19 @@ int main(int argc, char const *argv[])
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
             // mylsh.queryRankingByLoss(data[bench.getQuery(i)], probers[i], numBK);
-            mylsh.queryRankingByHamming(data[bench.getQuery(i)], probers[i], numBK);
+            mylsh.queryLookupByHamming(data[bench.getQuery(i)], probers[i], numBK);
+
 
             lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> 
                 scanner = probers[i].getScanner();
-
+           // scanner = probers[i].getScanner();
             scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
             float thisRecall = scanner.topk().recall(bench.getAnswer(i));
 
+            // not true precision, library is wrong
+            // float thisPrecision = scanner.topk().precision(bench.getAnswer(i));
+
+            // modified version
             float matched = thisRecall * (K - 1); 
             float thisPrecision;
             assert(scanner.cnt() > 0);
@@ -138,6 +144,11 @@ int main(int argc, char const *argv[])
                 thisPrecision = matched / (scanner.cnt() - 1);
             float thisCost = float(scanner.cnt()) / float(data.getSize());
 
+            // std::cout << "above is query " << i
+            //     << ", recall " << thisRecall
+            //     << ", precision " << thisPrecision
+            //     << ", cost " << thisCost << std::endl << std::endl;
+                
             recall << thisRecall;
             precision << thisPrecision;
             cost << thisCost;
@@ -159,7 +170,5 @@ int main(int argc, char const *argv[])
     for (unsigned i = bench.getQ() - 1; i !=0; --i) {
         probers[i].~PROBER();
     }
-
-    std::cout << "end of program" << std::endl;
     // operator delete[](raw_memory);
 }
