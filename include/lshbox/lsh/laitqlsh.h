@@ -713,7 +713,7 @@ template<typename PROBER>
 void lshbox::laItqLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
     assert(param.L == 1);
 
-    while(prober.getNumBucketsProbed() < tables[0].size() && prober.getNumItemsProbed() < numItems) {
+    while(prober.getNumItemsProbed() < numItems && prober.nextBucketExisted()) {
         const BIDTYPE& probedBId = prober.getNextBID();
         probe(0, probedBId, prober); 
     }

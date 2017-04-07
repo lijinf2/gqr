@@ -22,6 +22,8 @@
 #include <map>
 #include <fstream>
 #include <lshbox/lsh/hammingranking.h>
+#include <lshbox/lsh/hashlookup.h>
+#include <lshbox/lsh/hashlookupPP.h>
 // #include <lshbox/lsh/lossranking.h>
 
 
@@ -101,8 +103,9 @@ int main(int argc, char const *argv[])
     fout << "probed buckets" << "," << "overall query time" << "\n";
 
     // initialize prober
-    // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
@@ -121,6 +124,7 @@ int main(int argc, char const *argv[])
         {
             // queries are applied incrementally, i.e. the result of this round depends on the last round
             mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numBK);
+            // std::cout << "Query i = " << i << ", probed items " << probers[i].getNumItemsProbed() << std::endl;
         }
         double retTime = timer.elapsed();
         fout << numBK << "," << (initTime + retTime) << "\n";
