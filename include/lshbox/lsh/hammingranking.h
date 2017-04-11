@@ -34,15 +34,29 @@ public:
             assert(hamDist < dstToBks_.size());
             dstToBks_[hamDist].push_back(bucketVal);
         }
+        setNextRowCol_();
+    }
+
+    bool nextBucketExisted() {
+
+        if (proRow_ == - 1  && proCol_ == -1) {
+            return false;
+        } else {
+            return true;
+        }
     }
 
     BIDTYPE getNextBID(){
         numBucketsProbed_++;
-        while (proCol_ == dstToBks_[proRow_].size()) {
-            proCol_ = 0;
-            proRow_++;
-        }
-        return dstToBks_[proRow_][proCol_++];
+
+        // get current bucket to be returned
+        BIDTYPE nextBID = dstToBks_[proRow_][proCol_];
+
+        // set proRow_ or proCol_ to the next bucket
+        setNextRowCol_();
+
+        return nextBID;
+
     }
 
     void operator()(unsigned key){
@@ -72,8 +86,24 @@ public:
 private:
     std::vector<std::vector<BIDTYPE>> dstToBks_;
     int proRow_ = 0;
-    int proCol_ = 0;
+    int proCol_ = -1;
     lshbox::Scanner<ACCESSOR> scanner_;
-    int numBucketsProbed_ = 0;
+    unsigned long long numBucketsProbed_ = 0;
     int numItemsProbed_ = 0;
+
+    // set proRow_ and proCol_ to the position of next bucket
+    // If there is no next bucket, proRow_ and proCol will be both set to -1
+    void setNextRowCol_() {
+        proCol_++;
+        while(proRow_ < dstToBks_.size() && proCol_ >= dstToBks_[proRow_].size()) {
+            proRow_++;
+            proCol_ = 0;
+        }
+
+        // set proRow_ and proCol_ to -1 to denote no bucket
+        if (proRow_ == dstToBks_.size()) {
+            proRow_ = -1;
+            proCol_ = -1;
+        }
+    }
 };

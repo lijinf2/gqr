@@ -63,6 +63,6 @@ public:
     }
 private:
     std::vector<std::pair<float, unsigned> > dstToBks_;
-    unsigned index = 0;
+    unsigned long long index = 0;
     lshbox::Scanner<ACCESSOR> scanner_;
 };

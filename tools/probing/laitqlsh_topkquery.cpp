@@ -103,9 +103,9 @@ int main(int argc, char const *argv[])
     fout << "probed buckets" << "," << "overall query time" << "\n";
 
     // initialize prober
-    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
