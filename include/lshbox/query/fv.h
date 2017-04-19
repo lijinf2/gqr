@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#pragma once
 // flipping vector
 class FV {
     public:

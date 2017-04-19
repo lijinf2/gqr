@@ -25,7 +25,6 @@
 #include <lshbox/lsh/hashlookup.h>
 #include <lshbox/lsh/hashlookupPP.h>
 #include <lshbox/lsh/lossranking.h>
-#include <lshbox/lsh/losslookup.h>
 #include <lshbox/query/fv.h>
 #include <lshbox/query/losslookup.h>
 
@@ -124,7 +123,7 @@ int main(int argc, char const *argv[])
 
     // initialize losslookup probers
     typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    FV fvs(param.N);
+    FV fvs(mylsh.param.N);
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());

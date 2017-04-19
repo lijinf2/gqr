@@ -29,7 +29,7 @@ public:
             }
             dstToBks_.push_back(std::pair<float, BIDTYPE>(dst, it->first));
         }
-        assert(dstToBks.size() == mylsh.tables[0].size());
+        assert(dstToBks_.size() == mylsh.tables[0].size());
 
         std::sort(dstToBks_.begin(), 
             dstToBks_.end(), 

@@ -9,7 +9,7 @@
 // layer equals to hamDist
 class LayerScoreComparator {
 public: 
-    bool operator(
+    bool operator() (
         const std::pair<unsigned int, float>& a,
         const std::pair<unsigned int, float>& b) const {
         return a.second > b.second;
@@ -32,7 +32,7 @@ public:
 
         // initialize scanner_, hashBits_, and R_
         scanner_.reset(domin);
-        std::vector<bool> hashBits_ = mylsh.getHashBits(0, domin);
+        hashBits_ = mylsh.getHashBits(0, domin);
         R_ = hashBits_.size();
 
         // initialize posLossPairs_
@@ -53,10 +53,10 @@ public:
         
         fvs_ = fvs;
         // initialize idxToLayer_ and then minHeap
-        idxToLayer_.resize(hashBits.size() + 1);
+        idxToLayer_.resize(R_ + 1);
         for (int layer = 0; layer < idxToLayer_.size(); ++layer) {
             idxToLayer_[layer] = 0;
-            insertHeap(layer, 0); 
+            insertHeap_(layer, 0); 
         }
 
     }
@@ -67,13 +67,22 @@ public:
         unsigned int layer = popHeap_();
         const bool* fv = fvs_->getFlippingVector(layer, idxToLayer_[layer]);
 
-        BIDTYPE newBucket = 0;
+        // apply flipping
+        std::vector<bool> newHashBits = hashBits_;
         for (int i = 0; i < R_; ++i) {
-            newBucket <<= 1;
             if (fv[i] == true) {
-                newBucket += 1 - hashBits_[i];
-            } else {
-                newBucket += hashBits_[i];
+                newHashBits[posLossPairs_[i].first] = 
+                    1 - newHashBits[posLossPairs_[i].first];
+            }
+        }
+
+
+        // cal new Bucket
+        BIDTYPE newBucket = 0;
+        for (int i = 0; i < newHashBits.size() ; ++i) {
+            newBucket <<= 1;
+            if (newHashBits[i] == true) {
+                newBucket += 1;
             }
         }
 
@@ -87,8 +96,8 @@ public:
     }
 
     bool nextBucketExisted() {
-        if (minHeap_.size() != 0) return true;
-        else return false;
+        if (minHeap_.empty()) return false;
+        else return true;
     }
     void operator()(unsigned key){
         numItemsProbed_++;
@@ -105,27 +114,28 @@ private:
     // example: 
     // if queryBits = 101, queryFloats = 0.1, -0.05, 0.9 
     // posLossPairs_ = (1, 0.05), (0, 0.1), (2, 0.9)
-    std::vector<std::pair<int, float>> posLossPairs_;
+    std::vector<std::pair<unsigned int, float>> posLossPairs_;
 
     // FVSIdx: FVSIdx[i] remembers the idx of hamming distance i of flopping vectors
     // priority queue: (layer, score) pairs
     std::vector<unsigned int> idxToLayer_;
 
     std::priority_queue<
-        std:pair<unsigned int, float>,
-        std::vector<std::pair<unsigned int, float>>,
+        std::pair<unsigned int, float>,
+        std::vector<std::pair<unsigned int, float> >,
         LayerScoreComparator> minHeap_; 
 
     const FV* fvs_ = NULL;
 
     lshbox::Scanner<ACCESSOR> scanner_;
-    int numItemsProbed_ = 0;
+    unsigned int numItemsProbed_ = 0;
+    unsigned int numBucketsProbed_ = 0;
 
     // insert the next element in layer $layer to minHeap_
     void insertHeap_(int layer, int idxToLayer) {
 
         // extract fv
-        if (!fvs_->existed(layer, idsToLayer)) {
+        if (!fvs_->existed(layer, idxToLayer)) {
             return ;
         }
         const bool* fv = fvs_->getFlippingVector(layer, idxToLayer);
@@ -134,12 +144,12 @@ private:
         float score = 0;
         for (int idxToFV = 0; idxToFV < R_; ++idxToFV) {
             if (fv[idxToFV] == true) {
-                score += posLossPairs_[idxToFV];
+                score += posLossPairs_[idxToFV].second;
             }
         }
 
         // push to minHeap 
-        minHeap_.insert(std::make_pair(layer, score));
+        minHeap_.push(std::make_pair(layer, score));
     }
 
     // return layer
