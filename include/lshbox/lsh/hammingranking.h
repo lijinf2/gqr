@@ -83,6 +83,7 @@ public:
     int getNumBucketsProbed() {
         return numBucketsProbed_;
     }
+
 private:
     std::vector<std::vector<BIDTYPE>> dstToBks_;
     int proRow_ = 0;

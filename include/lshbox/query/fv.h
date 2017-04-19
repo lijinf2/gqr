@@ -1,7 +1,6 @@
 #include <vector>
 #include <string>
 #include <cassert>
-
 // flipping vector
 class FV {
     public:
@@ -76,19 +75,19 @@ class FV {
         }
 
         // check whether the idx-th flipping set of FVS_[hamDist] exists or not
-        bool existed(int hamDist, int idx) {
-            if (hamDist < 0 || hamDist >= FVS_.size()) return false;
-            if (idx < 0 || idx >= numFVS_[hamDist]) return false;
+        bool existed(unsigned int hamDist, unsigned int idx) const {
+            if (hamDist >= FVS_.size()) return false;
+            if (idx >= numFVS_[hamDist]) return false;
             return true;
         }
 
         // FVS_[hammingdist], return the idx-th flipping vector
-        bool* getFlippingVector(int hamDist, int idx) {
+        const bool* getFlippingVector(unsigned int hamDist, unsigned int idx) const {
             assert(existed(hamDist, idx));
             return FVS_[hamDist] + idx * R_;
         }
 
-        std::string fvtoString(bool* p) {
+        std::string fvtoString(const bool* p) const {
             std::string str = "";
             for (int i = 0; i < R_; ++i) {
                 str += std::to_string(p[i]);
@@ -96,7 +95,7 @@ class FV {
             return str;
         }
 
-        std::string toString() {
+        std::string toString() const {
             std::string str = "";
             for (int layer = 0; layer < numFVS_.size(); ++layer) {
                 for (int idx = 0; idx < numFVS_[layer]; ++idx) {
@@ -124,4 +123,3 @@ class FV {
         std::vector<int> numFVS_; // # of flipping vector of hamming distance r
         std::vector<bool*> FVS_; // hamming distance r from 0 to R_
 };
-

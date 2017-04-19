@@ -24,7 +24,10 @@
 #include <lshbox/lsh/hammingranking.h>
 #include <lshbox/lsh/hashlookup.h>
 #include <lshbox/lsh/hashlookupPP.h>
-// #include <lshbox/lsh/lossranking.h>
+#include <lshbox/lsh/lossranking.h>
+#include <lshbox/lsh/losslookup.h>
+#include <lshbox/query/fv.h>
+#include <lshbox/query/losslookup.h>
 
 
 int main(int argc, char const *argv[])
@@ -105,7 +108,23 @@ int main(int argc, char const *argv[])
     // initialize prober
     // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    //
+    // void* raw_memory = operator new[]( 
+    //     sizeof(PROBER) * bench.getQ());
+    // PROBER* probers = static_cast<PROBER*>(raw_memory);
+    // for (int i = 0; i < bench.getQ(); ++i) {
+    //     new(&probers[i]) PROBER(
+    //         data[bench.getQuery(i)],
+    //         initScanner,
+    //         mylsh);// for non losslookup probers
+    // }
+
+
+    // initialize losslookup probers
+    typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    FV fvs(param.N);
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
@@ -114,8 +133,10 @@ int main(int argc, char const *argv[])
         new(&probers[i]) PROBER(
             data[bench.getQuery(i)],
             initScanner,
-            mylsh);
+            mylsh,
+            &fvs);// for non losslookup probers
     }
+
     double initTime = timer.elapsed();
     // probe
     timer.restart();
