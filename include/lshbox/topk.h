@@ -352,6 +352,9 @@ public:
             topk_.push(key, metric_.dist(query_, accessor_(key)));
         }
     }
+    unsigned getK() {
+        return K_;
+    }
 private:
     ACCESSOR accessor_;
     Metric<DATATYPE> metric_;

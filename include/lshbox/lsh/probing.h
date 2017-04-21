@@ -3,6 +3,8 @@
 #include <utility>
 #include <vector>
 #include "PTBSet.hpp"
+/*
+ * Multi-probe LSH*/
 class Probing {
 public:
     Probing(

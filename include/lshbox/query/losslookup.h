@@ -76,7 +76,6 @@ public:
             }
         }
 
-
         // cal new Bucket
         BIDTYPE newBucket = 0;
         for (int i = 0; i < newHashBits.size() ; ++i) {
