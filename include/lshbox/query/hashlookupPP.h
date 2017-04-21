@@ -2,7 +2,6 @@
 // only work in single-thread environment
 #include <vector>
 #include <map>
-#include "hashlookup.h"
 #include <lshbox/query/prober.h>
 #include <lshbox/query/fv.h>
 #pragma once
