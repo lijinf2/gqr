@@ -23,11 +23,12 @@
 #include <fstream>
 #include <lshbox/lsh/hammingranking.h>
 #include <lshbox/lsh/hashlookup.h>
-#include <lshbox/lsh/hashlookupPP.h>
 #include <lshbox/lsh/lossranking.h>
+
 #include <lshbox/query/fv.h>
 #include <lshbox/query/losslookup.h>
-
+#include <lshbox/query/hashlookupPP.h>
+#include <lshbox/utils.h>
 
 int main(int argc, char const *argv[])
 {
@@ -66,8 +67,8 @@ int main(int argc, char const *argv[])
         param.M = 1; // number of buckets in a table, useless in this example
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 20;  // number of bits
-        param.S = 1000000; // number of vectors
+        param.N = 16;  // number of bits
+        param.S = 60000; // number of vectors
         param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);
@@ -101,15 +102,11 @@ int main(int argc, char const *argv[])
     if (argc >= 6)
         maxProbedBK = std::atoi(argv[5]);
 
-    std::ofstream fout("result.csv");
-    fout << "probed buckets" << "," << "overall query time" << "\n";
-
     // initialize prober
-    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    //
+
     // void* raw_memory = operator new[]( 
     //     sizeof(PROBER) * bench.getQ());
     // PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -121,8 +118,10 @@ int main(int argc, char const *argv[])
     // }
 
 
-    // initialize losslookup probers
-    typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // // initialize losslookup probers
+    // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+
     FV fvs(mylsh.param.N);
 
     void* raw_memory = operator new[]( 
@@ -137,20 +136,30 @@ int main(int argc, char const *argv[])
     }
 
     double initTime = timer.elapsed();
+    std::cout << "init time: " << initTime << std::endl;
+
     // probe
+    // std::ofstream fout("result.csv");
+    std::cout << "probed items, " << "overall query time, " 
+        << "avg recall, " << "avg precision" <<"\n";
+
     timer.restart();
-    for (int numBK = 1; numBK <= maxProbedBK; numBK *= 2) { //  # of probed items must be the power of two
+    for (int numItems = 1; numItems <= maxProbedBK; numItems *= 2) { //  # of probed items must be the power of two
+        // std::cout << "start queries " << std::endl;
+        lshbox::Stat recall, precision;
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
             // queries are applied incrementally, i.e. the result of this round depends on the last round
-            mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numBK);
-            // std::cout << "Query i = " << i << ", probed items " << probers[i].getNumItemsProbed() << std::endl;
+            mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numItems);
+
+            // collect accuracy information
+            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, precision);
         }
         double retTime = timer.elapsed();
-        fout << numBK << "," << (initTime + retTime) << "\n";
-        std::cout << numBK << ", " << (initTime + retTime) << "\n";
+        std::cout << numItems << ", " << retTime <<", "
+            << recall.getAvg() << ", " << precision.getAvg() << "\n";
     }
-    fout.close();
+    // fout.close();
 
     // release memory of prober;
     std::cout << "bench.getQ: " << bench.getQ() << std::endl;
