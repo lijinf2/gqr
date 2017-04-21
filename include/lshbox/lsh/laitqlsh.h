@@ -32,10 +32,12 @@
 #include <random>
 #include <iostream>
 #include <functional>
+#include <unordered_map>
 #include <eigen/Eigen/Dense>
 #include <cmath>
 #include "probing.h"
 #include <lshbox/utils.h>
+
 
 namespace lshbox
 {
@@ -236,8 +238,7 @@ public:
     void queryRehash(const DATATYPE *domin, SCANNER &scanner);
 
     Parameter param;
-    // std::vector<std::map<unsigned, std::vector<unsigned> > > tables;
-    std::vector<std::map<BIDTYPE, std::vector<unsigned> > > tables;
+    std::vector<std::unordered_map<BIDTYPE, std::vector<unsigned> > > tables;
 
 private:
     std::vector<std::vector<std::vector<float> > > pcsAll;
@@ -597,7 +598,7 @@ void lshbox::laItqLsh<DATATYPE>::save(const std::string &file)
         out.write((char *)&rndArray[i][0], sizeof(unsigned) * param.N);  // 4 * N bytes
         unsigned count = unsigned(tables[i].size());
         out.write((char *)&count, sizeof(unsigned));
-        for (std::map<BIDTYPE, std::vector<unsigned> >::iterator iter = tables[i].begin(); iter != tables[i].end(); ++iter)
+        for (std::unordered_map<BIDTYPE, std::vector<unsigned> >::iterator iter = tables[i].begin(); iter != tables[i].end(); ++iter)
         {
             BIDTYPE target = iter->first;
             out.write((char *)&target, sizeof(BIDTYPE));
@@ -670,7 +671,7 @@ int lshbox::laItqLsh<DATATYPE>::getMaxBucketSize()
 {
     assert(param.L == 1);
     int max = 0;
-    std::map<BIDTYPE, std::vector<unsigned> >::const_iterator it;
+    std::unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it;
     for (it = tables[0].begin(); it != tables[0].end(); ++it) {
         if (it->second.size() > max) {
             max = it->second.size();
