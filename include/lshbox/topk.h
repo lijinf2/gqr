@@ -243,45 +243,20 @@ public:
      */
     const float recall(const Topk &topk) const
     {
-        std::vector<std::pair<float, unsigned> > tops = getTopk();
-        std::vector<std::pair<float, unsigned> > benchTops = topk.getTopk();
+        const std::vector<std::pair<float, unsigned> >& tops = getTopk();
+        const std::vector<std::pair<float, unsigned> >& benchTops = topk.getTopk();
         unsigned matched = 0;
-        for (std::vector<std::pair<float, unsigned> >::iterator i = tops.begin(); i != tops.end(); ++i)
-        {
-            for (std::vector<std::pair<float, unsigned> >::iterator j = benchTops.begin(); j != benchTops.end(); ++j)
-            {
-                if (i->second == j->second)
-                {
-                    ++matched;
+        for (const auto& top : tops) {
+            for (const auto& benchTop: benchTops) {
+                if (top.second == benchTop.second) {
+                    matched++;
                     break;
                 }
             }
         }
-        return float(matched - 1) / float(benchTops.size() - 1);
-    }
-    /**
-     * marked by JF: it is developed by author and it is wrong, denominator should be scanner.cnt
-     * Calculate the precision vale with another heap.
-     * @param  topk another TopK.
-     */
-    const float precision(const Topk &topk) const
-    {
-        std::vector<std::pair<float, unsigned> > tops = getTopk();
-        std::vector<std::pair<float, unsigned> > benchTops = topk.getTopk();
-        unsigned matched = 0;
-        for (std::vector<std::pair<float, unsigned> >::iterator i = tops.begin(); i != tops.end(); ++i)
-        {
-            for (std::vector<std::pair<float, unsigned> >::iterator j = benchTops.begin(); j != benchTops.end(); ++j)
-            {
-                if (i->second == j->second)
-                {
-                    ++matched;
-                    break;
-                }
-            }
-        }
-        if (tops.size() == 1) return 0;
-        else return float(matched - 1) / float(tops.size() - 1);
+        assert(matched != 0);
+        float result = (float) (matched - 1) / float(benchTops.size() - 1);
+        return result;
     }
 };
 

@@ -57,7 +57,7 @@ void setStat(
     scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
     float thisRecall = scanner.topk().recall(ans);
 
-    float matched = thisRecall * (scanner.getK() - 1); 
+    float matched = thisRecall * scanner.getK(); 
     float thisPrecision;
     assert(scanner.cnt() > 0);
     if(scanner.cnt() == 1)
