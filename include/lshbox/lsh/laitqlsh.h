@@ -119,7 +119,7 @@ public:
      * @return number of item probed
      */
     template<typename PROBER>
-    int probe(int t, BIDTYPE bucketId, PROBER &prober);
+    int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
     /**
      * Query the approximate nearest neighborholds.
      *
@@ -273,27 +273,32 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
     int npca = param.N;
     std::mt19937 rng(unsigned(std::time(0)));
     std::normal_distribution<float> nd;
-    std::uniform_int_distribution<unsigned> usBits(0, data.getSize() - 1);
+    // std::uniform_int_distribution<unsigned> usBits(0, data.getSize() - 1);
     for (unsigned k = 0; k != param.L; ++k)
     {
-        std::cout << "start PCA " << std::endl;
+        // select data for training
+        std::cout << "table " << k << " starts PCA " << std::endl;
+        std::vector<bool> selected = selection(data.getSize(), param.S);
+
         std::vector<unsigned> seqs;
-        while (seqs.size() != param.S)
-        {
-            unsigned target = usBits(rng);
-            if (std::find(seqs.begin(), seqs.end(), target) == seqs.end())
-            {
-                seqs.push_back(target);
+        seqs.reserve(param.S);
+        for (unsigned idxToSelected = 0; idxToSelected < selected.size(); ++idxToSelected) {
+            if (selected[idxToSelected]) {
+                seqs.push_back(idxToSelected);
             }
         }
-        std::sort(seqs.begin(), seqs.end());
+        assert(seqs.size() == param.S);
+
+
+        // pca
         Eigen::MatrixXf tmp(param.S, data.getDim());
         for (unsigned i = 0; i != tmp.rows(); ++i)
         {
             std::vector<float> vals(0);
+            vals.resize(data.getDim());
             for (int j = 0; j != data.getDim(); ++j)
             {
-                vals.push_back(data[seqs[i]][j]);
+                vals[j] = data[seqs[i]][j];
             }
             tmp.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
         }
@@ -301,7 +306,18 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
         Eigen::MatrixXf cov = (centered.transpose() * centered) / float(tmp.rows() - 1);
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
         Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(npca);
-        Eigen::MatrixXf mat_c = tmp * mat_pca;
+
+        pcsAll[k].resize(npca);
+        for (unsigned i = 0; i != pcsAll[k].size(); ++i)
+        {
+            pcsAll[k][i].resize(param.D);
+            for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
+            {
+                pcsAll[k][i][j] = mat_pca(j, i);
+            }
+        }
+
+        // itq rotation
         Eigen::MatrixXf R(npca, npca);
         for (unsigned i = 0; i != R.rows(); ++i)
         {
@@ -310,9 +326,10 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
                 R(i, j) = nd(rng);
             }
         }
+        Eigen::MatrixXf mat_c = tmp * mat_pca;
         Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
         R = svd.matrixU();
-        std::cout << "finish PCA " << std::endl;
+        std::cout << "finish PCA and start rotation " << std::endl;
         for (unsigned iter = 0; iter != param.I; ++iter)
         {
             std::cout << "start iteration: " << iter << std::endl;
@@ -342,15 +359,6 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
             for (unsigned j = 0; j != omegasAll[k][i].size(); ++j)
             {
                 omegasAll[k][i][j] = R(j, i);
-            }
-        }
-        pcsAll[k].resize(npca);
-        for (unsigned i = 0; i != pcsAll[k].size(); ++i)
-        {
-            pcsAll[k][i].resize(param.D);
-            for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
-            {
-                pcsAll[k][i][j] = mat_pca(j, i);
             }
         }
     }
@@ -478,7 +486,7 @@ void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
 }
 template<typename DATATYPE>
 template<typename PROBER>
-int lshbox::laItqLsh<DATATYPE>::probe(int t, BIDTYPE bucketId, PROBER& prober)
+int lshbox::laItqLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prober)
 {
     int numProbed = 0;
     if (tables[t].find(bucketId) != tables[t].end())
@@ -715,8 +723,9 @@ void lshbox::laItqLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &pr
     assert(param.L == 1);
 
     while(prober.getNumItemsProbed() < numItems && prober.nextBucketExisted()) {
-        const BIDTYPE& probedBId = prober.getNextBID();
-        probe(0, probedBId, prober); 
+        // <table, bucketId>
+        const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
+        probe(probePair.first, probePair.second, prober); 
     }
 }
 

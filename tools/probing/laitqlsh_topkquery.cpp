@@ -21,12 +21,12 @@
 #include <lshbox/lsh/laitqlsh.h>
 #include <map>
 #include <fstream>
-#include <lshbox/lsh/hammingranking.h>
 #include <lshbox/lsh/hashlookup.h>
 #include <lshbox/lsh/lossranking.h>
 
 #include <lshbox/query/fv.h>
 #include <lshbox/query/losslookup.h>
+#include <lshbox/query/hammingranking.h>
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/utils.h>
 
@@ -64,11 +64,10 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.M = 1; // number of buckets in a table, useless in this example
-        param.L = 1;  // number of tables
+        param.L = 5;  // number of tables
         param.D = data.getDim();
         param.N = 16;  // number of bits
-        param.S = 60000; // number of vectors
+        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);
@@ -104,9 +103,10 @@ int main(int argc, char const *argv[])
 
     // initialize prober
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-
+    
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    //
     // void* raw_memory = operator new[]( 
     //     sizeof(PROBER) * bench.getQ());
     // PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -118,9 +118,10 @@ int main(int argc, char const *argv[])
     // }
 
 
-    // // initialize losslookup probers
-    // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // // // initialize losslookup probers
+    typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+
 
     FV fvs(mylsh.param.N);
 
@@ -144,7 +145,7 @@ int main(int argc, char const *argv[])
         << "avg recall, " << "avg precision" <<"\n";
 
     timer.restart();
-    for (int numItems = 1; numItems <= maxProbedBK; numItems *= 2) { //  # of probed items must be the power of two
+    for (unsigned numItems = 1; numItems <= maxProbedBK; numItems *= 2) { //  # of probed items must be the power of two
         // std::cout << "start queries " << std::endl;
         lshbox::Stat recall, precision;
         for (unsigned i = 0; i != bench.getQ(); ++i)
@@ -167,6 +168,8 @@ int main(int argc, char const *argv[])
         probers[i].~PROBER();
     }
 
+    std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
+    std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
     std::cout << "end of program" << std::endl;
     // operator delete[](raw_memory);
 }
