@@ -16,7 +16,7 @@
 std::vector<bool> selection(unsigned n, unsigned k) {
     std::hash<std::thread::id> hasher;
     std::thread::id this_id = std::this_thread::get_id();
-    std::mt19937 rng((unsigned) hasher(this_id));
+    std::mt19937 rng((unsigned) hasher(this_id) + std::time(0));
     std::uniform_int_distribution<unsigned> usBits(0, n - 1);
     usBits(rng);
     std::vector<bool> selected(n, 0);

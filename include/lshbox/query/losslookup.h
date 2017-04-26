@@ -97,7 +97,7 @@ public:
 
         // cal new Bucket
         BIDTYPE newBucket = 0;
-        for (int i = 0; i < newHashBits.size() ; ++i) {
+        for (unsigned i = 0; i < newHashBits.size() ; ++i) {
             newBucket <<= 1;
             if (newHashBits[i] == true) {
                 newBucket += 1;
@@ -138,7 +138,7 @@ private:
             }
         }
 
-        // push to minHeap 
+        // push to minHeapk
         minHeap_.push(HeapUnit(t, layer, score));
     }
 

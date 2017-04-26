@@ -67,7 +67,7 @@ int main(int argc, char const *argv[])
         param.L = 10;  // number of tables
         param.D = data.getDim();
         param.N = 16;  // number of bits
-        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.S = 6000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.train(data);

@@ -245,7 +245,7 @@ public:
     {
         const std::vector<std::pair<float, unsigned> >& tops = getTopk();
         const std::vector<std::pair<float, unsigned> >& benchTops = topk.getTopk();
-        unsigned matched = 0;
+        unsigned matched = 0; // the matched should ignore itself
         for (const auto& top : tops) {
             for (const auto& benchTop: benchTops) {
                 if (top.second == benchTop.second) {
@@ -254,8 +254,8 @@ public:
                 }
             }
         }
-        assert(matched != 0);
-        float result = (float) (matched - 1) / float(benchTops.size() - 1);
+        // float result = (float) (matched - 1) / float(benchTops.size() - 1);
+        float result = matched * 1.0 / benchTops.size();
         return result;
     }
 };

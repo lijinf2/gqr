@@ -10,54 +10,53 @@ class HashLookupPP : public Prober<ACCESSOR>{
 public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
-    typedef unsigned long long BIDTYPE;
+    typedef typename Prober<ACCESSOR>::BIDTYPE BIDTYPE;
 
     template<typename LSHTYPE>
     HashLookupPP(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh,
-        FV* fvs) : Prober<ACCESSOR>(domin, scanner), fvs_(fvs) {
+        FV* fvs) : Prober<ACCESSOR>(domin, scanner, mylsh), fvs_(fvs) {
 
-        hashBits_ = mylsh.getHashBits(0, domin);
-        R_ = hashBits_.size();
         layer_ = 0;
         idxToLayer_ = 0;
+        table_ = 0;
     }
 
-    BIDTYPE getNextBID(){
+    std::pair<unsigned, BIDTYPE> getNextBID(){
         this->numBucketsProbed_++;
+
+        if (table_ == this->hashBits_.size()) {
+            table_ = 0;
+            idxToLayer_++;
+            if (!fvs_->existed(layer_, idxToLayer_)) {
+                layer_++;
+                idxToLayer_ = 0;
+            }
+        }
 
         const bool* fv = fvs_->getFlippingVector(layer_, idxToLayer_);
 
         BIDTYPE newBucket = 0;
-        for (int i = 0; i < R_; ++i) {
+        for (unsigned i = 0; i < this->R_; ++i) {
             newBucket <<= 1; 
             if (fv[i] == true) {
-                newBucket += 1 - hashBits_[i];
+                newBucket += 1 - this->hashBits_[table_][i];
             } else {
-                newBucket += hashBits_[i];
+                newBucket += this->hashBits_[table_][i];
             }
         }
         
-        idxToLayer_++;
-        if (!fvs_->existed(layer_, idxToLayer_)) {
-            layer_++;
-            idxToLayer_ = 0;
-        }
+        std::pair<unsigned, BIDTYPE> result = std::make_pair(table_, newBucket);
+        table_++;
 
-        return newBucket;
-    }
-
-    bool nextBucketExisted() {
-        if (fvs_->existed(layer_, idxToLayer_)) return true;
-        else return false;
+        return result;
     }
 
 private:
     const FV* fvs_ = NULL;
-    std::vector<bool> hashBits_;
-    unsigned R_;
     unsigned layer_;
     unsigned idxToLayer_;
+    unsigned table_ = 0;
 };
