@@ -60,17 +60,17 @@ public:
     struct Parameter
     {
         /// Hash table size
-        unsigned M;
+        unsigned M = 0;
         /// Number of hash tables
-        unsigned L;
+        unsigned L = 0;
         /// Dimension of the vector, it can be obtained from the instance of Matrix
-        unsigned D;
+        unsigned D = 0;
         /// Binary code bytes
-        unsigned N;
+        unsigned N = 0;
         /// Size of vectors in train
-        unsigned S;
+        unsigned S = 0;
         /// Training iterations
-        unsigned I;
+        unsigned I = 0;
     };
     laItqLsh() {}
     laItqLsh(const Parameter &param_)
@@ -91,6 +91,13 @@ public:
      * @param data A instance of Matrix<DATATYPE>, most of the time, is the search dataset.
      */
     void train(Matrix<DATATYPE> &data);
+
+    static void trainSingleTable( 
+        const Matrix<DATATYPE> &data,
+        std::vector<std::vector<float> >* pcsPointer,
+        std::vector<std::vector<float> >* omegaPointer,
+        Parameter param);
+    void trainAll(const Matrix<DATATYPE> &data);
     /**
      * Hash the dataset.
      *
@@ -267,13 +274,166 @@ void lshbox::laItqLsh<DATATYPE>::reset(const Parameter &param_)
         }
     }
 }
+
+// trainSingleTable, data, pcsAll[k], omegaAll[k]
+template<typename DATATYPE>
+void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
+    const Matrix<DATATYPE> &data,
+    std::vector<std::vector<float> >* pcsPointer,
+    std::vector<std::vector<float> >* omegaPointer,
+    Parameter param)
+{
+        // std::cout << "table " << k << " starts PCA " << std::endl;
+        std::vector<bool> selected = selection(data.getSize(), param.S);
+
+        std::vector<unsigned> seqs;
+        seqs.reserve(param.S);
+        for (unsigned idxToSelected = 0; idxToSelected < selected.size(); ++idxToSelected) {
+            if (selected[idxToSelected]) {
+                seqs.push_back(idxToSelected);
+            }
+        }
+        assert(seqs.size() == param.S);
+
+
+        // pca
+        // Eigen::MatrixXf tmp(param.S, data.getDim());
+        Eigen::MatrixXf centered(param.S, data.getDim());
+        std::vector<float> vals(0);
+        vals.resize(data.getDim());
+        for (unsigned i = 0; i != centered.rows(); ++i)
+        {
+            for (int j = 0; j != data.getDim(); ++j)
+            {
+                vals[j] = data[seqs[i]][j];
+            }
+            centered.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
+        }
+
+        // delete seqs to save memory
+        seqs.clear();
+        seqs.shrink_to_fit();
+
+        std::cout << "start pca " << std::endl;
+        centered = centered.rowwise() - centered.colwise().mean();
+
+        // implement efficient cov computation, using eigen lead to multiple copies of the data
+        Eigen::MatrixXf cov = (centered.transpose() * centered) / float(centered.rows() - 1);
+
+        // implement cov calculation on our own, much worse than eigen since underlying storage is unclear
+        // Eigen::MatrixXf cov(centered.cols(), centered.cols());
+        // for (unsigned rowIdxA = 0; rowIdxA < cov.rows(); ++rowIdxA) {
+        //     for (unsigned colIdxA = 0; colIdxA < cov.cols(); ++colIdxA) {
+        //         cov.row(rowIdxA)[colIdxA] = 0;
+        //     }
+        // }
+        // for (unsigned pass = 0; pass < centered.rows(); ++pass) { 
+        //     for (unsigned rowIdxC = 0; rowIdxC < cov.rows(); ++rowIdxC) { // Matrix cov
+        //         for (unsigned colIdxC = 0; colIdxC < cov.cols(); ++colIdxC) { // Matrix cov
+        //             // cov.row(rowIdxA)[targetCol] += centered.row(rowIdxA)[colIdxA] * centered.row(colIdxA)[targetCol];
+        //             int tmp = 1;
+        //             cov.row(rowIdxC)[colIdxC] += centered.row(pass)[rowIdxC] * centered.row(pass)[colIdxC];
+        //         }
+        //     }
+        // }
+
+        // Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
+        // Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(param.N);
+        
+        Eigen::MatrixXf mat_pca =
+            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf>(cov).eigenvectors().rightCols(param.N);
+
+        (*pcsPointer).resize(param.N);
+        for (unsigned i = 0; i != (*pcsPointer).size(); ++i)
+        {
+            (*pcsPointer)[i].resize(param.D);
+            for (unsigned j = 0; j != (*pcsPointer)[i].size(); ++j)
+            {
+                (*pcsPointer)[i][j] = mat_pca(j, i);
+            }
+        }
+
+        // itq rotation
+
+        // Eigen::MatrixXf mat_c = tmp * mat_pca; original implementation, same result as using centered
+        Eigen::MatrixXf mat_c = centered * mat_pca;
+
+        // delete centered
+        centered = Eigen::MatrixXf();
+
+        std::hash<std::thread::id> hasher;
+        std::thread::id this_id = std::this_thread::get_id();
+        std::mt19937 rng((unsigned) hasher(this_id) + std::time(0));
+        std::normal_distribution<float> nd;
+        Eigen::MatrixXf R(param.N, param.N);
+        for (unsigned i = 0; i != R.rows(); ++i)
+        {
+            for (unsigned j = 0; j != R.cols(); ++j)
+            {
+                R(i, j) = nd(rng);
+            }
+        }
+        Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
+        R = svd.matrixU();
+        std::cout << "finish PCA and start rotation " << std::endl;
+        for (unsigned iter = 0; iter != param.I; ++iter)
+        {
+            std::cout << "start iteration: " << iter << std::endl;
+            Eigen::MatrixXf Z = mat_c * R;
+            Eigen::MatrixXf UX(Z.rows(), Z.cols());
+            for (unsigned i = 0; i != Z.rows(); ++i)
+            {
+                for (unsigned j = 0; j != Z.cols(); ++j)
+                {
+                    if (Z(i, j) > 0)
+                    {
+                        UX(i, j) = 1;
+                    }
+                    else
+                    {
+                        UX(i, j) = -1;
+                    }
+                }
+            }
+            Eigen::JacobiSVD<Eigen::MatrixXf> svd_tmp(UX.transpose() * mat_c, Eigen::ComputeThinU | Eigen::ComputeThinV);
+            R = svd_tmp.matrixV() * svd_tmp.matrixU().transpose();
+        }
+        (*omegaPointer).resize(param.N);
+        for (unsigned i = 0; i != (*omegaPointer).size(); ++i)
+        {
+            (*omegaPointer)[i].resize(param.N);
+            for (unsigned j = 0; j != (*omegaPointer)[i].size(); ++j)
+            {
+                (*omegaPointer)[i][j] = R(j, i);
+            }
+        }
+}
+
+template<typename DATATYPE>
+void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data){
+    // for (unsigned k = 0; k != param.L; ++k) {
+    //     trainSingleTable(data, &pcsAll[k], &omegasAll[k], param);
+    // }
+    std::vector<std::thread> threads;
+    for (unsigned k = 0; k != param.L; ++k) {
+        threads.push_back(
+            std::thread(
+                trainSingleTable, 
+                data, &pcsAll[k], &omegasAll[k], param)
+         );
+    }
+
+    for (unsigned k = 0; k < threads.size(); ++k) {
+        threads[k].join();
+    }
+}
+
 template<typename DATATYPE>
 void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
 {
     int npca = param.N;
     std::mt19937 rng(unsigned(std::time(0)));
     std::normal_distribution<float> nd;
-    // std::uniform_int_distribution<unsigned> usBits(0, data.getSize() - 1);
     for (unsigned k = 0; k != param.L; ++k)
     {
         // select data for training

@@ -21,14 +21,6 @@ struct HeapUnit{
     unsigned layer;
     float score;
 };
-// class LayerScoreComparator {
-// public: 
-//     bool operator() (
-//         const HeapUnit& a,
-//         const HeapUnit& b) const {
-//         return a.second > b.second;
-//     }
-// };
 
 class TableHandler{
 public:
@@ -89,12 +81,12 @@ public:
     std::pair<unsigned, BIDTYPE> getNextBID(){
         this->numBucketsProbed_++;
 
-        std::pair<unsigned, unsigned> tableAndLayer = popHeap_();
-        unsigned int table = popHeap_().first;
-        unsigned int layer = popHeap_().second;
+        unsigned int table = minHeap_.top().table;
+        unsigned int layer = minHeap_.top().layer;
+        minHeap_.pop();
         const bool* fv = fvs_->getFlippingVector(layer, handlers_[table].idxToLayer[layer]);
 
-        // apply flipping
+        // apply flippinif while g
         std::vector<bool> newHashBits = this->hashBits_[table];
         for (unsigned int i = 0; i < this->R_; ++i) {
             if (fv[i] == true) {
@@ -105,7 +97,7 @@ public:
 
         // cal new Bucket
         BIDTYPE newBucket = 0;
-        for (int i = 0; i < newHashBits.size() ; ++i) {
+        for (unsigned i = 0; i < newHashBits.size() ; ++i) {
             newBucket <<= 1;
             if (newHashBits[i] == true) {
                 newBucket += 1;
@@ -121,11 +113,6 @@ public:
         
     }
 
-    // bool nextBucketExisted() {
-    //     if (minHeap_.empty()) return false;
-    //     else return true;
-    // }
-
 private:
     const FV* fvs_ = NULL;
     std::vector<TableHandler> handlers_;
@@ -137,7 +124,7 @@ private:
         unsigned& idxToLayer = handlers_[t].idxToLayer[layer];
 
         // extract fv
-        while (!fvs_->existed(layer, idxToLayer)) {
+        if (!fvs_->existed(layer, idxToLayer)) {
             return;
         }
 
@@ -151,16 +138,8 @@ private:
             }
         }
 
-        // push to minHeap 
+        // push to minHeapk
         minHeap_.push(HeapUnit(t, layer, score));
     }
 
-    // return layer
-    std::pair<unsigned, unsigned> popHeap_() {
-        std::pair<unsigned, unsigned> p;
-        p.first = minHeap_.top().table;
-        p.second = minHeap_.top().layer;
-        minHeap_.pop();
-        return p;
-    }
 };
