@@ -297,21 +297,51 @@ void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
 
 
         // pca
-        Eigen::MatrixXf tmp(param.S, data.getDim());
-        for (unsigned i = 0; i != tmp.rows(); ++i)
+        // Eigen::MatrixXf tmp(param.S, data.getDim());
+        Eigen::MatrixXf centered(param.S, data.getDim());
+        std::vector<float> vals(0);
+        vals.resize(data.getDim());
+        for (unsigned i = 0; i != centered.rows(); ++i)
         {
-            std::vector<float> vals(0);
-            vals.resize(data.getDim());
             for (int j = 0; j != data.getDim(); ++j)
             {
                 vals[j] = data[seqs[i]][j];
             }
-            tmp.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
+            centered.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
         }
-        Eigen::MatrixXf centered = tmp.rowwise() - tmp.colwise().mean();
-        Eigen::MatrixXf cov = (centered.transpose() * centered) / float(tmp.rows() - 1);
-        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
-        Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(param.N);
+
+        // delete seqs to save memory
+        seqs.clear();
+        seqs.shrink_to_fit();
+
+        std::cout << "start pca " << std::endl;
+        centered = centered.rowwise() - centered.colwise().mean();
+
+        // implement efficient cov computation, using eigen lead to multiple copies of the data
+        Eigen::MatrixXf cov = (centered.transpose() * centered) / float(centered.rows() - 1);
+
+        // implement cov calculation on our own, much worse than eigen since underlying storage is unclear
+        // Eigen::MatrixXf cov(centered.cols(), centered.cols());
+        // for (unsigned rowIdxA = 0; rowIdxA < cov.rows(); ++rowIdxA) {
+        //     for (unsigned colIdxA = 0; colIdxA < cov.cols(); ++colIdxA) {
+        //         cov.row(rowIdxA)[colIdxA] = 0;
+        //     }
+        // }
+        // for (unsigned pass = 0; pass < centered.rows(); ++pass) { 
+        //     for (unsigned rowIdxC = 0; rowIdxC < cov.rows(); ++rowIdxC) { // Matrix cov
+        //         for (unsigned colIdxC = 0; colIdxC < cov.cols(); ++colIdxC) { // Matrix cov
+        //             // cov.row(rowIdxA)[targetCol] += centered.row(rowIdxA)[colIdxA] * centered.row(colIdxA)[targetCol];
+        //             int tmp = 1;
+        //             cov.row(rowIdxC)[colIdxC] += centered.row(pass)[rowIdxC] * centered.row(pass)[colIdxC];
+        //         }
+        //     }
+        // }
+
+        // Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
+        // Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(param.N);
+        
+        Eigen::MatrixXf mat_pca =
+            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf>(cov).eigenvectors().rightCols(param.N);
 
         (*pcsPointer).resize(param.N);
         for (unsigned i = 0; i != (*pcsPointer).size(); ++i)
@@ -323,11 +353,18 @@ void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
             }
         }
 
+        // itq rotation
+
+        // Eigen::MatrixXf mat_c = tmp * mat_pca; original implementation, same result as using centered
+        Eigen::MatrixXf mat_c = centered * mat_pca;
+
+        // delete centered
+        centered = Eigen::MatrixXf();
+
         std::hash<std::thread::id> hasher;
         std::thread::id this_id = std::this_thread::get_id();
         std::mt19937 rng((unsigned) hasher(this_id) + std::time(0));
         std::normal_distribution<float> nd;
-        // itq rotation
         Eigen::MatrixXf R(param.N, param.N);
         for (unsigned i = 0; i != R.rows(); ++i)
         {
@@ -336,7 +373,6 @@ void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
                 R(i, j) = nd(rng);
             }
         }
-        Eigen::MatrixXf mat_c = tmp * mat_pca;
         Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
         R = svd.matrixU();
         std::cout << "finish PCA and start rotation " << std::endl;
