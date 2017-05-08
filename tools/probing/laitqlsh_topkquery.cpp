@@ -64,10 +64,10 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.L = 1;  // number of tables
+        param.L = 50;  // number of tables
         param.D = data.getDim();
         param.N = 20;  // number of bits
-        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.S = 1000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         // mylsh.train(data);
