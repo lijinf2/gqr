@@ -64,14 +64,14 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.L = 50;  // number of tables
+        param.L = 20;  // number of tables
         param.D = data.getDim();
         param.N = 20;  // number of bits
         param.S = 1000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
+        mylsh.trainAll(data, 4); // the second parameter: parallelism, more parallelism requires more memory and CPU
         // mylsh.train(data);
-        mylsh.trainAll(data, 5); // the second parameter: parallelism, more parallelism requires more memory and CPU
         mylsh.hash(data);
         mylsh.save(file);
         std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
