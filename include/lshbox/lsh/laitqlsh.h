@@ -37,8 +37,6 @@
 #include <cmath>
 #include "probing.h"
 #include <lshbox/utils.h>
-#include "ThreadPool/ThreadPool.h"
-
 
 namespace lshbox
 {
@@ -413,24 +411,46 @@ bool lshbox::laItqLsh<DATATYPE>::trainSingleTable(
 
 template<typename DATATYPE>
 void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned batchSize){
-    // use thread pool
 
-    ThreadPool pool(6);
-    std::vector<std::future<bool>> results;
+    // use loop
+    unsigned numBatches = param.L / batchSize;
+    for (unsigned batch = 0; batch < numBatches; ++batch) {
+        std::vector<std::thread> threads;
+        threads.resize(batchSize);
 
-    for (unsigned k = 0; k < param.L; ++k) {
-        results.emplace_back(
-            pool.enqueue(
-            trainSingleTable, 
-            data, &pcsAll[k], &omegasAll[k], param)
-        );
+        unsigned startk = batch * batchSize;
+        for (unsigned i = 0; i < threads.size(); ++i) {
+            unsigned tableId = startk + i;
+            threads[i] = std::thread(
+                    trainSingleTable, 
+                    data, &pcsAll[tableId], &omegasAll[tableId], param);
+            std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
+        }
+
+        for (unsigned i = 0; i < threads.size(); ++i) {
+            threads[i].join();
+        }
+        std::cout << "batch " + std::to_string(batch) + " finished!\n" << std::endl;
     }
 
-    for (auto&& result: results) {
-        result.get();
+    unsigned remaining = param.L % batchSize;
+    std::vector<std::thread> threads;
+    threads.resize(remaining);
+
+    unsigned startk = numBatches * batchSize;
+    for (unsigned i = 0; i < threads.size(); ++i) {
+        unsigned tableId = startk + i;
+        threads[i] = std::thread(
+                trainSingleTable, 
+                data, &pcsAll[tableId], &omegasAll[tableId], param);
+        std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
     }
 
-    // std::vector<std::thread> threads;
+    for (unsigned i = 0; i < threads.size(); ++i) {
+        threads[i].join();
+    }
+    std::cout << "last batch finished\n " << std::endl;
+
     // for (unsigned k = 0; k != param.L; ++k) {
     //     threads.push_back(
     //         std::thread(
