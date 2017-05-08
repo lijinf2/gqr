@@ -9,10 +9,11 @@
 
 // layer equals to hamDist
 struct HeapUnit{
-    HeapUnit(unsigned t, unsigned l, float s) {
+    HeapUnit(unsigned t, unsigned l, float s, unsigned long long bk) {
         table = t;
         layer = l;
         score = s;
+        bucket = bk;
     }
     bool operator<(const HeapUnit& other) const  {
         return score > other.score;
@@ -20,6 +21,7 @@ struct HeapUnit{
     unsigned table;
     unsigned layer;
     float score;
+    unsigned long long bucket;
 };
 
 class TableHandler{
@@ -49,8 +51,9 @@ public:
         LSHTYPE& mylsh,
         FV* fvs) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
-        // initialize fvs_, handlers_ , meanHeap_
+        // initialize fvs_, refTables_, handlers_ , meanHeap_
         fvs_ = fvs;
+        refTables_ = &(mylsh.tables);
 
         handlers_.resize(mylsh.param.L);
         for (unsigned t = 0; t < mylsh.param.L; ++t) {
@@ -76,36 +79,17 @@ public:
 
         }
 
+
     }
 
     std::pair<unsigned, BIDTYPE> getNextBID(){
         this->numBucketsProbed_++;
 
-        unsigned int table = minHeap_.top().table;
-        unsigned int layer = minHeap_.top().layer;
-        minHeap_.pop();
-        const bool* fv = fvs_->getFlippingVector(layer, handlers_[table].idxToLayer[layer]);
-
-        // apply flippinif while g
-        std::vector<bool> newHashBits = this->hashBits_[table];
-        for (unsigned int i = 0; i < this->R_; ++i) {
-            if (fv[i] == true) {
-                newHashBits[handlers_[table].posLossPairs[i].first] = 
-                    1 - newHashBits[handlers_[table].posLossPairs[i].first];
-            }
-        }
-
-        // cal new Bucket
-        BIDTYPE newBucket = 0;
-        for (unsigned i = 0; i < newHashBits.size() ; ++i) {
-            newBucket <<= 1;
-            if (newHashBits[i] == true) {
-                newBucket += 1;
-            }
-        }
-
-        // insert next element to minHeap
+        const unsigned int& table = minHeap_.top().table;
+        const unsigned int& layer = minHeap_.top().layer;
         handlers_[table].idxToLayer[layer]++;
+        BIDTYPE newBucket = minHeap_.top().bucket;
+        minHeap_.pop();
         insertHeap_(table, layer);
 
         // return value
@@ -117,29 +101,62 @@ private:
     const FV* fvs_ = NULL;
     std::vector<TableHandler> handlers_;
     std::priority_queue<HeapUnit> minHeap_; 
+    std::vector<std::unordered_map<BIDTYPE, std::vector<unsigned> > >* refTables_ = NULL;
+
 
     // insert the current element in layer $layer to minHeap_
-    void insertHeap_(unsigned t, unsigned layer) {
+    void insertHeap_(unsigned table, unsigned layer) {
 
-        unsigned& idxToLayer = handlers_[t].idxToLayer[layer];
+        unsigned& idxToLayer = handlers_[table].idxToLayer[layer];
 
-        // extract fv
-        if (!fvs_->existed(layer, idxToLayer)) {
-            return;
+        // calculate newBucket with fv
+        // apply flippinif while g
+        std::vector<bool> newHashBits;
+        newHashBits.resize(this->R_);
+        const bool* fv = NULL;
+        BIDTYPE newBucket = 0;
+
+        unsigned layerSize = fvs_->getLayerSize(layer);
+        while(true) {
+            if (idxToLayer >= layerSize) return;
+
+            fv = fvs_->getFlippingVector(layer, idxToLayer);
+            newHashBits = this->hashBits_[table];
+
+            for (unsigned int i = 0; i < this->R_; ++i) {
+                if (fv[i]) {
+                    newHashBits[handlers_[table].posLossPairs[i].first] = 
+                        1 - newHashBits[handlers_[table].posLossPairs[i].first];
+                }
+            }
+
+            newBucket = 0;
+            for (unsigned i = 0; i < newHashBits.size() ; ++i) {
+                newBucket <<= 1;
+                if (newHashBits[i] == true) {
+                    newBucket += 1;
+                }
+            }
+            
+            // if newBucket exits break, else continue to find an exist bucket
+            if((*refTables_)[table].find(newBucket) != (*refTables_)[table].end()) {
+                break;
+            } else {
+                idxToLayer++;
+            }
         }
 
-        const bool* fv = fvs_->getFlippingVector(layer, idxToLayer);
-
+        
         // calculate score 
         float score = 0;
-        for (int idxToFV = 0; idxToFV < this->R_; ++idxToFV) {
-            if (fv[idxToFV] == true) {
-                score += handlers_[t].posLossPairs[idxToFV].second;
+        for (unsigned idxToFV = 0; idxToFV < this->R_; ++idxToFV) {
+            if (fv[idxToFV]) {
+                score += handlers_[table].posLossPairs[idxToFV].second;
             }
         }
 
         // push to minHeapk
-        minHeap_.push(HeapUnit(t, layer, score));
+        minHeap_.push(HeapUnit(table, layer, score, newBucket));
     }
 
 };

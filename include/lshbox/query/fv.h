@@ -84,8 +84,18 @@ class FV {
 
         // FVS_[hammingdist], return the idx-th flipping vector
         const bool* getFlippingVector(unsigned int hamDist, unsigned int idx) const {
-            assert(existed(hamDist, idx));
+            // hamDist normally will not exceed the size
+            // if (hamDist >= FVS_.size()) return NULL;
+            // if (idx >= numFVS_[hamDist]) return NULL;
             return FVS_[hamDist] + idx * R_;
+        }
+
+        unsigned getNumLayers() const {
+            return FVS_.size();
+        }
+
+        unsigned getLayerSize(unsigned layer) const {
+            return numFVS_[layer];
         }
 
         std::string fvtoString(const bool* p) const {

@@ -64,14 +64,14 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.L = 10;  // number of tables
+        param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 16;  // number of bits
+        param.N = 20;  // number of bits
         param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         // mylsh.train(data);
-        mylsh.trainAll(data);
+        mylsh.trainAll(data, 5); // the second parameter: parallelism, more parallelism requires more memory and CPU
         mylsh.hash(data);
         mylsh.save(file);
         std::cout << "CONSTRUCTING TIME: " << timer.elapsed() << "s." << std::endl;
@@ -120,8 +120,8 @@ int main(int argc, char const *argv[])
 
 
     // // // initialize losslookup probers
-    typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
 
 
     FV fvs(mylsh.param.N);

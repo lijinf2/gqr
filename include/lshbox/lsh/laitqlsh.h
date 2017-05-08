@@ -37,6 +37,7 @@
 #include <cmath>
 #include "probing.h"
 #include <lshbox/utils.h>
+#include "ThreadPool/ThreadPool.h"
 
 
 namespace lshbox
@@ -97,7 +98,7 @@ public:
         std::vector<std::vector<float> >* pcsPointer,
         std::vector<std::vector<float> >* omegaPointer,
         Parameter param);
-    void trainAll(const Matrix<DATATYPE> &data);
+    void trainAll(const Matrix<DATATYPE> &data, unsigned batchSize);
     /**
      * Hash the dataset.
      *
@@ -410,10 +411,9 @@ void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
 }
 
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data){
-    // for (unsigned k = 0; k != param.L; ++k) {
-    //     trainSingleTable(data, &pcsAll[k], &omegasAll[k], param);
-    // }
+void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned batchSize){
+    // use thread pool
+
     std::vector<std::thread> threads;
     for (unsigned k = 0; k != param.L; ++k) {
         threads.push_back(
