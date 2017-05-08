@@ -37,6 +37,7 @@
 #include <cmath>
 #include "probing.h"
 #include <lshbox/utils.h>
+#include "ThreadPool/ThreadPool.h"
 
 
 namespace lshbox
@@ -92,12 +93,12 @@ public:
      */
     void train(Matrix<DATATYPE> &data);
 
-    static void trainSingleTable( 
+    static bool trainSingleTable( 
         const Matrix<DATATYPE> &data,
         std::vector<std::vector<float> >* pcsPointer,
         std::vector<std::vector<float> >* omegaPointer,
         Parameter param);
-    void trainAll(const Matrix<DATATYPE> &data);
+    void trainAll(const Matrix<DATATYPE> &data, unsigned batchSize);
     /**
      * Hash the dataset.
      *
@@ -277,7 +278,7 @@ void lshbox::laItqLsh<DATATYPE>::reset(const Parameter &param_)
 
 // trainSingleTable, data, pcsAll[k], omegaAll[k]
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
+bool lshbox::laItqLsh<DATATYPE>::trainSingleTable(
     const Matrix<DATATYPE> &data,
     std::vector<std::vector<float> >* pcsPointer,
     std::vector<std::vector<float> >* omegaPointer,
@@ -407,25 +408,40 @@ void lshbox::laItqLsh<DATATYPE>::trainSingleTable(
                 (*omegaPointer)[i][j] = R(j, i);
             }
         }
+        return true;
 }
 
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data){
-    // for (unsigned k = 0; k != param.L; ++k) {
-    //     trainSingleTable(data, &pcsAll[k], &omegasAll[k], param);
-    // }
-    std::vector<std::thread> threads;
-    for (unsigned k = 0; k != param.L; ++k) {
-        threads.push_back(
-            std::thread(
-                trainSingleTable, 
-                data, &pcsAll[k], &omegasAll[k], param)
-         );
+void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned batchSize){
+    // use thread pool
+
+    ThreadPool pool(6);
+    std::vector<std::future<bool>> results;
+
+    for (unsigned k = 0; k < param.L; ++k) {
+        results.emplace_back(
+            pool.enqueue(
+            trainSingleTable, 
+            data, &pcsAll[k], &omegasAll[k], param)
+        );
     }
 
-    for (unsigned k = 0; k < threads.size(); ++k) {
-        threads[k].join();
+    for (auto&& result: results) {
+        result.get();
     }
+
+    // std::vector<std::thread> threads;
+    // for (unsigned k = 0; k != param.L; ++k) {
+    //     threads.push_back(
+    //         std::thread(
+    //             trainSingleTable, 
+    //             data, &pcsAll[k], &omegasAll[k], param)
+    //      );
+    // }
+    //
+    // for (unsigned k = 0; k < threads.size(); ++k) {
+    //     threads[k].join();
+    // }
 }
 
 template<typename DATATYPE>
