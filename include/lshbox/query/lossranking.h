@@ -31,7 +31,7 @@ public:
 
             dstToBks_.emplace_back(std::pair<float, BIDTYPE>(dst, it->first));
         }
-        assert(dstToBks_.size() == mylsh.tables[0].size());
+        assert(dstToBks_.size() == table.size());
 
         std::sort(dstToBks_.begin(), 
             dstToBks_.end(), 
