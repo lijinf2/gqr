@@ -14,6 +14,7 @@
 
 /**
  * @file laitqlsh_test.cpp
+ xorVal = hashVal ^ bucketVal;
  *
  * @brief Example of using Iterative Quantization LSH index for L2 distance.
  */
@@ -22,12 +23,12 @@
 #include <map>
 #include <fstream>
 #include <lshbox/lsh/hashlookup.h>
-#include <lshbox/lsh/lossranking.h>
 
 #include <lshbox/query/fv.h>
 #include <lshbox/query/losslookup.h>
 #include <lshbox/query/hammingranking.h>
 #include <lshbox/query/hashlookupPP.h>
+#include <lshbox/query/lossranking.h>
 #include <lshbox/utils.h>
 
 int main(int argc, char const *argv[])
@@ -102,11 +103,11 @@ int main(int argc, char const *argv[])
     if (argc >= 6)
         maxProbedBK = std::atoi(argv[5]);
 
-    // initialize prober
-    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // // initialize prober
+    // // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    
-    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    //
+    // // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     //
     // void* raw_memory = operator new[]( 
     //     sizeof(PROBER) * bench.getQ());

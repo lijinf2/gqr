@@ -71,6 +71,19 @@ void setStat(
     return;
 }
 
+namespace lshbox {
+
+std::vector<bool> to_bits (unsigned long long num)
+{
+    std::vector<bool> bits;
+    while(num > 0 ){
+        bits.push_back(num % 2);
+        num /= 2;
+    }
+    return bits;
+}
+};
+
 namespace std {
     template<typename FIRST, typename SECOND>
         std::string to_string(const std::vector<std::pair<FIRST, SECOND>>& vec){
