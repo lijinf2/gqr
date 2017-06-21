@@ -60,7 +60,7 @@ public:
         assert(count_ == numFV);
     }
 
-    const bool* getFV(unsigned idx) {
+    const bool* getFV(unsigned idx) const {
         return &(bits_[idx * R_]);
     }
 
@@ -72,7 +72,7 @@ public:
         return result;
     }
 
-    std::string toString() {
+    std::string toString() const {
         std::string log = "";
         for (unsigned idx = 0; idx < lastOne_.size(); ++idx) {
             auto p = getFV(idx);
@@ -84,6 +84,10 @@ public:
             log += "\n";
         }
         return log;
+    }
+
+    unsigned getSize() const {
+        return count_;
     }
 
     ~Tree(){

@@ -71,7 +71,7 @@ public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
-    typedef std::pair<float, unsigned > PairT; // <score, idx> 
+    typedef std::pair<float, unsigned > PairT; // <score, tableIdx> 
 
     template<typename LSHTYPE>
     LossRanking(

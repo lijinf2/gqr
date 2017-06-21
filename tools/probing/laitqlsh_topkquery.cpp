@@ -29,6 +29,7 @@
 #include <lshbox/query/hammingranking.h>
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/query/lossranking.h>
+#include <lshbox/query/treelookup.h>
 #include <lshbox/utils.h>
 
 int main(int argc, char const *argv[])
@@ -65,10 +66,10 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.L = 20;  // number of tables
+        param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 20;  // number of bits
-        param.S = 1000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.N = 64;  // number of bits
+        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.trainAll(data, 4); // the second parameter: parallelism, more parallelism requires more memory and CPU
@@ -103,12 +104,12 @@ int main(int argc, char const *argv[])
     if (argc >= 6)
         maxProbedBK = std::atoi(argv[5]);
 
-    // // initialize prober
-    // // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // initialize prober
+    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    //
-    // // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    //
+    // //
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // //
     // void* raw_memory = operator new[]( 
     //     sizeof(PROBER) * bench.getQ());
     // PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -120,12 +121,14 @@ int main(int argc, char const *argv[])
     // }
 
 
-    // // // initialize losslookup probers
+    // // // // initialize losslookup probers
     // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-
-
-    FV fvs(mylsh.param.N);
+    // // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // FV fvs(mylsh.param.N);
+    //
+    //
+    typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    Tree fvs(mylsh.param.N);
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
@@ -161,6 +164,8 @@ int main(int argc, char const *argv[])
         double retTime = timer.elapsed();
         std::cout << numItems << ", " << retTime <<", "
             << recall.getAvg() << ", " << precision.getAvg() << "\n";
+        
+        // std::cout << numItems << ", " << retTime <<", " << std::endl;
     }
     // fout.close();
 
