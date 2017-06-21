@@ -3,14 +3,12 @@
 #include <cmath>
 #include <algorithm>
 #include <queue>
-#include <lshbox/query/fv.h>
+#include <lshbox/query/tree.h>
 #include <lshbox/query/prober.h>
-#include <lshbox/query/lltable.h>
-#include <lshbox/query/tstable.h>
 #pragma once
 
 template<typename ACCESSOR>
-class LossLookup : public Prober<ACCESSOR>{
+class TreeSearch : public Prober<ACCESSOR>{
 public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
@@ -19,7 +17,7 @@ public:
     typedef std::pair<float, unsigned > PairT; // <score, tableIdx> 
 
     template<typename LSHTYPE>
-    LossLookup(
+    TreeSearch(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh,

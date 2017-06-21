@@ -186,10 +186,10 @@ public:
      */
     int getTableSize();
     int getMaxBucketSize();
-    /**
-     * convert unsigned int to vector of boolbucketss.
-     */
-    std::vector<bool> unsignedToBools(unsigned num);
+    // /**
+    //  * convert unsigned int to vector of boolbucketss.
+    //  */
+    // std::vector<bool> unsignedToBools(unsigned num);
     /**
      * ranking hash code to query the approximate nearest neighborholds.
      *
@@ -883,20 +883,22 @@ int lshbox::laItqLsh<DATATYPE>::getMaxBucketSize()
     }
     return max;
 }
-template<typename DATATYPE>
-std::vector<bool> lshbox::laItqLsh<DATATYPE>::unsignedToBools(unsigned num)
-{
-    int nBits = param.N;
-    std::vector<bool> bits;
-    bits.resize(nBits);
-    
-    while(num > 0 ){
-        bits[--nBits] = num % 2;
-        num /= 2;
-    }
-    assert(bits.size() == param.N);
-    return bits;
-}
+
+// the above should be usinged long long
+// template<typename DATATYPE>
+// std::vector<bool> lshbox::laItqLsh<DATATYPE>::unsignedToBools(unsigned num)
+// {
+//     int nBits = param.N;
+//     std::vector<bool> bits;
+//     bits.resize(nBits);
+//     
+//     while(num > 0 ){
+//         bits[--nBits] = num % 2;
+//         num /= 2;
+//     }
+//     assert(bits.size() == param.N);
+//     return bits;
+// }
 
 template<typename DATATYPE>
 template<typename PROBER>
