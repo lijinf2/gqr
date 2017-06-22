@@ -60,8 +60,12 @@ public:
         assert(count_ == numFV);
     }
 
-    const bool* getFV(unsigned idx) const {
+    const bool* getFV(const unsigned& idx) const {
         return &(bits_[idx * R_]);
+    }
+
+    const unsigned& getLastOne(const unsigned& idx) const {
+        return lastOne_[idx];
     }
 
     std::vector<bool> copy(const bool* p) {
