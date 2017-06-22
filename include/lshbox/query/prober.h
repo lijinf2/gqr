@@ -35,7 +35,7 @@ public:
     }
 
     bool nextBucketExisted() {
-        if (getNumItemsProbed() != totalItems_)
+        if (getNumItemsProbed() < totalItems_)
             return true;
         else return false;
     }

@@ -50,24 +50,33 @@ public:
         return minHeap_.top().score_;
     }
 
-    // move until next exist bucket
+    // here we use relation to apply score computation, save some overhead, 
+    // but result has very little difference from lossranking since accuracy of float number computation
+    // if want to exact the same result, use calScore instead
     bool moveForward() {
-        unsigned idx = minHeap_.top().index_;
-        minHeap_.pop();
+        const unsigned& idx = minHeap_.top().index_;
+        const float& score = minHeap_.top().score_;
+        const unsigned& lastOnePos = tree_->getLastOne(idx);
 
         if (idx <= upperIdx) {
             // shift
             unsigned shiftIdx = 2 * idx + 1; 
             const bool* shiftFV = tree_->getFV(shiftIdx);
-            float shiftScore = calScore(shiftFV);
+            // float shiftScore = calScore(shiftFV);
+            float shiftScore = 
+                score - posLossPairs_[lastOnePos].second + posLossPairs_[lastOnePos + 1].second;
             minHeap_.push(ScoreIdxPair(shiftScore, shiftIdx));
 
             // expand
             unsigned expandIdx = 2 * idx + 2;
+
             const bool* expandFV = tree_->getFV(expandIdx);
-            float expandScore = calScore(expandFV);
+            // float expandScore = calScore(expandFV);
+            float expandScore = 
+                score + posLossPairs_[lastOnePos + 1].second;
             minHeap_.push(ScoreIdxPair(expandScore, expandIdx));
         }
+        minHeap_.pop();
         
         return !minHeap_.empty();
     }

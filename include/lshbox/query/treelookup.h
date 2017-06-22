@@ -51,16 +51,15 @@ public:
         }
         // always return the first bucket of every table
 
-        const unsigned int& table = heap_.top().index_;
-        BIDTYPE newBucket = handlers_[table].getCurBucket();
+        unsigned tb = heap_.top().index_;
         heap_.pop();
-        bool success = handlers_[table].moveForward();
-        if (success){
-            heap_.push(ScoreIdxPair(handlers_[table].getCurScore(), table)); 
+        BIDTYPE newBucket = handlers_[tb].getCurBucket();
+        if (handlers_[tb].moveForward()){
+            heap_.push(ScoreIdxPair(handlers_[tb].getCurScore(), tb)); 
         }
 
         // return value
-        return std::make_pair(table, newBucket);
+        return std::make_pair(tb, newBucket);
     }
 
 private:
