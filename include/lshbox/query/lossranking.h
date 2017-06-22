@@ -2,6 +2,7 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include "lshbox/query/scoreidxpair.h"
 class LRTable {
 public:
     typedef unsigned long long BIDTYPE;
@@ -71,7 +72,8 @@ public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
-    typedef std::pair<float, unsigned > PairT; // <score, tableIdx> 
+    // typedef std::pair<float, unsigned > PairT; // <score, tableIdx> 
+    typedef ScoreIdxPair PairT;
 
     template<typename LSHTYPE>
     LossRanking(
@@ -94,29 +96,26 @@ public:
         }
 
         for (unsigned i = 0; i != allTables_.size(); ++i) {
-            heap_.push(PairT(allTables_[i].getCurScore(), i));
+            float score = allTables_[i].getCurScore();
+            heap_.push(PairT(score , i));
         }
     }
 
     std::pair<unsigned, BIDTYPE> getNextBID(){
         this->numBucketsProbed_++;
-        unsigned tb = heap_.top().second;
+        unsigned tb = heap_.top().index_;
         heap_.pop();
 
         BIDTYPE nextBucket = allTables_[tb].getCurBucket();
         if (allTables_[tb].moveForward()) {
-            heap_.push(PairT(allTables_[tb].getCurScore(), tb));
+            float score = allTables_[tb].getCurScore();
+            heap_.push(PairT(score, tb));
         }
         return std::make_pair(tb, nextBucket);
     }
 
 private:
     std::vector<LRTable> allTables_;
-    std::function<bool(const PairT&, const PairT&)> cmp = 
-        [](const PairT& a, const PairT& b) { return a.first > b.first;};
 
-    std::priority_queue<
-        PairT,
-        std::vector<PairT>,
-        decltype(cmp)> heap_;
+    std::priority_queue<PairT> heap_;
 };
