@@ -184,6 +184,8 @@ void lshbox::shLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
         Eigen::MatrixXf cov = (centered.adjoint() * centered) / float(tmp.rows() - 1);
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
         Eigen::MatrixXf mat_c = tmp * eig.eigenvectors().rightCols(npca);
+
+
         minsAll[k].resize(npca);
         std::vector<double> maxs(npca);
         std::vector<double> omega0(npca);

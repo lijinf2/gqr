@@ -3,7 +3,8 @@ PROJECT(PROBINGS)
 SET(PROBINGS
     newitqlsh_probing
     laitqlsh_rank
-    laitqlsh_topkquery
+    lapcalsh_topkquery
+    lashlsh_topkquery
 )
 
 FOREACH(PROBING ${PROBINGS})
