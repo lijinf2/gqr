@@ -75,8 +75,8 @@ int main(int argc, char const *argv[])
         // param.L = 64;  // number of tables
         param.L = std::atoi(argv[6]);
         param.D = data.getDim();
-        param.N = 20;  // number of bits
-        param.S = 10000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.N = 12;  // number of bits
+        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.trainAll(data, 4); // the second parameter: parallelism, more parallelism requires more memory and CPU
