@@ -5,6 +5,7 @@ SET(PROBINGS
     laitqlsh_rank
     lapcalsh_topkquery
     lashlsh_topkquery
+    lasphlsh_topkquery
 )
 
 FOREACH(PROBING ${PROBINGS})

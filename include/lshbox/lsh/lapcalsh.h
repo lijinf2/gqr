@@ -84,12 +84,6 @@ public:
      * the necessary parameters
      */
     void reset(const Parameter &param_);
-    /**
-     * Train the data to get several groups of suitable vector for index.
-     *
-     * @param data A instance of Matrix<DATATYPE>, most of the time, is the search dataset.
-     */
-    void train(Matrix<DATATYPE> &data);
 
     static bool trainSingleTable( 
         const Matrix<DATATYPE> &data,
@@ -125,14 +119,6 @@ public:
      */
     template<typename PROBER>
     int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
-    /**
-     * Query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void query(const DATATYPE *domin, SCANNER &scanner);
     /**
      * get the hash value of a vector.
      *
@@ -185,19 +171,6 @@ public:
      */
     int getTableSize();
     int getMaxBucketSize();
-    // /**
-    //  * convert unsigned int to vector of boolbucketss.
-    //  */
-    // std::vector<bool> unsignedToBools(unsigned num);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
 
     /**
      * ranking hash code to query the approximate nearest neighborholds.
@@ -208,39 +181,6 @@ public:
      * */
     template<typename PROBER>
     void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds by considering the query quantization error.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
-    /**
-     * expand hash code by loss to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename SCANNER>
-    void queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD = false);
-
-    /**
-     * re Hash the dataset to L buckets, by multi assignment.
-     *
-     * @param data A instance of Matrix<DATATYPE>, it is the search dataset.
-     */
-    void rehash(Matrix<DATATYPE> &data, int numTables);
-    /**
-     * Query the rehashed tables.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void queryRehash(const DATATYPE *domin, SCANNER &scanner);
 
     Parameter param;
     std::vector<std::unordered_map<BIDTYPE, std::vector<unsigned> > > tables;
@@ -315,26 +255,6 @@ bool lshbox::laPcaLsh<DATATYPE>::trainSingleTable(
         // implement efficient cov computation, using eigen lead to multiple copies of the data
         Eigen::MatrixXf cov = (centered.transpose() * centered) / float(centered.rows() - 1);
 
-        // implement cov calculation on our own, much worse than eigen since underlying storage is unclear
-        // Eigen::MatrixXf cov(centered.cols(), centered.cols());
-        // for (unsigned rowIdxA = 0; rowIdxA < cov.rows(); ++rowIdxA) {
-        //     for (unsigned colIdxA = 0; colIdxA < cov.cols(); ++colIdxA) {
-        //         cov.row(rowIdxA)[colIdxA] = 0;
-        //     }
-        // }
-        // for (unsigned pass = 0; pass < centered.rows(); ++pass) { 
-        //     for (unsigned rowIdxC = 0; rowIdxC < cov.rows(); ++rowIdxC) { // Matrix cov
-        //         for (unsigned colIdxC = 0; colIdxC < cov.cols(); ++colIdxC) { // Matrix cov
-        //             // cov.row(rowIdxA)[targetCol] += centered.row(rowIdxA)[colIdxA] * centered.row(colIdxA)[targetCol];
-        //             int tmp = 1;
-        //             cov.row(rowIdxC)[colIdxC] += centered.row(pass)[rowIdxC] * centered.row(pass)[colIdxC];
-        //         }
-        //     }
-        // }
-
-        // Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
-        // Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(param.N);
-        
         Eigen::MatrixXf mat_pca =
             Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf>(cov).eigenvectors().rightCols(param.N);
 
@@ -419,92 +339,6 @@ void lshbox::laPcaLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned
 }
 
 template<typename DATATYPE>
-void lshbox::laPcaLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
-{
-    int npca = param.N;
-    std::mt19937 rng(unsigned(std::time(0)));
-    std::normal_distribution<float> nd;
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        // select data for training
-        std::cout << "table " << k << " starts PCA " << std::endl;
-        std::vector<bool> selected = selection(data.getSize(), param.S);
-
-        std::vector<unsigned> seqs;
-        seqs.reserve(param.S);
-        for (unsigned idxToSelected = 0; idxToSelected < selected.size(); ++idxToSelected) {
-            if (selected[idxToSelected]) {
-                seqs.push_back(idxToSelected);
-            }
-        }
-        assert(seqs.size() == param.S);
-
-
-        // pca
-        Eigen::MatrixXf tmp(param.S, data.getDim());
-        for (unsigned i = 0; i != tmp.rows(); ++i)
-        {
-            std::vector<float> vals(0);
-            vals.resize(data.getDim());
-            for (int j = 0; j != data.getDim(); ++j)
-            {
-                vals[j] = data[seqs[i]][j];
-            }
-            tmp.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
-        }
-        Eigen::MatrixXf centered = tmp.rowwise() - tmp.colwise().mean();
-        Eigen::MatrixXf cov = (centered.transpose() * centered) / float(tmp.rows() - 1);
-        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
-        Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(npca);
-
-        pcsAll[k].resize(npca);
-        for (unsigned i = 0; i != pcsAll[k].size(); ++i)
-        {
-            pcsAll[k][i].resize(param.D);
-            for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
-            {
-                pcsAll[k][i][j] = mat_pca(j, i);
-            }
-        }
-
-        // itq rotation
-        Eigen::MatrixXf R(npca, npca);
-        for (unsigned i = 0; i != R.rows(); ++i)
-        {
-            for (unsigned j = 0; j != R.cols(); ++j)
-            {
-                R(i, j) = nd(rng);
-            }
-        }
-        Eigen::MatrixXf mat_c = tmp * mat_pca;
-        Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        R = svd.matrixU();
-        std::cout << "finish PCA and start rotation " << std::endl;
-        for (unsigned iter = 0; iter != param.I; ++iter)
-        {
-            std::cout << "start iteration: " << iter << std::endl;
-            Eigen::MatrixXf Z = mat_c * R;
-            Eigen::MatrixXf UX(Z.rows(), Z.cols());
-            for (unsigned i = 0; i != Z.rows(); ++i)
-            {
-                for (unsigned j = 0; j != Z.cols(); ++j)
-                {
-                    if (Z(i, j) > 0)
-                    {
-                        UX(i, j) = 1;
-                    }
-                    else
-                    {
-                        UX(i, j) = -1;
-                    }
-                }
-            }
-            Eigen::JacobiSVD<Eigen::MatrixXf> svd_tmp(UX.transpose() * mat_c, Eigen::ComputeThinU | Eigen::ComputeThinV);
-            R = svd_tmp.matrixV() * svd_tmp.matrixU().transpose();
-        }
-    }
-}
-template<typename DATATYPE>
 std::vector<std::vector<float>> lshbox::laPcaLsh<DATATYPE>::getMeanAndSTD(Matrix<DATATYPE> &data)
 {
     // calculate mean
@@ -542,18 +376,6 @@ std::vector<std::vector<float>> lshbox::laPcaLsh<DATATYPE>::getMeanAndSTD(Matrix
         if(countNegative[i] != 0) sumNegative[i] /= countNegative[i];
     }
 
-    // std::cout << "Positive mean: ";
-    // for (int i = 0; i < param.N; ++i) {
-    //     std::cout << sumPositive[i] << " ";
-    // }
-    // std::cout << std::endl;
-    // std::cout << "Negative mean: ";
-    // for (int i = 0; i < param.N; ++i) {
-    //     std::cout << sumNegative[i] << " ";
-    // }
-    // std::cout << std::endl;
-
-    // return std::pair<std::vector<float>, std::vector<float>>(sumPositive, sumNegative);
     // calculate STD
     std::vector<float> stdPositive;
     std::vector<float> stdNegative;
@@ -583,17 +405,6 @@ std::vector<std::vector<float>> lshbox::laPcaLsh<DATATYPE>::getMeanAndSTD(Matrix
         assert(stdNegative[i] > 0);
     }
 
-    // std::cout << "Positive std: ";
-    // for (int i = 0; i < param.N; ++i) {
-    //     std::cout << stdPositive[i] << " ";
-    // }
-    // std::cout << std::endl;
-    // std::cout << "Negative std: ";
-    // for (int i = 0; i < param.N; ++i) {
-    //     std::cout << stdNegative[i] << " ";
-    // }
-    // std::cout << std::endl;
-    //
     std::vector<std::vector<float>> result;
     result.push_back(sumPositive);
     result.push_back(sumNegative);
@@ -640,20 +451,6 @@ int lshbox::laPcaLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prob
     }
     
     return numProbed;
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laPcaLsh<DATATYPE>::query(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        // std::cout << "hashVal " << hashVal << std::endl;
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
 }
 template<typename DATATYPE>
 typename lshbox::laPcaLsh<DATATYPE>::BIDTYPE lshbox::laPcaLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
@@ -809,37 +606,6 @@ int lshbox::laPcaLsh<DATATYPE>::getMaxBucketSize()
     return max;
 }
 
-// the above should be usinged long long
-// template<typename DATATYPE>
-// std::vector<bool> lshbox::laPcaLsh<DATATYPE>::unsignedToBools(unsigned num)
-// {
-//     int nBits = param.N;
-//     std::vector<bool> bits;
-//     bits.resize(nBits);
-//     
-//     while(num > 0 ){
-//         bits[--nBits] = num % 2;
-//         num /= 2;
-//     }
-//     assert(bits.size() == param.N);
-//     return bits;
-// }
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laPcaLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-
-    // noted that the prober will persist the last probed results, so probed maxNumBuckets/2 buckets more
-    for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-
-        const BIDTYPE& probedBId = prober.getNextBID();
-        probe(0, probedBId, prober);
-    }
-
-}
-
 template<typename DATATYPE>
 template<typename PROBER>
 void lshbox::laPcaLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
@@ -850,93 +616,4 @@ void lshbox::laPcaLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &pr
         const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
         probe(probePair.first, probePair.second, prober); 
     }
-}
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laPcaLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-
-        for (int bId = maxNumBuckets/2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-            unsigned probedBId = prober.getNextBID();
-
-            probe(k, probedBId, prober);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laPcaLsh<DATATYPE>::queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        std::vector<bool> hashBits = getHashBits(k, domin);
-        std::vector<float> hashFloats = getHashFloats(k, domin);
-        
-        assert(hashBits.size() == param.N);
-        assert(hashFloats.size() == param.N);
-
-        // query the first bucket
-        unsigned probedBId = hashVal;
-        probe(0, probedBId, scanner);
-
-        Probing pro(hashBits, hashFloats, false);
-        // multi-probing
-        for (int numBk = 1; numBk < maxNumBuckets; ++numBk) {
-            probedBId = pro.pop();
-            // std::cout << std::endl 
-            //     << "the second probed bucket is:" << probedBId
-            //     << std::endl;
-            // std::cout << "hashFloats: ";
-            // for(auto e : hashFloats)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            // std::cout << "hashBits: ";
-            // for(auto e: hashBits)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            probe(0, probedBId, scanner);
-        }
-    }
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
-}
-template<typename DATATYPE>
-void lshbox::laPcaLsh<DATATYPE>::rehash(Matrix<DATATYPE> &data, int numTables)
-{
-    if (numTables == 1) return;
-    tables.clear();
-    tables.resize(numTables);
-    for (unsigned i = 0; i != data.getSize(); ++i)
-    {
-        unsigned hashVal = getHashVal(0, data[i]);
-        std::vector<bool> hashBits = getHashBits(0, data[i]);
-        std::vector<float> hashFloats = getHashFloats(0, data[i]);
-        tables[0][hashVal].push_back(i);
-
-        Probing pro(hashBits, hashFloats, false);
-        for (unsigned k = 1; k != tables.size(); ++k) {
-            hashVal = pro.pop();
-            tables[k][hashVal].push_back(i);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laPcaLsh<DATATYPE>::queryRehash(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    unsigned hashVal = getHashVal(0, domin);
-    // std::cout << "hashVal " << hashVal << std::endl;
-    for (unsigned k = 0; k != tables.size(); ++k)
-    {
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
 }

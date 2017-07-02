@@ -128,14 +128,6 @@ public:
     template<typename PROBER>
     int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
     /**
-     * Query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void query(const DATATYPE *domin, SCANNER &scanner);
-    /**
      * get the hash value of a vector.
      *
      * @param k     The idx of the table
@@ -187,20 +179,6 @@ public:
      */
     int getTableSize();
     int getMaxBucketSize();
-    // /**
-    //  * convert unsigned int to vector of boolbucketss.
-    //  */
-    // std::vector<bool> unsignedToBools(unsigned num);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
-
     /**
      * ranking hash code to query the approximate nearest neighborholds.
      *
@@ -210,39 +188,6 @@ public:
      * */
     template<typename PROBER>
     void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds by considering the query quantization error.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
-    /**
-     * expand hash code by loss to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename SCANNER>
-    void queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD = false);
-
-    /**
-     * re Hash the dataset to L buckets, by multi assignment.
-     *
-     * @param data A instance of Matrix<DATATYPE>, it is the search dataset.
-     */
-    void rehash(Matrix<DATATYPE> &data, int numTables);
-    /**
-     * Query the rehashed tables.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void queryRehash(const DATATYPE *domin, SCANNER &scanner);
 
     Parameter param;
     std::vector<std::unordered_map<BIDTYPE, std::vector<unsigned> > > tables;
@@ -600,20 +545,7 @@ int lshbox::laShLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& probe
     
     return numProbed;
 }
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laShLsh<DATATYPE>::query(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        // std::cout << "hashVal " << hashVal << std::endl;
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
-}
+
 template<typename DATATYPE>
 typename lshbox::laShLsh<DATATYPE>::BIDTYPE lshbox::laShLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
 {
@@ -796,37 +728,6 @@ int lshbox::laShLsh<DATATYPE>::getMaxBucketSize()
     return max;
 }
 
-// the above should be usinged long long
-// template<typename DATATYPE>
-// std::vector<bool> lshbox::laShLsh<DATATYPE>::unsignedToBools(unsigned num)
-// {
-//     int nBits = param.N;
-//     std::vector<bool> bits;
-//     bits.resize(nBits);
-//     
-//     while(num > 0 ){
-//         bits[--nBits] = num % 2;
-//         num /= 2;
-//     }
-//     assert(bits.size() == param.N);
-//     return bits;
-// }
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laShLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-
-    // noted that the prober will persist the last probed results, so probed maxNumBuckets/2 buckets more
-    for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-
-        const BIDTYPE& probedBId = prober.getNextBID();
-        probe(0, probedBId, prober);
-    }
-
-}
-
 template<typename DATATYPE>
 template<typename PROBER>
 void lshbox::laShLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
@@ -837,93 +738,4 @@ void lshbox::laShLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &pro
         const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
         probe(probePair.first, probePair.second, prober); 
     }
-}
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laShLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-
-        for (int bId = maxNumBuckets/2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-            unsigned probedBId = prober.getNextBID();
-
-            probe(k, probedBId, prober);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laShLsh<DATATYPE>::queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        std::vector<bool> hashBits = getHashBits(k, domin);
-        std::vector<float> hashFloats = getHashFloats(k, domin);
-        
-        assert(hashBits.size() == param.N);
-        assert(hashFloats.size() == param.N);
-
-        // query the first bucket
-        unsigned probedBId = hashVal;
-        probe(0, probedBId, scanner);
-
-        Probing pro(hashBits, hashFloats, false);
-        // multi-probing
-        for (int numBk = 1; numBk < maxNumBuckets; ++numBk) {
-            probedBId = pro.pop();
-            // std::cout << std::endl 
-            //     << "the second probed bucket is:" << probedBId
-            //     << std::endl;
-            // std::cout << "hashFloats: ";
-            // for(auto e : hashFloats)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            // std::cout << "hashBits: ";
-            // for(auto e: hashBits)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            probe(0, probedBId, scanner);
-        }
-    }
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
-}
-template<typename DATATYPE>
-void lshbox::laShLsh<DATATYPE>::rehash(Matrix<DATATYPE> &data, int numTables)
-{
-    if (numTables == 1) return;
-    tables.clear();
-    tables.resize(numTables);
-    for (unsigned i = 0; i != data.getSize(); ++i)
-    {
-        unsigned hashVal = getHashVal(0, data[i]);
-        std::vector<bool> hashBits = getHashBits(0, data[i]);
-        std::vector<float> hashFloats = getHashFloats(0, data[i]);
-        tables[0][hashVal].push_back(i);
-
-        Probing pro(hashBits, hashFloats, false);
-        for (unsigned k = 1; k != tables.size(); ++k) {
-            hashVal = pro.pop();
-            tables[k][hashVal].push_back(i);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laShLsh<DATATYPE>::queryRehash(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    unsigned hashVal = getHashVal(0, domin);
-    // std::cout << "hashVal " << hashVal << std::endl;
-    for (unsigned k = 0; k != tables.size(); ++k)
-    {
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
 }
