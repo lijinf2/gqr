@@ -47,7 +47,7 @@ std::vector<bool> selection(unsigned n, unsigned k) {
 }
 
 template<typename ScannerT, typename AnswerT>
-void setStat(
+bool setStat(
         // lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> scanner, 
         ScannerT scanner, 
         const AnswerT& ans, 
@@ -68,7 +68,8 @@ void setStat(
     recall << thisRecall;
     precision << thisPrecision;
 
-    return;
+    if (thisRecall > 0.99) return true;
+    else return false;
 }
 
 namespace lshbox {
