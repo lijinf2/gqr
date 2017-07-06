@@ -214,7 +214,7 @@ public:
      * @param domin The pointer to the vector
      * @return      The hash value
      */
-    std::vector<bool> quantization(unsigned k, const std::vector<float>& hashFloats);
+    std::vector<bool> quantization(const std::vector<float>& hashFloats);
     /**
      * Added by Jinfeng
      * getHashBits for of a vector, i.e. projection + quantization
@@ -601,17 +601,20 @@ std::vector<float> lshbox::laSphLsh<DATATYPE>::getHashFloats(unsigned k, const D
             hashFloats[i] += (pivots[k][i][idx] - domin[idx]) * (pivots[k][i][idx] - domin[idx]);
         }
     }
+
+    for (int i = 0; i < hashFloats.size(); ++i) {
+        hashFloats[i] = hashFloats[i] -  thresholds[k][i];
+    }
     return hashFloats;
 }
 
 template<typename DATATYPE>
-std::vector<bool> lshbox::laSphLsh<DATATYPE>::quantization(unsigned k, const std::vector<float>& hashFloats)
+std::vector<bool> lshbox::laSphLsh<DATATYPE>::quantization(const std::vector<float>& hashFloats)
 {
     std::vector<bool> hashBits;
     hashBits.resize(hashFloats.size());
-
     for (int i = 0; i < hashFloats.size(); ++i) {
-        if (hashFloats[i] > thresholds[k][i]) {
+        if (hashFloats[i] >= 0) {
             hashBits[i] = 1;
         } else {
             hashBits[i] = 0;
@@ -623,7 +626,7 @@ template<typename DATATYPE>
 std::vector<bool> lshbox::laSphLsh<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
 {
     std::vector<float> hashFloats = getHashFloats(k, domin);
-    std::vector<bool> hashBits = quantization(k, hashFloats);
+    std::vector<bool> hashBits = quantization(hashFloats);
     return hashBits;
 }
 template<typename DATATYPE>

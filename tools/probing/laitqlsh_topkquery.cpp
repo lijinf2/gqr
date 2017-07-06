@@ -39,6 +39,13 @@ int main(int argc, char const *argv[])
         std::cerr << "Usage: ./laitqlsh_test data_file lsh_file benchmark_file" << std::endl;
         return -1;
     }
+
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    for (int i = 0; i < argc; ++i) {
+        std::cout << argv[i] << std::endl;
+    }
     std::cout << "Example of using Iterative Quantization" << std::endl << std::endl;
     typedef float DATATYPE;
     std::cout << "LOADING DATA ..." << std::endl;
@@ -68,8 +75,8 @@ int main(int argc, char const *argv[])
         lshbox::laItqLsh<DATATYPE>::Parameter param;
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 12;  // number of bits
-        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.N = 28;  // number of bits
+        param.S = 10000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.trainAll(data, 4); // the second parameter: parallelism, more parallelism requires more memory and CPU
@@ -108,17 +115,17 @@ int main(int argc, char const *argv[])
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // //
-    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    //
-    void* raw_memory = operator new[]( 
-        sizeof(PROBER) * bench.getQ());
-    PROBER* probers = static_cast<PROBER*>(raw_memory);
-    for (int i = 0; i < bench.getQ(); ++i) {
-        new(&probers[i]) PROBER(
-            data[bench.getQuery(i)],
-            initScanner,
-            mylsh);// for non losslookup probers
-    }
+    // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // //
+    // void* raw_memory = operator new[]( 
+    //     sizeof(PROBER) * bench.getQ());
+    // PROBER* probers = static_cast<PROBER*>(raw_memory);
+    // for (int i = 0; i < bench.getQ(); ++i) {
+    //     new(&probers[i]) PROBER(
+    //         data[bench.getQuery(i)],
+    //         initScanner,
+    //         mylsh);// for non losslookup probers
+    // }
 
 
     // // // // initialize losslookup probers
@@ -127,19 +134,19 @@ int main(int argc, char const *argv[])
     // FV fvs(mylsh.param.N);
     //
     //
-    // typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // Tree fvs(mylsh.param.N);
-    //
-    // void* raw_memory = operator new[]( 
-    //     sizeof(PROBER) * bench.getQ());
-    // PROBER* probers = static_cast<PROBER*>(raw_memory);
-    // for (int i = 0; i < bench.getQ(); ++i) {
-    //     new(&probers[i]) PROBER(
-    //         data[bench.getQuery(i)],
-    //         initScanner,
-    //         mylsh,
-    //         &fvs);// for non losslookup probers
-    // }
+    typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    Tree fvs(mylsh.param.N);
+
+    void* raw_memory = operator new[]( 
+        sizeof(PROBER) * bench.getQ());
+    PROBER* probers = static_cast<PROBER*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) PROBER(
+            data[bench.getQuery(i)],
+            initScanner,
+            mylsh,
+            &fvs);// for non losslookup probers
+    }
 
     double initTime = timer.elapsed();
     std::cout << "init time: " << initTime << std::endl;
