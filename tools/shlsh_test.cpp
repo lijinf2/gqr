@@ -52,11 +52,11 @@ int main(int argc, char const *argv[])
     else
     {
         lshbox::shLsh<DATATYPE>::Parameter param;
-        param.M = 521;
-        param.L = 5;
+        param.M = 4096 ;
+        param.L = 1;
         param.D = data.getDim();
-        param.N = 4;
-        param.S = 100;
+        param.N = 12;
+        param.S = 60000;
         mylsh.reset(param);
         mylsh.train(data);
         mylsh.hash(data);
