@@ -52,7 +52,7 @@ namespace lshbox
  *     35(12): 2916-2929.
  */
 template<typename DATATYPE = float>
-class laItqLsh 
+class laShLsh 
 {
 public:
     typedef unsigned long long BIDTYPE;
@@ -71,16 +71,16 @@ public:
         /// Training iterations
         unsigned I = 0;
     };
-    laItqLsh() {}
-    laItqLsh(const Parameter &param_)
+    laShLsh() {}
+    laShLsh(const Parameter &param_)
     {
         reset(param_);
     }
-    ~laItqLsh() {}
+    ~laShLsh() {}
     /**
      * Reset the parameter setting
      *
-     * @param param_ A instance of laItqLsh<DATATYPE>::Parametor, which contains
+     * @param param_ A instance of laShLsh<DATATYPE>::Parametor, which contains
      * the necessary parameters
      */
     void reset(const Parameter &param_);
@@ -89,12 +89,13 @@ public:
      *
      * @param data A instance of Matrix<DATATYPE>, most of the time, is the search dataset.
      */
-    void train(Matrix<DATATYPE> &data);
+    // void train(Matrix<DATATYPE> &data);
 
     static bool trainSingleTable( 
         const Matrix<DATATYPE> &data,
         std::vector<std::vector<float> >* pcsPointer,
         std::vector<std::vector<float> >* omegaPointer,
+        std::vector<double>* minPointer,
         Parameter param);
     void trainAll(const Matrix<DATATYPE> &data, unsigned batchSize);
     /**
@@ -126,14 +127,6 @@ public:
      */
     template<typename PROBER>
     int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
-    /**
-     * Query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void query(const DATATYPE *domin, SCANNER &scanner);
     /**
      * get the hash value of a vector.
      *
@@ -186,20 +179,6 @@ public:
      */
     int getTableSize();
     int getMaxBucketSize();
-    // /**
-    //  * convert unsigned int to vector of boolbucketss.
-    //  */
-    // std::vector<bool> unsignedToBools(unsigned num);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
-
     /**
      * ranking hash code to query the approximate nearest neighborholds.
      *
@@ -209,39 +188,6 @@ public:
      * */
     template<typename PROBER>
     void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
-    /**
-     * ranking hash code to query the approximate nearest neighborholds by considering the query quantization error.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename PROBER>
-    void queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets);
-    /**
-     * expand hash code by loss to query the approximate nearest neighborholds.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     * @param maxNumBuckets Maximum number of buckets to probe
-     * */
-    template<typename SCANNER>
-    void queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD = false);
-
-    /**
-     * re Hash the dataset to L buckets, by multi assignment.
-     *
-     * @param data A instance of Matrix<DATATYPE>, it is the search dataset.
-     */
-    void rehash(Matrix<DATATYPE> &data, int numTables);
-    /**
-     * Query the rehashed tables.
-     *
-     * @param domin   The pointer to the vector
-     * @param scanner Top-K scanner, use for scan the approximate nearest neighborholds
-     */
-    template<typename SCANNER>
-    void queryRehash(const DATATYPE *domin, SCANNER &scanner);
 
     Parameter param;
     std::vector<std::unordered_map<BIDTYPE, std::vector<unsigned> > > tables;
@@ -251,18 +197,21 @@ private:
     std::vector<std::vector<std::vector<float> > > omegasAll;
     std::vector<std::vector<unsigned> > rndArray;
     std::vector<std::vector<float>> meanAndSTD;
+
+    std::vector<std::vector<double> > minsAll;
 };
 }
 
 // ------------------------- implementation -------------------------
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::reset(const Parameter &param_)
+void lshbox::laShLsh<DATATYPE>::reset(const Parameter &param_)
 {
     param = param_;
     tables.resize(param.L);
     rndArray.resize(param.L);
     pcsAll.resize(param.L);
     omegasAll.resize(param.L);
+    minsAll.resize(param.L);
     std::mt19937 rng(unsigned(std::time(0)));
     std::uniform_int_distribution<unsigned> usArray(0, param.M - 1);
     for (std::vector<std::vector<unsigned> >::iterator iter = rndArray.begin(); iter != rndArray.end(); ++iter)
@@ -276,204 +225,14 @@ void lshbox::laItqLsh<DATATYPE>::reset(const Parameter &param_)
 
 // trainSingleTable, data, pcsAll[k], omegaAll[k]
 template<typename DATATYPE>
-bool lshbox::laItqLsh<DATATYPE>::trainSingleTable(
+bool lshbox::laShLsh<DATATYPE>::trainSingleTable(
     const Matrix<DATATYPE> &data,
     std::vector<std::vector<float> >* pcsPointer,
     std::vector<std::vector<float> >* omegaPointer,
+    std::vector<double>* minPointer,
     Parameter param)
 {
         // std::cout << "table " << k << " starts PCA " << std::endl;
-        std::vector<bool> selected = selection(data.getSize(), param.S);
-
-        std::vector<unsigned> seqs;
-        seqs.reserve(param.S);
-        for (unsigned idxToSelected = 0; idxToSelected < selected.size(); ++idxToSelected) {
-            if (selected[idxToSelected]) {
-                seqs.push_back(idxToSelected);
-            }
-        }
-        assert(seqs.size() == param.S);
-
-
-        // pca
-        // Eigen::MatrixXf tmp(param.S, data.getDim());
-        Eigen::MatrixXf centered(param.S, data.getDim());
-        std::vector<float> vals(0);
-        vals.resize(data.getDim());
-        for (unsigned i = 0; i != centered.rows(); ++i)
-        {
-            for (int j = 0; j != data.getDim(); ++j)
-            {
-                vals[j] = data[seqs[i]][j];
-            }
-            centered.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
-        }
-
-        // delete seqs to save memory
-        seqs.clear();
-        seqs.shrink_to_fit();
-
-        std::cout << "start pca " << std::endl;
-        centered = centered.rowwise() - centered.colwise().mean();
-
-        // implement efficient cov computation, using eigen lead to multiple copies of the data
-        Eigen::MatrixXf cov = (centered.transpose() * centered) / float(centered.rows() - 1);
-
-        // implement cov calculation on our own, much worse than eigen since underlying storage is unclear
-        // Eigen::MatrixXf cov(centered.cols(), centered.cols());
-        // for (unsigned rowIdxA = 0; rowIdxA < cov.rows(); ++rowIdxA) {
-        //     for (unsigned colIdxA = 0; colIdxA < cov.cols(); ++colIdxA) {
-        //         cov.row(rowIdxA)[colIdxA] = 0;
-        //     }
-        // }
-        // for (unsigned pass = 0; pass < centered.rows(); ++pass) { 
-        //     for (unsigned rowIdxC = 0; rowIdxC < cov.rows(); ++rowIdxC) { // Matrix cov
-        //         for (unsigned colIdxC = 0; colIdxC < cov.cols(); ++colIdxC) { // Matrix cov
-        //             // cov.row(rowIdxA)[targetCol] += centered.row(rowIdxA)[colIdxA] * centered.row(colIdxA)[targetCol];
-        //             int tmp = 1;
-        //             cov.row(rowIdxC)[colIdxC] += centered.row(pass)[rowIdxC] * centered.row(pass)[colIdxC];
-        //         }
-        //     }
-        // }
-
-        // Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
-        // Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(param.N);
-        
-        Eigen::MatrixXf mat_pca =
-            Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf>(cov).eigenvectors().rightCols(param.N);
-
-        (*pcsPointer).resize(param.N);
-        for (unsigned i = 0; i != (*pcsPointer).size(); ++i)
-        {
-            (*pcsPointer)[i].resize(param.D);
-            for (unsigned j = 0; j != (*pcsPointer)[i].size(); ++j)
-            {
-                (*pcsPointer)[i][j] = mat_pca(j, i);
-            }
-        }
-
-        // itq rotation
-
-        // Eigen::MatrixXf mat_c = tmp * mat_pca; original implementation, same result as using centered
-        Eigen::MatrixXf mat_c = centered * mat_pca;
-
-        // delete centered
-        centered = Eigen::MatrixXf();
-
-        std::hash<std::thread::id> hasher;
-        std::thread::id this_id = std::this_thread::get_id();
-        std::mt19937 rng((unsigned) hasher(this_id) + std::time(0));
-        std::normal_distribution<float> nd;
-        Eigen::MatrixXf R(param.N, param.N);
-        for (unsigned i = 0; i != R.rows(); ++i)
-        {
-            for (unsigned j = 0; j != R.cols(); ++j)
-            {
-                R(i, j) = nd(rng);
-            }
-        }
-        Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        R = svd.matrixU();
-        std::cout << "finish PCA and start rotation " << std::endl;
-        for (unsigned iter = 0; iter != param.I; ++iter)
-        {
-            std::cout << "start iteration: " << iter << std::endl;
-            Eigen::MatrixXf Z = mat_c * R;
-            Eigen::MatrixXf UX(Z.rows(), Z.cols());
-            for (unsigned i = 0; i != Z.rows(); ++i)
-            {
-                for (unsigned j = 0; j != Z.cols(); ++j)
-                {
-                    if (Z(i, j) > 0)
-                    {
-                        UX(i, j) = 1;
-                    }
-                    else
-                    {
-                        UX(i, j) = -1;
-                    }
-                }
-            }
-            Eigen::JacobiSVD<Eigen::MatrixXf> svd_tmp(UX.transpose() * mat_c, Eigen::ComputeThinU | Eigen::ComputeThinV);
-            R = svd_tmp.matrixV() * svd_tmp.matrixU().transpose();
-        }
-        (*omegaPointer).resize(param.N);
-        for (unsigned i = 0; i != (*omegaPointer).size(); ++i)
-        {
-            (*omegaPointer)[i].resize(param.N);
-            for (unsigned j = 0; j != (*omegaPointer)[i].size(); ++j)
-            {
-                (*omegaPointer)[i][j] = R(j, i);
-            }
-        }
-        return true;
-}
-
-template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned batchSize){
-
-    // use loop
-    unsigned numBatches = param.L / batchSize;
-    for (unsigned batch = 0; batch < numBatches; ++batch) {
-        std::vector<std::thread> threads;
-        threads.resize(batchSize);
-
-        unsigned startk = batch * batchSize;
-        for (unsigned i = 0; i < threads.size(); ++i) {
-            unsigned tableId = startk + i;
-            threads[i] = std::thread(
-                    trainSingleTable, 
-                    data, &pcsAll[tableId], &omegasAll[tableId], param);
-            std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
-        }
-
-        for (unsigned i = 0; i < threads.size(); ++i) {
-            threads[i].join();
-        }
-        std::cout << "batch " + std::to_string(batch) + " finished!\n" << std::endl;
-    }
-
-    unsigned remaining = param.L % batchSize;
-    std::vector<std::thread> threads;
-    threads.resize(remaining);
-
-    unsigned startk = numBatches * batchSize;
-    for (unsigned i = 0; i < threads.size(); ++i) {
-        unsigned tableId = startk + i;
-        threads[i] = std::thread(
-                trainSingleTable, 
-                data, &pcsAll[tableId], &omegasAll[tableId], param);
-        std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
-    }
-
-    for (unsigned i = 0; i < threads.size(); ++i) {
-        threads[i].join();
-    }
-    std::cout << "last batch finished\n " << std::endl;
-
-    // for (unsigned k = 0; k != param.L; ++k) {
-    //     threads.push_back(
-    //         std::thread(
-    //             trainSingleTable, 
-    //             data, &pcsAll[k], &omegasAll[k], param)
-    //      );
-    // }
-    //
-    // for (unsigned k = 0; k < threads.size(); ++k) {
-    //     threads[k].join();
-    // }
-}
-
-template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
-{
-    int npca = param.N;
-    std::mt19937 rng(unsigned(std::time(0)));
-    std::normal_distribution<float> nd;
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        // select data for training
-        std::cout << "table " << k << " starts PCA " << std::endl;
         std::vector<bool> selected = selection(data.getSize(), param.S);
 
         std::vector<unsigned> seqs;
@@ -498,69 +257,159 @@ void lshbox::laItqLsh<DATATYPE>::train(Matrix<DATATYPE> &data)
             }
             tmp.row(i) = Eigen::Map<Eigen::VectorXf>(&vals[0], data.getDim());
         }
+
+        // delete seqs to save memory
+        seqs.clear();
+        seqs.shrink_to_fit();
+
+        std::cout << "start pca " << std::endl;
         Eigen::MatrixXf centered = tmp.rowwise() - tmp.colwise().mean();
+
+        // implement efficient cov computation, using eigen lead to multiple copies of the data
         Eigen::MatrixXf cov = (centered.transpose() * centered) / float(tmp.rows() - 1);
+        // // delete centered
+        // centered = Eigen::MatrixXf();
+
         Eigen::SelfAdjointEigenSolver<Eigen::MatrixXf> eig(cov);
-        Eigen::MatrixXf mat_pca = eig.eigenvectors().rightCols(npca);
+        Eigen::MatrixXf mat_c =
+            tmp * eig.eigenvectors().rightCols(param.N);
 
-        pcsAll[k].resize(npca);
-        for (unsigned i = 0; i != pcsAll[k].size(); ++i)
+
+        // // delete tmp;
+        // tmp = Eigen::MatrixXf();
+        
+        // build minsAll matrix
+        (*minPointer).resize(param.N);
+        std::vector<double> maxs(param.N);
+        std::vector<double> omega0(param.N);
+        double maxR = 0;
+        for (unsigned i = 0; i != omega0.size(); ++i)
         {
-            pcsAll[k][i].resize(param.D);
-            for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
+            (*minPointer)[i] = mat_c.colwise().minCoeff()(i);
+            maxs[i] = mat_c.colwise().maxCoeff()(i);
+            omega0[i] = M_PI / (maxs[i] - (*minPointer)[i]);
+            if ((maxs[i] - (*minPointer)[i]) > maxR)
             {
-                pcsAll[k][i][j] = mat_pca(j, i);
+                maxR = maxs[i] - (*minPointer)[i];
             }
         }
 
-        // itq rotation
-        Eigen::MatrixXf R(npca, npca);
-        for (unsigned i = 0; i != R.rows(); ++i)
+
+        std::vector<double> maxMode(param.N);
+        int sum = 0;
+        for (unsigned i = 0; i != maxMode.size(); ++i)
         {
-            for (unsigned j = 0; j != R.cols(); ++j)
+            maxMode[i] = std::ceil((param.N+ 1) * (maxs[i] - (*minPointer)[i]) / maxR);
+            sum += int(maxMode[i]);
+        }
+
+
+        int nModes = sum - param.N + 1;
+        std::vector<float> modes_in(nModes, 1);
+        std::vector<std::vector<float> > modes(param.N, modes_in);
+        int m = 1;
+        for (unsigned i = 0; i != modes.size(); ++i)
+        {
+            for (unsigned j = 0; j != maxMode[i] - 1; ++j)
             {
-                R(i, j) = nd(rng);
+                modes[i][m + j] = float(j + 2);
+            }
+            m = m + int(maxMode[i]) - 1;
+        }
+
+
+        // build omegas
+        std::vector<std::vector<float> > omegas(param.N);
+        for (unsigned i = 0; i != omegas.size(); ++i)
+        {
+            omegas[i].resize(nModes);
+            for (unsigned j = 0; j != omegas[i].size(); ++j)
+            {
+                omegas[i][j] = float(modes[i][j] * omega0[i]);
             }
         }
-        Eigen::MatrixXf mat_c = tmp * mat_pca;
-        Eigen::JacobiSVD<Eigen::MatrixXf> svd(R, Eigen::ComputeThinU | Eigen::ComputeThinV);
-        R = svd.matrixU();
-        std::cout << "finish PCA and start rotation " << std::endl;
-        for (unsigned iter = 0; iter != param.I; ++iter)
+        std::vector<std::pair<unsigned, float> > eigVal(nModes);
+        for (unsigned i = 0; i != eigVal.size(); ++i)
         {
-            std::cout << "start iteration: " << iter << std::endl;
-            Eigen::MatrixXf Z = mat_c * R;
-            Eigen::MatrixXf UX(Z.rows(), Z.cols());
-            for (unsigned i = 0; i != Z.rows(); ++i)
+            float sum = 0;
+            for (unsigned j = 0; j != omegas.size(); ++j)
             {
-                for (unsigned j = 0; j != Z.cols(); ++j)
-                {
-                    if (Z(i, j) > 0)
-                    {
-                        UX(i, j) = 1;
-                    }
-                    else
-                    {
-                        UX(i, j) = -1;
-                    }
-                }
+                sum += omegas[j][i] * omegas[j][i];
             }
-            Eigen::JacobiSVD<Eigen::MatrixXf> svd_tmp(UX.transpose() * mat_c, Eigen::ComputeThinU | Eigen::ComputeThinV);
-            R = svd_tmp.matrixV() * svd_tmp.matrixU().transpose();
+            eigVal[i] = std::make_pair(i, sum);
         }
-        omegasAll[k].resize(npca);
-        for (unsigned i = 0; i != omegasAll[k].size(); ++i)
+        std::sort(eigVal.begin(), eigVal.end(), ascend_sort());
+
+        (*omegaPointer).resize(param.N);
+        for (unsigned i = 0; i != (*omegaPointer).size(); ++i)
         {
-            omegasAll[k][i].resize(npca);
-            for (unsigned j = 0; j != omegasAll[k][i].size(); ++j)
+            (*omegaPointer)[i].resize(param.N);
+            for (unsigned j = 0; j != (*omegaPointer)[i].size(); ++j)
             {
-                omegasAll[k][i][j] = R(j, i);
+                (*omegaPointer)[i][j] = omegas[i][eigVal[j + 1].first];
             }
         }
-    }
+
+
+        // build pca
+        (*pcsPointer).resize(param.N);
+        for (unsigned i = 0; i != (*pcsPointer).size(); ++i)
+        {
+            (*pcsPointer)[i].resize(param.D);
+            for (unsigned j = 0; j != (*pcsPointer)[i].size(); ++j)
+            {
+                (*pcsPointer)[i][j] = eig.eigenvectors().rightCols(param.N).adjoint()(i, j);
+            }
+        }
+
+        return true;
 }
+
 template<typename DATATYPE>
-std::vector<std::vector<float>> lshbox::laItqLsh<DATATYPE>::getMeanAndSTD(Matrix<DATATYPE> &data)
+void lshbox::laShLsh<DATATYPE>::trainAll(const Matrix<DATATYPE> &data, unsigned batchSize){
+
+    // use loop
+    unsigned numBatches = param.L / batchSize;
+    for (unsigned batch = 0; batch < numBatches; ++batch) {
+        std::vector<std::thread> threads;
+        threads.resize(batchSize);
+
+        unsigned startk = batch * batchSize;
+        for (unsigned i = 0; i < threads.size(); ++i) {
+            unsigned tableId = startk + i;
+            threads[i] = std::thread(
+                    trainSingleTable, 
+                    data, &pcsAll[tableId], &omegasAll[tableId], &minsAll[tableId], param);
+            std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
+        }
+
+        for (unsigned i = 0; i < threads.size(); ++i) {
+            threads[i].join();
+        }
+        std::cout << "batch " + std::to_string(batch) + " finished!\n" << std::endl;
+    }
+
+    unsigned remaining = param.L % batchSize;
+    std::vector<std::thread> threads;
+    threads.resize(remaining);
+
+    unsigned startk = numBatches * batchSize;
+    for (unsigned i = 0; i < threads.size(); ++i) {
+        unsigned tableId = startk + i;
+        threads[i] = std::thread(
+                trainSingleTable, 
+                data, &pcsAll[tableId], &omegasAll[tableId], &minsAll[tableId], param);
+        std::cout << "table " + std::to_string(tableId) + " added!\n" << std::endl;
+    }
+
+    for (unsigned i = 0; i < threads.size(); ++i) {
+        threads[i].join();
+    }
+    std::cout << "last batch finished\n " << std::endl;
+}
+
+template<typename DATATYPE>
+std::vector<std::vector<float>> lshbox::laShLsh<DATATYPE>::getMeanAndSTD(Matrix<DATATYPE> &data)
 {
     // calculate mean
     std::vector<float> sumPositive;
@@ -657,12 +506,12 @@ std::vector<std::vector<float>> lshbox::laItqLsh<DATATYPE>::getMeanAndSTD(Matrix
     return result;
 }
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::setMeanAndSTD(Matrix<DATATYPE> &data){
+void lshbox::laShLsh<DATATYPE>::setMeanAndSTD(Matrix<DATATYPE> &data){
     meanAndSTD = getMeanAndSTD(data);
 }
 
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::hash(Matrix<DATATYPE> &data)
+void lshbox::laShLsh<DATATYPE>::hash(Matrix<DATATYPE> &data)
 {
     progress_display pd(data.getSize());
     for (unsigned i = 0; i != data.getSize(); ++i)
@@ -672,7 +521,7 @@ void lshbox::laItqLsh<DATATYPE>::hash(Matrix<DATATYPE> &data)
     }
 }
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
+void lshbox::laShLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
 {
     for (unsigned k = 0; k != param.L; ++k)
     {
@@ -682,7 +531,7 @@ void lshbox::laItqLsh<DATATYPE>::insert(unsigned key, const DATATYPE *domin)
 }
 template<typename DATATYPE>
 template<typename PROBER>
-int lshbox::laItqLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prober)
+int lshbox::laShLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prober)
 {
     int numProbed = 0;
     if (tables[t].find(bucketId) != tables[t].end())
@@ -696,22 +545,9 @@ int lshbox::laItqLsh<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prob
     
     return numProbed;
 }
+
 template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::query(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        // std::cout << "hashVal " << hashVal << std::endl;
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
-}
-template<typename DATATYPE>
-typename lshbox::laItqLsh<DATATYPE>::BIDTYPE lshbox::laItqLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
+typename lshbox::laShLsh<DATATYPE>::BIDTYPE lshbox::laShLsh<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin)
 {
     std::vector<float> domin_pc(pcsAll[k].size());
     for (unsigned i = 0; i != domin_pc.size(); ++i)
@@ -720,15 +556,16 @@ typename lshbox::laItqLsh<DATATYPE>::BIDTYPE lshbox::laItqLsh<DATATYPE>::getHash
         {
             domin_pc[i] += domin[j] * pcsAll[k][i][j];
         }
+        domin_pc[i] -= float(minsAll[k][i]);
     }
 
     BIDTYPE hashVal = 0;
     for (unsigned i = 0; i != domin_pc.size(); ++i)
     {
-        float product = 0;
+        float product = 1;
         for (unsigned j = 0; j != omegasAll[k][i].size(); ++j)
         {
-            product += float(domin_pc[j] * omegasAll[k][i][j]);
+            product *= float(std::sin(domin_pc[j] * omegasAll[k][i][j] + M_PI / 2));
         }
         hashVal <<= 1; // hashVal *= 2
         if (product > 0)
@@ -738,8 +575,9 @@ typename lshbox::laItqLsh<DATATYPE>::BIDTYPE lshbox::laItqLsh<DATATYPE>::getHash
     }
     return hashVal;
 }
+
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
+void lshbox::laShLsh<DATATYPE>::load(const std::string &file)
 {
     std::ifstream in(file, std::ios::binary);
     if (!in) {
@@ -753,6 +591,7 @@ void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
     in.read((char *)&param.S, sizeof(unsigned));
     tables.resize(param.L);
     rndArray.resize(param.L);
+    minsAll.resize(param.L);
     pcsAll.resize(param.L);
     omegasAll.resize(param.L);
     for (unsigned i = 0; i != param.L; ++i)
@@ -776,10 +615,12 @@ void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
             tables[i][target].resize(length);
             in.read((char *) & (tables[i][target][0]), sizeof(unsigned) * length);
         }
+        minsAll[i].resize(param.N);
         pcsAll[i].resize(param.N);
         omegasAll[i].resize(param.N);
-        for (unsigned j = 0; j != param.N; ++j)
-        {
+        in.read((char *)&minsAll[i][0], sizeof(double) * param.N);
+        for (unsigned j = 0; j != param.N; ++j) {
+        
             pcsAll[i][j].resize(param.D);
             omegasAll[i][j].resize(param.N);
             in.read((char *)&pcsAll[i][j][0], sizeof(float) * param.D);
@@ -788,8 +629,9 @@ void lshbox::laItqLsh<DATATYPE>::load(const std::string &file)
     }
     in.close();
 }
+
 template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::save(const std::string &file)
+void lshbox::laShLsh<DATATYPE>::save(const std::string &file)
 {
     std::ofstream out(file, std::ios::binary);
     out.write((char *)&param.M, sizeof(unsigned)); // 4 bytes
@@ -810,6 +652,7 @@ void lshbox::laItqLsh<DATATYPE>::save(const std::string &file)
             out.write((char *)&length, sizeof(unsigned));
             out.write((char *) & ((iter->second)[0]), sizeof(unsigned) * length);
         }
+        out.write((char *)&minsAll[i][0], sizeof(double) * param.N);
         for (unsigned j = 0; j != param.N; ++j)
         {
             out.write((char *)&pcsAll[i][j][0], sizeof(float) * param.D);
@@ -819,7 +662,7 @@ void lshbox::laItqLsh<DATATYPE>::save(const std::string &file)
     out.close();
 }
 template<typename DATATYPE>
-std::vector<float> lshbox::laItqLsh<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+std::vector<float> lshbox::laShLsh<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
 {
     std::vector<float> domin_pc(pcsAll[k].size());
     for (unsigned i = 0; i != domin_pc.size(); ++i)
@@ -828,23 +671,24 @@ std::vector<float> lshbox::laItqLsh<DATATYPE>::getHashFloats(unsigned k, const D
         {
             domin_pc[i] += domin[j] * pcsAll[k][i][j];
         }
+        domin_pc[i] -= float(minsAll[k][i]);
     }
 
     std::vector<float> hashFloats;
     hashFloats.resize(domin_pc.size());
     for (unsigned i = 0; i != domin_pc.size(); ++i)
     {
-        float product = 0;
+        float product = 1;
         for (unsigned j = 0; j != omegasAll[k][i].size(); ++j)
         {
-            product += float(domin_pc[j] * omegasAll[k][i][j]);
+            product *= float(std::sin(domin_pc[j] * omegasAll[k][i][j] + M_PI / 2));
         }
         hashFloats[i] = product;
     }
     return hashFloats;
 }
 template<typename DATATYPE>
-std::vector<bool> lshbox::laItqLsh<DATATYPE>::quantization(const std::vector<float>& hashFloats)
+std::vector<bool> lshbox::laShLsh<DATATYPE>::quantization(const std::vector<float>& hashFloats)
 {
     std::vector<bool> hashBits;
     hashBits.resize(hashFloats.size());
@@ -858,20 +702,20 @@ std::vector<bool> lshbox::laItqLsh<DATATYPE>::quantization(const std::vector<flo
     return  hashBits;
 }
 template<typename DATATYPE>
-std::vector<bool> lshbox::laItqLsh<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+std::vector<bool> lshbox::laShLsh<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
 {
     std::vector<float> hashFloats = getHashFloats(k, domin);
     std::vector<bool> hashBits = quantization(hashFloats);
     return hashBits;
 }
 template<typename DATATYPE>
-int lshbox::laItqLsh<DATATYPE>::getTableSize()
+int lshbox::laShLsh<DATATYPE>::getTableSize()
 {
     assert(param.L == 1);
     return tables[0].size();
 }
 template<typename DATATYPE>
-int lshbox::laItqLsh<DATATYPE>::getMaxBucketSize()
+int lshbox::laShLsh<DATATYPE>::getMaxBucketSize()
 {
     assert(param.L == 1);
     int max = 0;
@@ -884,40 +728,9 @@ int lshbox::laItqLsh<DATATYPE>::getMaxBucketSize()
     return max;
 }
 
-// the above should be usinged long long
-// template<typename DATATYPE>
-// std::vector<bool> lshbox::laItqLsh<DATATYPE>::unsignedToBools(unsigned num)
-// {
-//     int nBits = param.N;
-//     std::vector<bool> bits;
-//     bits.resize(nBits);
-//     
-//     while(num > 0 ){
-//         bits[--nBits] = num % 2;
-//         num /= 2;
-//     }
-//     assert(bits.size() == param.N);
-//     return bits;
-// }
-
 template<typename DATATYPE>
 template<typename PROBER>
-void lshbox::laItqLsh<DATATYPE>::queryRankingByHamming(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-
-    // noted that the prober will persist the last probed results, so probed maxNumBuckets/2 buckets more
-    for (int bId = maxNumBuckets / 2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-
-        const BIDTYPE& probedBId = prober.getNextBID();
-        probe(0, probedBId, prober);
-    }
-
-}
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laItqLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
+void lshbox::laShLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
     assert(param.L == 1);
 
     while(prober.getNumItemsProbed() < numItems && prober.nextBucketExisted()) {
@@ -925,93 +738,4 @@ void lshbox::laItqLsh<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &pr
         const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
         probe(probePair.first, probePair.second, prober); 
     }
-}
-
-template<typename DATATYPE>
-template<typename PROBER>
-void lshbox::laItqLsh<DATATYPE>::queryRankingByLoss(const DATATYPE *domin, PROBER &prober, int maxNumBuckets)
-{
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-
-        for (int bId = maxNumBuckets/2; bId < tables[0].size() && bId < maxNumBuckets; ++bId) {
-            unsigned probedBId = prober.getNextBID();
-
-            probe(k, probedBId, prober);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::queryProbeByLoss(const DATATYPE *domin, SCANNER &scanner, int maxNumBuckets, bool withMeanAndSTD)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    for (unsigned k = 0; k != param.L; ++k)
-    {
-        unsigned hashVal = getHashVal(k, domin);
-        std::vector<bool> hashBits = getHashBits(k, domin);
-        std::vector<float> hashFloats = getHashFloats(k, domin);
-        
-        assert(hashBits.size() == param.N);
-        assert(hashFloats.size() == param.N);
-
-        // query the first bucket
-        unsigned probedBId = hashVal;
-        probe(0, probedBId, scanner);
-
-        Probing pro(hashBits, hashFloats, false);
-        // multi-probing
-        for (int numBk = 1; numBk < maxNumBuckets; ++numBk) {
-            probedBId = pro.pop();
-            // std::cout << std::endl 
-            //     << "the second probed bucket is:" << probedBId
-            //     << std::endl;
-            // std::cout << "hashFloats: ";
-            // for(auto e : hashFloats)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            // std::cout << "hashBits: ";
-            // for(auto e: hashBits)
-            //     std::cout<< e << ",";
-            // std::cout << std::endl;
-            probe(0, probedBId, scanner);
-        }
-    }
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
-}
-template<typename DATATYPE>
-void lshbox::laItqLsh<DATATYPE>::rehash(Matrix<DATATYPE> &data, int numTables)
-{
-    if (numTables == 1) return;
-    tables.clear();
-    tables.resize(numTables);
-    for (unsigned i = 0; i != data.getSize(); ++i)
-    {
-        unsigned hashVal = getHashVal(0, data[i]);
-        std::vector<bool> hashBits = getHashBits(0, data[i]);
-        std::vector<float> hashFloats = getHashFloats(0, data[i]);
-        tables[0][hashVal].push_back(i);
-
-        Probing pro(hashBits, hashFloats, false);
-        for (unsigned k = 1; k != tables.size(); ++k) {
-            hashVal = pro.pop();
-            tables[k][hashVal].push_back(i);
-        }
-    }
-}
-template<typename DATATYPE>
-template<typename SCANNER>
-void lshbox::laItqLsh<DATATYPE>::queryRehash(const DATATYPE *domin, SCANNER &scanner)
-{
-    scanner.reset(domin);
-    assert(param.L == 1);
-    unsigned hashVal = getHashVal(0, domin);
-    // std::cout << "hashVal " << hashVal << std::endl;
-    for (unsigned k = 0; k != tables.size(); ++k)
-    {
-        probe(k, hashVal, scanner);
-    }
-    scanner.topk().genTopk();
 }

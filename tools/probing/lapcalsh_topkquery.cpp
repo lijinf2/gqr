@@ -19,14 +19,14 @@
  * @brief Example of using Iterative Quantization LSH index for L2 distance.
  */
 #include <lshbox.h>
-#include <lshbox/lsh/laitqlsh.h>
+#include <lshbox/lsh/lapcalsh.h>
 #include <map>
 #include <fstream>
-#include <lshbox/lsh/hashlookup.h>
 
 #include <lshbox/query/fv.h>
 #include <lshbox/query/losslookup.h>
 #include <lshbox/query/hammingranking.h>
+#include <lshbox/query/hashlookup.h>
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/query/lossranking.h>
 #include <lshbox/query/treelookup.h>
@@ -39,7 +39,6 @@ int main(int argc, char const *argv[])
         std::cerr << "Usage: ./laitqlsh_test data_file lsh_file benchmark_file" << std::endl;
         return -1;
     }
-
     std::cout << std::endl;
     std::cout << std::endl;
 
@@ -65,18 +64,19 @@ int main(int argc, char const *argv[])
     }
     std::cout << "use_index: " << use_index << std::endl;
 
-    lshbox::laItqLsh<DATATYPE> mylsh;
+    lshbox::laPcaLsh<DATATYPE> mylsh;
     if (use_index)
     {
         mylsh.load(file);
     }
     else
     {
-        lshbox::laItqLsh<DATATYPE>::Parameter param;
-        param.L = 1;  // number of tables
+        lshbox::laPcaLsh<DATATYPE>::Parameter param;
+        // param.L = 64;  // number of tables
+        param.L = std::atoi(argv[6]);
         param.D = data.getDim();
-        param.N = 28;  // number of bits
-        param.S = 10000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
+        param.N = 12;  // number of bits
+        param.S = 60000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
         mylsh.trainAll(data, 4); // the second parameter: parallelism, more parallelism requires more memory and CPU
@@ -111,12 +111,11 @@ int main(int argc, char const *argv[])
     if (argc >= 6)
         maxProbedBK = std::atoi(argv[5]);
 
-    // initialize prober
-    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // // // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // typedef LossRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // //
+    // // // // // //
     // typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // //
+    // // // //
     // void* raw_memory = operator new[]( 
     //     sizeof(PROBER) * bench.getQ());
     // PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -130,13 +129,13 @@ int main(int argc, char const *argv[])
 
     // // // // initialize losslookup probers
     // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // FV fvs(mylsh.param.N);
-    //
-    //
+
+
     typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     Tree fvs(mylsh.param.N);
-
+    // //
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
     PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -156,17 +155,28 @@ int main(int argc, char const *argv[])
     std::cout << "probed items, " << "overall query time, " 
         << "avg recall, " << "avg precision" <<"\n";
 
+    std::vector<bool> finished(bench.getQ(), 0);
+    
     timer.restart();
+    int step = (int) (maxProbedBK * 0.01);
+    // for (unsigned numItems = 1; numItems <= maxProbedBK; numItems = numItems < step? numItems * 2 : numItems + step) { //  # of probed items must be the power of two
     for (unsigned numItems = 1; numItems <= maxProbedBK; numItems *= 2) { //  # of probed items must be the power of two
+
         // std::cout << "start queries " << std::endl;
         lshbox::Stat recall, precision;
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
             // queries are applied incrementally, i.e. the result of this round depends on the last round
-            mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numItems);
+            // if finished, skip probing more items;
+            if (!finished[i]) {
+                mylsh.KItemByProber(data[bench.getQuery(i)], probers[i], numItems);
+            }
 
             // collect accuracy information
-            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, precision);
+            bool setFinished = setStat(probers[i].getScanner(), bench.getAnswer(i), recall, precision);
+            if (!finished[i] && setFinished) {
+                finished[i] = true;
+            }         
         }
         double retTime = timer.elapsed();
         std::cout << numItems << ", " << retTime <<", "

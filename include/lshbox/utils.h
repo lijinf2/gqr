@@ -47,7 +47,7 @@ std::vector<bool> selection(unsigned n, unsigned k) {
 }
 
 template<typename ScannerT, typename AnswerT>
-void setStat(
+bool setStat(
         // lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> scanner, 
         ScannerT scanner, 
         const AnswerT& ans, 
@@ -57,7 +57,7 @@ void setStat(
     scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
     float thisRecall = scanner.topk().recall(ans);
 
-    float matched = thisRecall * scanner.getK(); 
+    float matched = thisRecall * (scanner.getK() - 1); 
     float thisPrecision;
     assert(scanner.cnt() > 0);
     if(scanner.cnt() == 1)
@@ -68,8 +68,22 @@ void setStat(
     recall << thisRecall;
     precision << thisPrecision;
 
-    return;
+    if (thisRecall > 0.99) return true;
+    else return false;
 }
+
+namespace lshbox {
+
+std::vector<bool> to_bits (unsigned long long num)
+{
+    std::vector<bool> bits;
+    while(num > 0 ){
+        bits.push_back(num % 2);
+        num /= 2;
+    }
+    return bits;
+}
+};
 
 namespace std {
     template<typename FIRST, typename SECOND>

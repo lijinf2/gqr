@@ -3,14 +3,13 @@
 #include <cmath>
 #include <algorithm>
 #include <queue>
-#include <lshbox/query/fv.h>
+#include <lshbox/query/tree.h>
 #include <lshbox/query/prober.h>
-#include <lshbox/query/lltable.h>
 #include <lshbox/query/tstable.h>
 #pragma once
 
 template<typename ACCESSOR>
-class LossLookup : public Prober<ACCESSOR>{
+class TreeLookup : public Prober<ACCESSOR>{
 public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
@@ -19,11 +18,11 @@ public:
     typedef std::pair<float, unsigned > PairT; // <score, tableIdx> 
 
     template<typename LSHTYPE>
-    LossLookup(
+    TreeLookup(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh,
-        FV* fvs) : Prober<ACCESSOR>(domin, scanner, mylsh) {
+        Tree* tree) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
         handlers_.reserve(mylsh.param.L);
         for (unsigned t = 0; t < mylsh.param.L; ++t) {
@@ -31,28 +30,41 @@ public:
             for (auto& e : hashFloats) {
                 e = fabs(e);
             }
-            handlers_.emplace_back(LLTable(this->hashBits_[t], hashFloats, &mylsh.tables[t], fvs));
+            handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, &mylsh.tables[t], tree));
             heap_.push(ScoreIdxPair(handlers_[t].getCurScore(), t)); 
         }
+
+        // initialize firstBKs_
+        firstBK_.reserve(mylsh.param.L);
+        for (unsigned t = 0; t < mylsh.param.L; ++t) {
+            firstBK_.push_back(mylsh.getHashVal(t, domin));
+        }
+
     }
 
     std::pair<unsigned, BIDTYPE> getNextBID(){
-        this->numBucketsProbed_++;
+        if (this->numBucketsProbed_++ < handlers_.size()) {
+            const unsigned int tb = this->numBucketsProbed_  - 1;
+            return std::make_pair(
+                    tb,
+                    firstBK_[tb]);
+        }
+        // always return the first bucket of every table
 
-        const unsigned int& table = heap_.top().index_;
-        BIDTYPE newBucket = handlers_[table].getCurBucket();
+        unsigned tb = heap_.top().index_;
         heap_.pop();
-        bool success = handlers_[table].moveForward();
-        if (success){
-            heap_.push(ScoreIdxPair(handlers_[table].getCurScore(), table)); 
+        BIDTYPE newBucket = handlers_[tb].getCurBucket();
+        if (handlers_[tb].moveForward()){
+            heap_.push(ScoreIdxPair(handlers_[tb].getCurScore(), tb)); 
         }
 
         // return value
-        return std::make_pair(table, newBucket);
+        return std::make_pair(tb, newBucket);
     }
 
 private:
-    std::vector<LLTable> handlers_;
+    std::vector<TSTable> handlers_;
+    std::vector<BIDTYPE> firstBK_;
 
     std::priority_queue<ScoreIdxPair> heap_; // <score, r> pairs
 };

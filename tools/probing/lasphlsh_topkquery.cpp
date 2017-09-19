@@ -19,7 +19,7 @@
  * @brief Example of using Iterative Quantization LSH index for L2 distance.
  */
 #include <lshbox.h>
-#include <lshbox/lsh/laitqlsh.h>
+#include <lshbox/lsh/lasphlsh.h>
 #include <map>
 #include <fstream>
 #include <lshbox/lsh/hashlookup.h>
@@ -65,17 +65,17 @@ int main(int argc, char const *argv[])
     }
     std::cout << "use_index: " << use_index << std::endl;
 
-    lshbox::laItqLsh<DATATYPE> mylsh;
+    lshbox::laSphLsh<DATATYPE> mylsh;
     if (use_index)
     {
         mylsh.load(file);
     }
     else
     {
-        lshbox::laItqLsh<DATATYPE>::Parameter param;
+        lshbox::laSphLsh<DATATYPE>::Parameter param;
         param.L = 1;  // number of tables
         param.D = data.getDim();
-        param.N = 28;  // number of bits
+        param.N = 22;  // number of bits
         param.S = 10000000; //must be the size of data, which will be used to init tables,  number of vectors in the training set
         param.I = 50;
         mylsh.reset(param);
@@ -130,13 +130,13 @@ int main(int argc, char const *argv[])
 
     // // // // initialize losslookup probers
     // typedef LossLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    // // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // typedef HashLookupPP<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     // FV fvs(mylsh.param.N);
     //
     //
     typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
     Tree fvs(mylsh.param.N);
-
+    //
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
     PROBER* probers = static_cast<PROBER*>(raw_memory);
@@ -157,6 +157,8 @@ int main(int argc, char const *argv[])
         << "avg recall, " << "avg precision" <<"\n";
 
     timer.restart();
+    int step = (int) (maxProbedBK * 0.01);
+    // for (unsigned numItems = 1; numItems <= maxProbedBK; numItems = numItems < step? numItems * 2 : numItems + step) { //  # of probed items must be the power of two
     for (unsigned numItems = 1; numItems <= maxProbedBK; numItems *= 2) { //  # of probed items must be the power of two
         // std::cout << "start queries " << std::endl;
         lshbox::Stat recall, precision;

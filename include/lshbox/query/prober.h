@@ -19,12 +19,7 @@ public:
             hashBits_[i] = mylsh.getHashBits(i, domin);
         }
 
-        // initialize visited 
         totalItems_ = mylsh.param.S;
-        visited = new bool[totalItems_];
-        for (unsigned i = 0; i < totalItems_; ++i) {
-            visited[i] = false; 
-        }
     }
 
     const lshbox::Scanner<ACCESSOR>& getScanner(){
@@ -32,21 +27,15 @@ public:
     }
 
     unsigned int getNumItemsProbed() { // get number of items probed;
-        return numItemsProbed_;
+        return scanner_.cnt();
     }
 
     void operator()(unsigned key){
-        // todo: compress 8 times, calculate visited[key]
-        if (visited[key] == true) {
-            return;
-        }
-        visited[key] = true;
-        numItemsProbed_++;
         scanner_(key);
     }
 
     bool nextBucketExisted() {
-        if (numItemsProbed_ != totalItems_)
+        if (getNumItemsProbed() < totalItems_)
             return true;
         else return false;
     }
@@ -62,7 +51,7 @@ public:
     }
 
     ~Prober(){
-        delete[] visited;
+        // delete[] visited;
     }
 protected:
     unsigned int numBucketsProbed_ = 0;
@@ -71,9 +60,5 @@ protected:
 
 private:
     lshbox::Scanner<ACCESSOR> scanner_;
-    unsigned int numItemsProbed_ = 0;
-
-    // for de-duplication
     unsigned totalItems_; // 
-    bool* visited;
 };
