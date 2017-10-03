@@ -20,7 +20,7 @@ ELSEIF(LINUX)
     SET(SAVE_CLASS linux)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
 ELSE()
-    SET(SAVE_CLASS darwin)
+    # SET(SAVE_CLASS darwin)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
 ENDIF()
 

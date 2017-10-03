@@ -12,14 +12,14 @@ public:
 
         // initialize scanner_, this->hashBits_, and this->R_
         scanner_.reset(domin);
-        R_ = mylsh.param.N;
 
-        hashBits_.resize(mylsh.param.L);
-        for (unsigned i = 0; i < hashBits_.size(); ++i) {
-            hashBits_[i] = mylsh.getHashBits(i, domin);
+        hashBits_.resize(mylsh.tables.size());
+        for (unsigned tb = 0; tb < hashBits_.size(); ++tb) {
+            hashBits_[tb] = mylsh.getHashBits(tb, domin);
         }
+        R_ = hashBits_[0].size();
 
-        totalItems_ = mylsh.param.S;
+        totalItems_ = mylsh.numItems;
     }
 
     const lshbox::Scanner<ACCESSOR>& getScanner(){

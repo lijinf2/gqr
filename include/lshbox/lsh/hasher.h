@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -11,24 +12,23 @@ template<typename DATATYPE = float>
 class Hasher {
 public:
     typedef unsigned long long BIDTYPE;
-    struct Parameter
-    {
-        /// Number of hash tables
-        unsigned L = 0;
-        /// Dimension of the vector
-        unsigned D = 0;
-        /// Binary code bytes
-        unsigned N = 0;
-        /// Size of vectors in train
-        unsigned S = 0;
-    };
+    // struct Parameter
+    // {
+    //     /// Number of hash tables
+    //     unsigned L = 0;
+    //     /// Dimension of the vector
+    //     unsigned D = 0;
+    //     /// Binary code bytes
+    //     unsigned N = 0;
+    //     /// Size of vectors in train
+    //     unsigned S = 0;
+    // };
 
-    Parameter  param;
+    int numItems;
     vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
 
     Hasher() {}
 
-    virtual void loadModel(const string& fileName) = 0;
     virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) = 0;
 
     virtual BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);

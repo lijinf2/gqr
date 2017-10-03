@@ -40,6 +40,6 @@
 #include <lshbox/lsh/thlsh.h>
 #include <lshbox/lsh/psdlsh.h>
 #include <lshbox/lsh/shlsh.h>
-#include <lshbox/lsh/itqlsh.h>
 #include <lshbox/lsh/dbqlsh.h>
 #include <lshbox/lsh/kdbqlsh.h>
+#include <lshbox/lsh/itq.h>

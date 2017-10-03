@@ -67,8 +67,8 @@ public:
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
-        allTables_.reserve(mylsh.param.L);
-        for (int i = 0; i < mylsh.param.L; ++i) {
+        allTables_.reserve(mylsh.tables.size());
+        for (int i = 0; i < mylsh.tables.size(); ++i) {
             BIDTYPE hashValue = mylsh.getHashVal(i, domin);
             allTables_.emplace_back(HRTable(hashValue, this->R_, mylsh.tables[i]));
         }

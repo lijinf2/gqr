@@ -49,10 +49,13 @@ for d=1:length(datasetCandi)
             trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
             testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
             trainset = trainset';
+            meanTrainset = mean(trainset);
+            trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
             testset = testset';
+            testset = testset - repmat(meanTrainset, size(testset, 1), 1);
             
             train_all = 0;
-            test_all = 0;
+            test_all = 0;            
             for j =1:nHashTable                
                 % train and test model
                 trainStr = ['[model, trainB ,train_elapse] = ',method,'_learn(trainset, codelength);'];
@@ -64,15 +67,16 @@ for d=1:length(datasetCandi)
                 test_all = test_all + test_elapse;
                
                 % save model and data table
-                ResultFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
+                ModelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
                                           
-                fid = fopen(ResultFile,'wt');
+                fid = fopen(ModelFile,'wt');
                 
                 % #of tables, dimension, codelength, #data points
                 [numPoints, dimension] = size(trainset);
                 fprintf(fid, '%d %d %d %d\n', nHashTable, dimension, codelength, numPoints);
                 
                 % save model
+                fprintf(fid, '%g ', meanTrainset);
                 for i = 1 : size(model.pc, 1);
                     fprintf(fid, '%g ', model.pc(i, :));
                     fprintf(fid, '\n');
@@ -82,8 +86,12 @@ for d=1:length(datasetCandi)
                     fprintf(fid, '%g ', model.R(i, :));
                     fprintf(fid, '\n');
                 end
+                fclose(fid)
+                % save table   
+                ResultFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
+                                          
+                fid = fopen(ResultFile,'wt');
                 
-                % save table                
                 for i = 1 : size(trainB,1);
                     fprintf(fid,'%g ',trainB(i,:));
                     fprintf(fid,'\n');

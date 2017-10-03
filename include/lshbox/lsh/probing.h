@@ -1,3 +1,4 @@
+#pragma once
 #include <algorithm>
 #include <queue>
 #include <utility>

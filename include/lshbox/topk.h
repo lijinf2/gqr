@@ -254,9 +254,7 @@ public:
                 }
             }
         }
-        assert(matched >= 1);
-        float result = (float) (matched - 1) / float(benchTops.size() - 1);
-        // float result = matched * 1.0 / benchTops.size();
+        float result = (float) matched / (float) benchTops.size();
         return result;
     }
 };

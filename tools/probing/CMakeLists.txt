@@ -8,6 +8,8 @@ SET(PROBINGS
     lashlsh_topkquery
     lasphlsh_topkquery
     hasher
+    benchhasher
+    itq_topkquery
 )
 
 FOREACH(PROBING ${PROBINGS})
