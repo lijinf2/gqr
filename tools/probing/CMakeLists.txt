@@ -7,6 +7,7 @@ SET(PROBINGS
     lapcalsh_topkquery
     lashlsh_topkquery
     lasphlsh_topkquery
+    hasher
 )
 
 FOREACH(PROBING ${PROBINGS})
