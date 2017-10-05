@@ -1,7 +1,8 @@
 
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
-datasetCandi = {'audio'};
+addpath('../../MatlabFunc/Clustering')
+datasetCandi = {'gist'};
 % datasetCandi = {'siftsmall'};
 % datasetCandi = {'sift', 'gist'};
 % datasetCandi = {'sift'};
@@ -20,7 +21,7 @@ datasetCandi = {'audio'};
 % methodCandi = {'DSH'};
 
 % methodCandi = {'LSH','SH','BRE','USPLH','ITQ','SpH','IsoH','DSH'};
-methodCandi = {'ITQ'};
+methodCandi = {'CPH'};
 
 % codelengthCandi = [24 28 36 40 44 48];
 codelengthCandi = [16];
@@ -68,25 +69,11 @@ for d=1:length(datasetCandi)
                
                 % save model and data table
                 ModelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
-                                          
-                fid = fopen(ModelFile,'wt');
-                
+                                                        
                 % #of tables, dimension, codelength, #data points
-                [numPoints, dimension] = size(trainset);
-                fprintf(fid, '%d %d %d %d\n', nHashTable, dimension, codelength, numPoints);
-                
+       
                 % save model
-                fprintf(fid, '%g ', meanTrainset);
-                for i = 1 : size(model.pc, 1);
-                    fprintf(fid, '%g ', model.pc(i, :));
-                    fprintf(fid, '\n');
-                end
-                
-                for i = 1 : size(model.R, 1);
-                    fprintf(fid, '%g ', model.R(i, :));
-                    fprintf(fid, '\n');
-                end
-                fclose(fid)
+
                 % save table   
                 ResultFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
                                           

@@ -72,7 +72,7 @@ void BenchHasher<DATATYPE>::loadModel(const char* baseBitsFile, const char* quer
         for (int i = 0; i < codelength; ++i) {
             iss >> tmp;
             if (tmp == 1) record[i] = 1;
-            else if(tmp == 0) record[i] = 0;
+            else if(tmp == 0 || tmp == -1) record[i] = 0;
             else assert(false);
         }
         BIDTYPE hashVal = this->bitsToBucket(record);
@@ -97,7 +97,7 @@ void BenchHasher<DATATYPE>::loadModel(const char* baseBitsFile, const char* quer
         for (int i = 0; i < codelength; ++i) {
             iss >> tmp;
             if (tmp == 1) record[i] = 1;
-            else if(tmp == 0) record[i] = 0;
+            else if(tmp == 0 || tmp == -1) record[i] = 0;
             else assert(false);
         }
         this->queryBits[query[bench.getQuery(count)]] = record;
