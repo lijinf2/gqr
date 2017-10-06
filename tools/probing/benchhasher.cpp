@@ -1,6 +1,6 @@
-#include <map>
 #include <cstdlib>
 #include <fstream>
+#include <unordered_map>
 
 #include <lshbox.h>
 #include <lshbox/query/fv.h>
@@ -10,14 +10,17 @@
 #include <lshbox/query/lossranking.h>
 #include <lshbox/query/treelookup.h>
 #include <lshbox/utils.h>
-
 #include <lshbox/lsh/benchhasher.h>
 
-int main(int argc, char const *argv[])
+using std::unordered_map;
+using std::string;
+int main(int argc, const char **argv)
 {
     // currently only support fvecs
     typedef float DATATYPE;
-    if (argc < 11)
+
+    unordered_map<string, string> params = lshbox::parseParams(argc, argv);
+    if (params.size() < 12)
     {
         std::cerr << "Usage: "
             << "./benhasher_topkquery "
@@ -35,20 +38,22 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    const char* baseFormat = argv[1];
-    if (strcmp(baseFormat, "fvecs") != 0) {
+    string baseFormat = params["base_format"];
+    if (baseFormat != "fvecs") {
         std::cerr << "Data format is not fvecs. Only fvecs is supported" << std::endl;
         return -1;
     }
-    const char* dataFile = argv[2];
-    int cardinality = atoi(argv[3]);
-    int dimension = atoi(argv[4]);
-    const char* baseBitsFile = argv[5];
-    const char* queryFile = argv[6];
-    int numQueries = atoi(argv[7]);
-    const char* queryBitsFile = argv[8];
-    const char* benchFile = argv[9];
-    int topK = atoi(argv[10]);
+    int cardinality = atoi(params["cardinality"].c_str());
+    int dimension = atoi(params["dimension"].c_str());
+    int numQueries = atoi(params["num_queries"].c_str());
+    int topK = atoi(params["topk"].c_str());
+    int numTables = atoi(params["num_tables"].c_str());
+    string modelFile = params["model_file"];
+    string dataFile = params["base_file"];
+    string baseBitsFile = params["base_bits_file"];
+    string queryFile = params["query_file"];
+    string queryBitsFile = params["query_bits_file"];
+    string benchFile = params["benchmark_file"];
 
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
@@ -57,23 +62,18 @@ int main(int argc, char const *argv[])
     std::cout << std::endl;
     lshbox::timer timer;
 
-    // load lshbox type data
-    std::cout << "load data ..." << std::endl;
+    // load lshbox type data and query
+    std::cout << "load data and query..." << std::endl;
     lshbox::Matrix<DATATYPE> data;
-    if (strcmp(baseFormat, "fvecs") == 0) {
-        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
-    }
-    std::cout << "load data time: " << timer.elapsed() << "s." << std::endl;
-
-    // load queries
     lshbox::Matrix<DATATYPE> query;
-    if (strcmp(baseFormat, "fvecs") == 0) {
+    if (baseFormat == "fvecs") {
+        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
         lshbox::loadFvecs(query, queryFile, dimension, numQueries);
     }
 
     // load bench
     // transform ivecs bench to lshbox bench 
-    std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile, numQueries, topK);
+    std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
     lshbox::Benchmark bench;
     std::string benchmark(lshboxBenchFile);
     bench.load(benchmark);
@@ -83,7 +83,7 @@ int main(int argc, char const *argv[])
     std::cout << "load model ..." << std::endl;
     timer.restart();
     lshbox::BenchHasher<DATATYPE> mylsh;
-    mylsh.loadModel(baseBitsFile, queryBitsFile, query, bench);
+    mylsh.loadModel(modelFile, baseBitsFile, queryBitsFile, query, bench);
     std::cout << "load model time: " << timer.elapsed() << "s." << std::endl;
 
     // initialize scanner
@@ -97,10 +97,6 @@ int main(int argc, char const *argv[])
     std::cout << "LOADING TIME: " << timer.elapsed() << "s." << std::endl;
     std::cout << "RUNING QUERY ..." << std::endl;
     timer.restart();
-
-    int maxProbedBK = 16;
-    if (argc >= 6)
-        maxProbedBK = std::atoi(argv[5]);
 
     // initialize prober
     // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
@@ -123,11 +119,15 @@ int main(int argc, char const *argv[])
         << "avg recall, " << "avg precision" <<"\n";
 
     timer.restart();
-    // int maxProbedItem = data.getSize();
+    int numAllItems = data.getSize();
     for (unsigned numItems = 1; true ; numItems *= 2) { //  # of probed items must be the power of two
-        if (numItems > data.getSize()) {
-            numItems = data.getSize();
-        }
+        if (numItems > numAllItems) 
+            numItems = numAllItems;
+
+        // numItems = 131072;
+        // // numItems = 16;
+        // numAllItems = numItems;
+
         lshbox::Stat recall, precision;
         for (unsigned i = 0; i != bench.getQ(); ++i)
         {
@@ -140,7 +140,7 @@ int main(int argc, char const *argv[])
         double retTime = timer.elapsed();
         std::cout << numItems << ", " << retTime <<", "
             << recall.getAvg() << ", " << precision.getAvg() << "\n";
-        if (numItems == data.getSize())
+        if (numItems == numAllItems)
             break;
     }
 

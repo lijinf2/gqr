@@ -24,7 +24,7 @@ public:
     //     unsigned S = 0;
     // };
 
-    int numItems;
+    int numTotalItems;
     vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
 
     Hasher() {}
@@ -44,6 +44,8 @@ public:
     int getTableSize();
 
     int getMaxBucketSize();
+
+    int getBaseSize();
 };
 
 //--------------------- Implementations ------------------
@@ -108,5 +110,10 @@ int Hasher<DATATYPE>::getMaxBucketSize() {
         }
     }
     return max;
+}
+
+template<typename DATATYPE>
+int Hasher<DATATYPE>::getBaseSize() {
+    return this->numTotalItems;
 }
 };

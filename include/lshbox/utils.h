@@ -1,5 +1,7 @@
 #include <iostream>
 #include <string>
+#include <cstring>
+#include <unordered_map>
 #include <fstream>
 #include <utility>
 #include <lshbox.h>
@@ -10,6 +12,7 @@
 #pragma once
 using std::vector;
 using std::string;
+using std::unordered_map;
 
 /* select k elements of n elements
  * @n: total number of elements 
@@ -77,6 +80,27 @@ bool setStat(
 
 namespace lshbox {
 
+unordered_map<string, string> parseParams(int argc, const char** argv) {
+    unordered_map<string, string> params;
+    for (int i = 1; i < argc; ++i) {
+        const char* pair = argv[i];
+        int length = strlen(pair);
+        int sepIdx = -1;
+        for (int idx = 0; idx < strlen(pair); ++idx) {
+            if (pair[idx] == '=')
+                sepIdx = idx;
+        }
+        if (strlen(pair) < 3 || pair[0] != '-' || pair[1] != '-' || sepIdx == -1) {
+            std::cout << "arguments error, format should be --[key]=[value]" << std::endl;
+            assert(false);
+        }
+        string key(pair, 2, sepIdx - 2);
+        string value(pair + sepIdx + 1);
+        params[key] = value;
+    }
+    return params;
+}
+
 vector<bool> to_bits (unsigned long long num)
 {
     vector<bool> bits;
@@ -88,9 +112,13 @@ vector<bool> to_bits (unsigned long long num)
 }
 
 template<typename DATATYPE>
-void loadFvecs(Matrix<DATATYPE>& data, const char* dataFile, int dimension, int cardinality) {
+void loadFvecs(Matrix<DATATYPE>& data, const string& dataFile, int dimension, int cardinality) {
     data.reset(dimension, cardinality);
-    std::ifstream fin(dataFile, std::ios::binary);
+    std::ifstream fin(dataFile.c_str(), std::ios::binary);
+    if (!fin) {
+        std::cout << "cannot open file " << dataFile.c_str() << std::endl;
+        assert(false);
+    }
     int dim;
     for (int i = 0; i < cardinality; ++i) {
         fin.read((char*)&dim, sizeof(int));

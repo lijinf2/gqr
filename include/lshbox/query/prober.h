@@ -19,7 +19,7 @@ public:
         }
         R_ = hashBits_[0].size();
 
-        totalItems_ = mylsh.numItems;
+        totalItems_ = mylsh.getBaseSize();
     }
 
     const lshbox::Scanner<ACCESSOR>& getScanner(){
