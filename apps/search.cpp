@@ -9,6 +9,7 @@
 #include <lshbox/query/lossranking.h>
 #include <lshbox/utils.h>
 #include <lshbox/lsh/pcah.h>
+#include <lshbox/lsh/itq.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -83,8 +84,8 @@ int main(int argc, const char **argv)
         mylsh.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mylsh, bench);
     } else if (hashMethod == "ITQ") {
-        // lshbox::PCAH<DATATYPE> mylsh;
-        // mylsh.loadModel(modelFile, baseBitsFile);
-        // search(queryMethod, data, query, mylsh, bench);
+        lshbox::ITQ<DATATYPE> mylsh;
+        mylsh.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, mylsh, bench);
     }
 }

@@ -27,11 +27,12 @@ public:
 
     vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
 
-    void loadModel(const string& fileName) override; 
+    void loadModel(const string& modelFile, const string& baseBitsFile); 
 
 private:
     vector<vector<vector<float> > > pcsAll;
-    vector<vector<vector<float> > > omegasAll;
+    vector<vector<vector<float> > > rotateAll;
+    vector<float> mean;
 };
 template<typename DATATYPE>
 vector<float> ITQ<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
@@ -41,7 +42,7 @@ vector<float> ITQ<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
     {
         for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
         {
-            domin_pc[i] += domin[j] * pcsAll[k][i][j];
+            domin_pc[i] += (domin[j] - mean[j]) * pcsAll[k][i][j];
         }
     }
 
@@ -50,9 +51,9 @@ vector<float> ITQ<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
     for (unsigned i = 0; i != domin_pc.size(); ++i)
     {
         float product = 0;
-        for (unsigned j = 0; j != omegasAll[k][i].size(); ++j)
+        for (unsigned j = 0; j != rotateAll[k][i].size(); ++j)
         {
-            product += float(domin_pc[j] * omegasAll[k][i][j]);
+            product += float(domin_pc[j] * rotateAll[k][i][j]);
         }
         hashFloats[i] = product;
     }
@@ -79,6 +80,58 @@ vector<bool> ITQ<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
     return hashBits;
 }
 template<typename DATATYPE>
-void ITQ<DATATYPE>::loadModel(const string& fileName) {
+void ITQ<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
+    string line;
+    // initialized statistics and model
+    ifstream modelFin(modelFile.c_str());
+    if (!modelFin) {
+        std::cout << "cannot open file " << modelFile << std::endl;
+        assert(false);
+    }
+    getline(modelFin, line);
+    istringstream statIss(line);
+    int numTables, tableDim, tableCodelen, tableNumItems, tableNumQueries;
+    statIss >> numTables >> tableDim >> tableCodelen >> tableNumItems >> tableNumQueries;
+
+    // mean, pcsAll and rotateAll
+    mean.resize(tableDim);
+    getline(modelFin, line);
+    istringstream meanIss(line);
+    for (int i = 0; i < mean.size(); ++i) {
+        meanIss >> mean[i];
+    }
+
+    this->pcsAll.resize(numTables);
+    this->rotateAll.resize(numTables);
+    for (int tb = 0; tb < numTables; ++tb) {
+        auto& curPcs = pcsAll[tb];
+        curPcs.resize(tableCodelen);
+        for (auto& v : curPcs) {
+            v.resize(tableDim);
+        }
+        for (int row = 0; row < tableDim; ++row) {
+            getline(modelFin, line);
+            istringstream iss(line);
+            for (int cIdx = 0; cIdx < tableCodelen; ++cIdx) {
+                iss >> curPcs[cIdx][row];
+            }
+        }
+
+        auto& curRotate = rotateAll[tb];
+        for (auto& v : curRotate) {
+            v.resize(tableCodelen);
+        }
+        for (int row = 0; row < tableCodelen; ++row) {
+            getline(modelFin, line);
+            istringstream iss(line);
+            for (int cIdx = 0; cIdx < tableCodelen; ++cIdx) {
+                iss >> curRotate[cIdx][row];
+            }
+        }
+    }
+    modelFin.close();
+
+    // initialized numTotalItems and tables
+    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen);
 }
 }
