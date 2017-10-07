@@ -59,42 +59,11 @@ void BenchHasher<DATATYPE>::loadModel(const string& modelFile, const string& bas
     statIss >> numTables >> tableDim >> tableCodelen >> tableNumItems >> tableNumQueries;
     modelFin.close();
     
+    // initialized numTotalItems,tables and queryBits
+    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen);
 
     int tmp;
-    int codelength = tableCodelen;
-    vector<bool> record(codelength);
-
-    ifstream baseFin(baseBitsFile.c_str());
-    if (!baseFin) {
-        std::cout << "cannot open file " << baseBitsFile << std::endl;
-        assert(false);
-    }
-
-    // initialized numTotalItems and tables
-    this->numTotalItems = tableNumItems;
-    int itemIdx = 0;
-    unordered_map<BIDTYPE, vector<unsigned>> tb;
-    while (getline(baseFin, line)) {
-        istringstream iss(line);
-        for (int i = 0; i < codelength; ++i) {
-            iss >> tmp;
-            if (tmp == 1) record[i] = 1;
-            else if(tmp == 0 || tmp == -1) record[i] = 0;
-            else assert(false);
-        }
-        BIDTYPE hashVal = this->bitsToBucket(record);
-        if (tb.find(hashVal) == tb.end())
-            tb[hashVal] = vector<unsigned>();
-        tb[hashVal].push_back(itemIdx);
-        itemIdx++;
-        if (itemIdx == tableNumItems) {
-            itemIdx = 0;
-            this->tables.emplace_back(tb);
-            tb.clear();
-        }
-    }
-    baseFin.close();
-
+    vector<bool> record(tableCodelen);
     ifstream queryFin(queryBitsFile.c_str());
     if (!queryFin) {
         std::cout << "cannot open file " << queryBitsFile << std::endl;
@@ -106,7 +75,7 @@ void BenchHasher<DATATYPE>::loadModel(const string& modelFile, const string& bas
         for (int count = 0; count < bench.getQ(); ++count) {
             getline(queryFin, line);
             istringstream iss(line);
-            for (int i = 0; i < codelength; ++i) {
+            for (int i = 0; i < tableCodelen; ++i) {
                 iss >> tmp;
                 if (tmp == 1) record[i] = 1;
                 else if(tmp == 0 || tmp == -1) record[i] = 0;

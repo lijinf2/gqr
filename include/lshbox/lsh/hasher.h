@@ -1,10 +1,15 @@
 #pragma once
 #include <vector>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <sstream>
 #include <unordered_map>
 using std::vector;
 using std::unordered_map;
 using std::string;
+using std::ifstream;
+using std::istringstream;
 
 namespace lshbox {
 
@@ -31,7 +36,13 @@ public:
 
     virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) = 0;
 
-    virtual BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
+    void initBaseHasher(
+        const string &bitsFile, 
+        int numTables,
+        int cardinality,
+        int codelength);
+
+    BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
 
     BIDTYPE bitsToBucket(const vector<bool>& hashbits); 
 
@@ -49,6 +60,48 @@ public:
 };
 
 //--------------------- Implementations ------------------
+template<typename DATATYPE>
+void Hasher<DATATYPE>::initBaseHasher(
+    const string &bitsFile,
+    int numTables,
+    int cardinality,
+    int codelength) {
+
+    this->numTotalItems = cardinality;
+
+    ifstream baseFin(bitsFile.c_str());
+    if (!baseFin) {
+        std::cout << "cannot open file " << bitsFile << std::endl;
+        assert(false);
+    }
+    this->tables.reserve(numTables);
+    string line;
+    int tmp;
+    vector<bool> record(codelength);
+    int itemIdx = 0;
+    unordered_map<BIDTYPE, vector<unsigned>> curTable;
+    while (getline(baseFin, line)) {
+        istringstream iss(line);
+        for (int i = 0; i < codelength; ++i) {
+            iss >> tmp;
+            if (tmp == 1) record[i] = 1;
+            else if(tmp == 0 || tmp == -1) record[i] = 0;
+            else assert(false);
+        }
+        BIDTYPE hashVal = this->bitsToBucket(record);
+        if (curTable.find(hashVal) == curTable.end())
+            curTable[hashVal] = vector<unsigned>();
+        curTable[hashVal].push_back(itemIdx);
+        itemIdx++;
+        if (itemIdx == cardinality) {
+            itemIdx = 0;
+            this->tables.emplace_back(curTable);
+            curTable.clear();
+        }
+    }
+    baseFin.close();
+}
+
 template<typename DATATYPE>
 typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin) {
     vector<bool> hashbits = getHashBits(k, domin);
