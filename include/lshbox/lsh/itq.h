@@ -15,7 +15,7 @@ namespace lshbox
 {
 
 template<typename DATATYPE = float>
-class ITQ : public Hasher <DATATYPE>
+class ITQ : public Hasher<DATATYPE>
 {
 public:
 

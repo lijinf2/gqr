@@ -24,8 +24,9 @@ public:
         LSHTYPE& mylsh,
         Tree* tree) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
-        handlers_.reserve(mylsh.param.L);
-        for (unsigned t = 0; t < mylsh.param.L; ++t) {
+        int numTables = mylsh.getNumTables();
+        handlers_.reserve(numTables);
+        for (unsigned t = 0; t < numTables; ++t) {
             std::vector<float> hashFloats = mylsh.getHashFloats(t, domin);
             for (auto& e : hashFloats) {
                 e = fabs(e);
@@ -35,11 +36,10 @@ public:
         }
 
         // initialize firstBKs_
-        firstBK_.reserve(mylsh.param.L);
-        for (unsigned t = 0; t < mylsh.param.L; ++t) {
+        firstBK_.reserve(numTables);
+        for (unsigned t = 0; t < numTables; ++t) {
             firstBK_.push_back(mylsh.getHashVal(t, domin));
         }
-
     }
 
     std::pair<unsigned, BIDTYPE> getNextBID(){

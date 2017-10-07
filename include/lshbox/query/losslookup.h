@@ -25,8 +25,9 @@ public:
         LSHTYPE& mylsh,
         FV* fvs) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
-        handlers_.reserve(mylsh.param.L);
-        for (unsigned t = 0; t < mylsh.param.L; ++t) {
+        int numTables = mylsh.getNumTables();
+        handlers_.reserve(numTables);
+        for (unsigned t = 0; t < numTables; ++t) {
             std::vector<float> hashFloats = mylsh.getHashFloats(t, domin);
             for (auto& e : hashFloats) {
                 e = fabs(e);

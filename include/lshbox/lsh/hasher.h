@@ -30,6 +30,7 @@ public:
     // };
 
     int numTotalItems;
+    int codelength;
     vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
 
     Hasher() {}
@@ -57,6 +58,10 @@ public:
     int getMaxBucketSize();
 
     int getBaseSize();
+
+    int getCodeLength();
+
+    int getNumTables();
 };
 
 //--------------------- Implementations ------------------
@@ -67,6 +72,7 @@ void Hasher<DATATYPE>::initBaseHasher(
     int cardinality,
     int codelength) {
 
+    this->codelength = codelength;
     this->numTotalItems = cardinality;
 
     ifstream baseFin(bitsFile.c_str());
@@ -168,5 +174,15 @@ int Hasher<DATATYPE>::getMaxBucketSize() {
 template<typename DATATYPE>
 int Hasher<DATATYPE>::getBaseSize() {
     return this->numTotalItems;
+}
+
+template<typename DATATYPE>
+int Hasher<DATATYPE>::getCodeLength() {
+    return this->codelength;
+}
+
+template<typename DATATYPE>
+int Hasher<DATATYPE>::getNumTables() {
+    return this->tables.size();
 }
 };
