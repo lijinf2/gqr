@@ -1,11 +1,11 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-% single PCA and multiple rotations
+% multiple PCA and multiple rotations
 dataset = 'gist';
 method = 'ITQ'
 codelength = 16;            
-nHashTable = 4;
+nHashTable = 16;
     
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
@@ -41,38 +41,35 @@ modelFid = fopen(modelFile,'wt');
 fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
 fprintf(modelFid, '%f ', meanTrainset);
 fprintf(modelFid, '\n');
-% pca and save pca 
-[pc, ~] = eigs(cov(trainset), codelength);
-model.pc = pc;
-trainset = trainset * model.pc;
-testset = testset * model.pc;
-for i = 1 : size(model.pc, 1);
-    fprintf(modelFid,'%f ',model.pc(i,:));
-    fprintf(modelFid,'\n');
-end
-
 baseCodeFid = fopen(baseCodeFile,'wt');
 queryCodeFid = fopen(queryCodeFile,'wt');
 for j =1:nHashTable                
-
-    % Rotation
-    [~, R] = ITQ(trainset, 50);
-    
+    % train and test model
+    trainStr = ['[model, trainB ,train_elapse] = ',method,'_learn(trainset, codelength);'];
+    testStr = ['[testB,test_elapse] = ',method,'_compress(testset, model);'];
+    eval(trainStr);
+    eval(testStr);
+                    
+    time_train = time_train + train_elapse;
+    time_test = time_test + test_elapse;
+   
     % save model
-    for i = 1 : size(R,1);
-        fprintf(modelFid,'%f ',R(i,:));
+    for i = 1 : size(model.pc, 1);
+        fprintf(modelFid,'%f ',model.pc(i,:));
         fprintf(modelFid,'\n');
     end
-    
+    for i = 1 : size(model.R,1);
+        fprintf(modelFid,'%f ',model.R(i,:));
+        fprintf(modelFid,'\n');
+    end
+
     % save base codes 
-    trainB = (trainset * R > 0);    
     for i = 1 : size(trainB,1);
         fprintf(baseCodeFid,'%g ',trainB(i,:));
         fprintf(baseCodeFid,'\n');
     end
     
     % save query codes
-    testB = (testset * R > 0); 
     for i = 1 : size(testB,1);
         fprintf(queryCodeFid,'%g ',testB(i,:));
         fprintf(queryCodeFid,'\n');
