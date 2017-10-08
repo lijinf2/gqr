@@ -4,7 +4,7 @@ addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 dataset = 'gist';
 method = 'ITQ'
 codelength = 16;            
-nHashTable = 1;
+nHashTable = 16;
     
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
@@ -38,6 +38,8 @@ numQueries = size(testset, 1)
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries
 fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
+fprintf(modelFid, '%f ', meanTrainset);
+fprintf(modelFid, '\n');
 baseCodeFid = fopen(baseCodeFile,'wt');
 queryCodeFid = fopen(queryCodeFile,'wt');
 for j =1:nHashTable                

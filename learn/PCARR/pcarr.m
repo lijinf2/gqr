@@ -4,7 +4,7 @@ addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 dataset = 'gist';
 method = 'PCARR'
 codelength = 16;            
-nHashTable = 4;
+nHashTable = 8;
     
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
@@ -18,12 +18,6 @@ meanTrainset = mean(trainset);
 trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
 testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);
-
-% PCA
-[pc, ~] = eigs(cov(trainset), codelength);
-model.pc = pc;
-trainset = trainset * model.pc;
-testset = testset * model.pc;
 
 if codelength > 128
     disp(['codelenth ',num2str(codelength),' not supported yet!']);
@@ -46,7 +40,11 @@ modelFid = fopen(modelFile,'wt');
 fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
 fprintf(modelFid, '%f ', meanTrainset);
 fprintf(modelFid, '\n');
-% save pca 
+% pca and save pca 
+[pc, ~] = eigs(cov(trainset), codelength);
+model.pc = pc;
+trainset = trainset * model.pc;
+testset = testset * model.pc;
 for i = 1 : size(model.pc, 1);
     fprintf(modelFid,'%f ',model.pc(i,:));
     fprintf(modelFid,'\n');

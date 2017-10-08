@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="ITQ"
+hash_method="PCARR"
 query_method="GQR"
 
 # #audio
@@ -24,7 +24,7 @@ query_method="GQR"
 
 # gist
 codelength=16
-num_tables=16
+num_tables=8
 dataset="gist"
 base_format="fvecs"
 cardinality=1000000

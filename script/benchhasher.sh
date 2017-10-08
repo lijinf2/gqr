@@ -9,27 +9,27 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-# #audio
-# method="PCAH"
+#audio
+method="PCARR"
+codelength=16
+num_tables=1
+dataset="audio"
+base_format="fvecs"
+cardinality=53387
+dimension=192
+num_queries=200
+topk=20
+
+# # gist
+# method="ITQ"
 # codelength=16
 # num_tables=1
-# dataset="audio"
+# dataset="gist"
 # base_format="fvecs"
-# cardinality=53387
-# dimension=192
-# num_queries=200
+# cardinality=1000000
+# dimension=960
+# num_queries=1000
 # topk=20
-
-# gist
-method="PCAH"
-codelength=16
-num_tables=8
-dataset="gist"
-base_format="fvecs"
-cardinality=1000000
-dimension=960
-num_queries=1000
-topk=20
 
 # #sift1m
 # method="PCAH"
