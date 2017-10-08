@@ -34,8 +34,6 @@ public:
 
     vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
 
-    vector<bool> quantization(const vector<float>& hashFloats);
-
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
 private:
@@ -60,16 +58,10 @@ vector<float> lshbox::PCAH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::PCAH<DATATYPE>::quantization(const vector<float>& hashFloats)
-{
-    return  this->quantizeByZero(hashFloats);
-}
-
-template<typename DATATYPE>
 vector<bool> lshbox::PCAH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
 {
     vector<float> hashFloats = getHashFloats(k, domin);
-    vector<bool> hashBits = quantization(hashFloats);
+    vector<bool> hashBits = this->quantization(hashFloats);
     return hashBits;
 }
 

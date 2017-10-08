@@ -15,7 +15,7 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         if (numItems > numAllItems) 
             numItems = numAllItems;
 
-        // numItems = 131072;
+        // numItems = 16384;
         // // numItems = 16;
         // numAllItems = numItems;
 

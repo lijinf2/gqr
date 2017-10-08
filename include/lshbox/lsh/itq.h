@@ -23,8 +23,6 @@ public:
 
     vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
 
-    vector<bool> quantization(const vector<float>& hashFloats);
-
     vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
@@ -59,24 +57,11 @@ vector<float> ITQ<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
     }
     return hashFloats;
 }
-template<typename DATATYPE>
-vector<bool> ITQ<DATATYPE>::quantization(const vector<float>& hashFloats)
-{
-    vector<bool> hashBits;
-    hashBits.resize(hashFloats.size());
-    for (int i = 0; i < hashFloats.size(); ++i) {
-        if (hashFloats[i] >= 0) {
-            hashBits[i] = 1;
-        } else {
-            hashBits[i] = 0;
-        }
-    }
-    return  hashBits;
-}
+
 template<typename DATATYPE>
 vector<bool> ITQ<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
     vector<float> hashFloats = getHashFloats(k, domin);
-    vector<bool> hashBits = quantization(hashFloats);
+    vector<bool> hashBits = this->quantization(hashFloats);
     return hashBits;
 }
 template<typename DATATYPE>

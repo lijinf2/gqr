@@ -37,6 +37,8 @@ public:
 
     virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) = 0;
 
+    virtual vector<bool> quantization(const vector<float>& hashFloats);
+
     void initBaseHasher(
         const string &bitsFile, 
         int numTables,
@@ -67,6 +69,12 @@ public:
 };
 
 //--------------------- Implementations ------------------
+template<typename DATATYPE>
+vector<bool> Hasher<DATATYPE>::quantization(const vector<float>& hashFloats)
+{
+    return  this->quantizeByZero(hashFloats);
+}
+
 template<typename DATATYPE>
 void Hasher<DATATYPE>::initBaseHasher(
     const string &bitsFile,
