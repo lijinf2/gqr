@@ -62,16 +62,7 @@ vector<float> lshbox::PCAH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
 template<typename DATATYPE>
 vector<bool> lshbox::PCAH<DATATYPE>::quantization(const vector<float>& hashFloats)
 {
-    vector<bool> hashBits;
-    hashBits.resize(hashFloats.size());
-    for (int i = 0; i < hashFloats.size(); ++i) {
-        if (hashFloats[i] >= 0) {
-            hashBits[i] = 1;
-        } else {
-            hashBits[i] = 0;
-        }
-    }
-    return  hashBits;
+    return  this->quantizeByZero(hashFloats);
 }
 
 template<typename DATATYPE>

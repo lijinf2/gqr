@@ -10,27 +10,27 @@ if [ "$log" != "" ]; then
 fi
 
 hash_method="ITQ"
-query_method="HR"
+query_method="GQR"
 
 # #audio
-num_tables=1
-codelength=16
-dataset="audio"
-base_format="fvecs"
-cardinality=53387
-dimension=192
-num_queries=200
-topk=20
+# num_tables=1
+# codelength=16
+# dataset="audio"
+# base_format="fvecs"
+# cardinality=53387
+# dimension=192
+# num_queries=200
+# topk=20
 
 # gist
-# codelength=16
-# num_tables=1
-# dataset="gist"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=960
-# num_queries=1000
-# topk=20
+codelength=16
+num_tables=16
+dataset="gist"
+base_format="fvecs"
+cardinality=1000000
+dimension=960
+num_queries=1000
+topk=20
 
 # #sift1m
 # codelength=16
@@ -59,7 +59,7 @@ base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${data
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
 
-gdb -args ../build/bin/search\
+../build/bin/search\
     --hash_method=$hash_method \
     --query_method=$query_method \
     --base_format=$base_format \

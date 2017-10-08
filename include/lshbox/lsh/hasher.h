@@ -53,6 +53,8 @@ public:
     template<typename PROBER>
     void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
 
+    vector<bool> quantizeByZero(const vector<float>& hashFloats);
+
     int getTableSize();
 
     int getMaxBucketSize();
@@ -152,6 +154,21 @@ void Hasher<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int 
         const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
         probe(probePair.first, probePair.second, prober); 
     }
+}
+
+template<typename DATATYPE>
+vector<bool> Hasher<DATATYPE>::quantizeByZero(const vector<float>& hashFloats)
+{
+    vector<bool> hashBits;
+    hashBits.resize(hashFloats.size());
+    for (int i = 0; i < hashFloats.size(); ++i) {
+        if (hashFloats[i] >= 0) {
+            hashBits[i] = 1;
+        } else {
+            hashBits[i] = 0;
+        }
+    }
+    return  hashBits;
 }
 
 template<typename DATATYPE>

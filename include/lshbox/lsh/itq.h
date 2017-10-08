@@ -118,6 +118,7 @@ void ITQ<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFil
         }
 
         auto& curRotate = rotateAll[tb];
+        curRotate.resize(tableCodelen);
         for (auto& v : curRotate) {
             v.resize(tableCodelen);
         }

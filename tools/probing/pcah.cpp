@@ -97,18 +97,19 @@ int main(int argc, const char **argv)
     std::cout << "RUNING QUERY ..." << std::endl;
     timer.restart();
 
-    // initialize prober
-    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    // initialized tree lookup
+    typedef TreeLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
+    Tree fvs(mylsh.getCodeLength());
 
     void* raw_memory = operator new[]( 
         sizeof(PROBER) * bench.getQ());
     PROBER* probers = static_cast<PROBER*>(raw_memory);
     for (int i = 0; i < bench.getQ(); ++i) {
         new(&probers[i]) PROBER(
-            query[bench.getQuery(i)],
+            data[bench.getQuery(i)],
             initScanner,
-            mylsh);
+            mylsh,
+            &fvs);// for non losslookup probers
     }
 
     double initTime = timer.elapsed();
