@@ -9,8 +9,8 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-#audio
-method="PCARR"
+# #audio
+method="SpH"
 codelength=16
 num_tables=1
 dataset="audio"
@@ -20,10 +20,10 @@ dimension=192
 num_queries=200
 topk=20
 
-# # gist
+# gist
 # method="ITQ"
 # codelength=16
-# num_tables=1
+# num_tables=16
 # dataset="gist"
 # base_format="fvecs"
 # cardinality=1000000
@@ -32,9 +32,9 @@ topk=20
 # topk=20
 
 # #sift1m
-# method="PCAH"
+# method="ITQ"
 # codelength=16
-# num_tables=1
+# num_tables=16
 # dataset="sift1m"
 # base_format="fvecs"
 # cardinality=1000000

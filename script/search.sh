@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="PCARR"
+hash_method="SpH"
 query_method="GQR"
 
 # #audio
@@ -23,8 +23,8 @@ query_method="GQR"
 # topk=20
 
 # gist
+num_tables=4
 codelength=16
-num_tables=8
 dataset="gist"
 base_format="fvecs"
 cardinality=1000000
@@ -32,9 +32,9 @@ dimension=960
 num_queries=1000
 topk=20
 
-# #sift1m
-# codelength=16
+#sift1m
 # num_tables=1
+# codelength=16
 # dataset="sift1m"
 # base_format="fvecs"
 # cardinality=1000000
@@ -44,8 +44,8 @@ topk=20
 
 
 # #sift10m
-# codelength=20
 # num_tables=1
+# codelength=20
 # dataset="sift10m"
 # base_format="fvecs"
 # cardinality=10000000
