@@ -9,32 +9,28 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="SpH"
+hash_method="PCAH"
 query_method="GQR"
+num_tables=1
+codelength=16
 
 #audio
-# num_tables=1
-# codelength=16
-# dataset="audio"
-# base_format="fvecs"
-# cardinality=53387
-# dimension=192
-# num_queries=200
-# topk=20
-
-# # gist
-num_tables=4
-codelength=16
-dataset="gist"
+dataset="audio"
 base_format="fvecs"
-cardinality=1000000
-dimension=960
-num_queries=1000
+cardinality=53387
+dimension=192
+num_queries=200
 topk=20
 
+# # gist
+# dataset="gist"
+# base_format="fvecs"
+# cardinality=1000000
+# dimension=960
+# num_queries=1000
+# topk=20
+
 #sift1m
-# num_tables=16
-# codelength=16
 # dataset="sift1m"
 # base_format="fvecs"
 # cardinality=1000000
@@ -44,8 +40,6 @@ topk=20
 
 
 # #sift10m
-# num_tables=1
-# codelength=20
 # dataset="sift10m"
 # base_format="fvecs"
 # cardinality=10000000
