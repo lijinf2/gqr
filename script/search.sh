@@ -12,7 +12,7 @@ fi
 hash_method="SpH"
 query_method="GQR"
 
-# #audio
+#audio
 # num_tables=1
 # codelength=16
 # dataset="audio"
@@ -22,7 +22,7 @@ query_method="GQR"
 # num_queries=200
 # topk=20
 
-# gist
+# # gist
 num_tables=4
 codelength=16
 dataset="gist"
@@ -33,7 +33,7 @@ num_queries=1000
 topk=20
 
 #sift1m
-# num_tables=1
+# num_tables=16
 # codelength=16
 # dataset="sift1m"
 # base_format="fvecs"

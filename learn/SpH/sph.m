@@ -5,7 +5,7 @@ addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 dataset = 'gist';
 method = 'SpH'
 codelength = 16;            
-nHashTable = 4;
+nHashTable = 1;
 
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

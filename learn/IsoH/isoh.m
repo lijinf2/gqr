@@ -1,95 +1,101 @@
-
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
-datasetCandi = {'sift1m'};
-% datasetCandi = {'siftsmall'};
-% datasetCandi = {'sift', 'gist'};
-% datasetCandi = {'sift'};
-% datasetCandi = {'gist'};
-% datasetCandi = {'imagenet'};
 
-% methodCandi = {'LSH','ITQ'};
-% methodCandi = {'LSH'};
-% methodCandi = {'ITQ'};
-% methodCandi = {'SH'};
-% methodCandi = {'SpH'};
-% methodCandi = {'BRE'};
-% methodCandi = {'USPLH'};
-% methodCandi = {'KLSH'};
-% methodCandi = {'IsoH'};
-% methodCandi = {'DSH'};
-
-% methodCandi = {'LSH','SH','BRE','USPLH','ITQ','SpH','IsoH','DSH'};
-methodCandi = {'IsoH'};
-
-% codelengthCandi = [24 28 36 40 44 48];
-codelengthCandi = [16];
-
+% single PCA and multiple rotations
+dataset = 'gist';
+method = 'IsoH'
+codelength = 16;
 nHashTable = 1;
 
-for d=1:length(datasetCandi)
-    dataset = datasetCandi{d};
-    
-    for m=1:length(methodCandi)
-        method = methodCandi{m};
-        
-        for l=1:length(codelengthCandi)
-            codelength = codelengthCandi(l);
-            
-            
-            if codelength > 128
-                disp(['codelenth ',num2str(codelength),' not supported yet!']);
-                return;
-            end
-            
-            disp('==============================');
-            disp([method,' ',num2str(codelength),'bit ',dataset,' nTable=',num2str(nHashTable)]);
-            disp('==============================');
-            
-            trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
-            testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
-            trainset = trainset';
-            testset = testset';
-            
-            train_all = 0;
-            test_all = 0;            
-            for j =1:nHashTable                
-                % train and test model
-                trainStr = ['[model, trainB ,train_elapse] = ',method,'_learn(trainset, codelength);'];
-                testStr = ['[testB,test_elapse] = ',method,'_compress(testset, model);'];
-                eval(trainStr);
-                eval(testStr);
-                                
-                train_all = train_all + train_elapse;
-                test_all = test_all + test_elapse;
-               
-                % save model and data table
-                ModelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
-               
-                
-                % save table   
-                ResultFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];              
-                                          
-                fid = fopen(ResultFile,'wt');
-                
-                for i = 1 : size(trainB,1);
-                    fprintf(fid,'%g ',trainB(i,:));
-                    fprintf(fid,'\n');
-                end
-                fclose(fid);
-                
-                % save query table
-                ResultFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(j),'.txt'];
-                fid = fopen(ResultFile,'wt');
-                for i = 1 : size(testB,1);
-                    fprintf(fid,'%g ',testB(i,:));
-                    fprintf(fid,'\n');
-                end
-                fclose(fid);
-            end
-            disp('==============================');
-            disp(['Total training time: ',num2str(train_all)]);
-            disp(['Total testing time: ',num2str(test_all)]);
+baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
+queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
+modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
+
+% zero-centered dataset
+trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
+testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
+trainset = trainset';
+meanTrainset = mean(trainset);
+trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
+testset = testset';
+testset = testset - repmat(meanTrainset, size(testset, 1), 1);
+
+if codelength > 128
+    disp(['codelenth ',num2str(codelength),' not supported yet!']);
+    return;
+end
+
+disp('==============================');
+disp([method,' ',num2str(codelength),'bit ',dataset,' nTable=',num2str(nHashTable)]);
+disp('==============================');
+
+
+time_train = 0;
+time_test = 0;
+
+[cardinality, dimension] = size(trainset)
+numQueries = size(testset, 1)
+
+modelFid = fopen(modelFile,'wt');
+% #of tables, dimension, codelength, #data points, #num queries
+fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
+fprintf(modelFid, '%f ', meanTrainset);
+fprintf(modelFid, '\n');
+
+% pca and save pca
+[pc, pv] = eigs(trainset'*trainset, codelength);
+meanPV = mean(diag(pv));
+
+model.pc = pc;
+for i = 1 : size(model.pc, 1);
+    fprintf(modelFid,'%f ',model.pc(i,:));
+    fprintf(modelFid,'\n');
+end
+
+baseCodeFid = fopen(baseCodeFile,'wt');
+queryCodeFid = fopen(queryCodeFile,'wt');
+for j =1:nHashTable
+
+    % Rotation
+
+    n_iter = 100;	
+    R = randn(codelength,codelength);
+    [U11, ~, ~] = svd(R);
+    R = U11(:,1:codelength);
+    Z = R'*pv*R;
+    for iter=1:n_iter
+        T = Z;
+        for i = 1:codelength
+            T(i,i) = meanPV;
         end
+        [R, ~] = eig(T);
+        Z = R'*pv*R;
+    end    
+
+    % save model
+    for i = 1 : size(R,1);
+        fprintf(modelFid,'%f ',R(i,:));
+        fprintf(modelFid,'\n');
+    end
+
+    % save base codes
+    trainB = (trainset * model.pc * R > 0);
+    for i = 1 : size(trainB,1);
+        fprintf(baseCodeFid,'%g ',trainB(i,:));
+        fprintf(baseCodeFid,'\n');
+    end
+
+    % save query codes
+    testB = (testset * model.pc * R > 0);
+    for i = 1 : size(testB,1);
+        fprintf(queryCodeFid,'%g ',testB(i,:));
+        fprintf(queryCodeFid,'\n');
     end
 end
+fclose(modelFid)
+fclose(baseCodeFid);
+fclose(queryCodeFid);
+disp('==============================');
+disp(['Total training time: ',num2str(time_train)]);
+disp(['Total testing time: ',num2str(time_test)]);
+

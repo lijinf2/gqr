@@ -2,10 +2,10 @@ addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
 % single PCA and multiple rotations
-dataset = 'gist';
+dataset = 'sift1m';
 method = 'ITQ'
 codelength = 16;            
-nHashTable = 4;
+nHashTable = 16;
     
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

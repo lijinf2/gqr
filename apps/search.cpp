@@ -12,6 +12,7 @@
 #include <lshbox/lsh/itq.h>
 #include <lshbox/lsh/pcarr.h>
 #include <lshbox/lsh/sph.h>
+#include <lshbox/lsh/isoh.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -95,6 +96,10 @@ int main(int argc, const char **argv)
         search(queryMethod, data, query, mylsh, bench);
     } else if (hashMethod == "SpH") {
         lshbox::SpH<DATATYPE> mylsh;
+        mylsh.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, mylsh, bench);
+    } else if (hashMethod == "IsoH") {
+        lshbox::IsoH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mylsh, bench);
     }
