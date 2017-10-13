@@ -9,18 +9,18 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="PCAH"
-query_method="GQR"
+hash_method="ITQ"
+query_method="HR"
 num_tables=1
 codelength=16
 
 #audio
-dataset="audio"
-base_format="fvecs"
-cardinality=53387
-dimension=192
-num_queries=200
-topk=20
+# dataset="audio"
+# base_format="fvecs"
+# cardinality=53387
+# dimension=192
+# num_queries=200
+# topk=20
 
 # # gist
 # dataset="gist"
@@ -31,15 +31,23 @@ topk=20
 # topk=20
 
 #sift1m
-# dataset="sift1m"
+dataset="sift1m"
+base_format="fvecs"
+cardinality=1000000
+dimension=128
+num_queries=1000
+topk=20
+
+
+# #tiny5m
+# dataset="tiny5m"
 # base_format="fvecs"
-# cardinality=1000000
-# dimension=128
+# cardinality=50000000
+# dimension=384
 # num_queries=1000
 # topk=20
 
-
-# #sift10m
+#sift10m
 # dataset="sift10m"
 # base_format="fvecs"
 # cardinality=10000000
@@ -47,11 +55,28 @@ topk=20
 # num_queries=1000
 # topk=20
 
+# #glove2.2m
+# dataset="glove2.2m"
+# base_format="fvecs"
+# cardinality=2196017
+# dimension=300
+# num_queries=1000
+# topk=20
+#
+# deep1m
+# dataset="deep1M"
+# base_format="fvecs"
+# cardinality=1000000
+# dimension=256
+# num_queries=1000
+# topk=20
+
 model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}b_${num_tables}tb.txt"
 base_file="../data/${dataset}/${dataset}_base.fvecs"
 base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}b_${num_tables}tb.txt"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
-benchmark_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
+# benchmark_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
+benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
 ../build/bin/search\
     --hash_method=$hash_method \

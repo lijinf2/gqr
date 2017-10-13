@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <string>
 #include <cstring>
@@ -59,22 +60,16 @@ bool setStat(
         ScannerT scanner, 
         const AnswerT& ans, 
         lshbox::Stat& recall,
-        lshbox::Stat& precision) {
+        lshbox::Stat& error) {
 
     scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
     float thisRecall = scanner.topk().recall(ans);
-
-    float matched = thisRecall * (scanner.getK() - 1); 
-    float thisPrecision;
-    if(scanner.cnt() == 0)
-        thisPrecision = 0;
-    else
-        thisPrecision = matched / scanner.cnt();
+    float thisError = scanner.topk().error(ans);;
 
     recall << thisRecall;
-    precision << thisPrecision;
+    error << thisError;
 
-    if (thisRecall > 0.99) return true;
+    if (thisRecall > 0.9999) return true;
     else return false;
 }
 

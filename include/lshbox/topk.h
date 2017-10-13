@@ -257,6 +257,23 @@ public:
         float result = (float) matched / (float) benchTops.size();
         return result;
     }
+
+    const float error(const Topk &topk) const
+    {
+        const std::vector<std::pair<float, unsigned> >& tops = getTopk();
+        const std::vector<std::pair<float, unsigned> >& benchTops = topk.getTopk();
+        float error = 0;
+        assert (tops.size() == benchTops.size());
+        for (int i = 0; i < benchTops.size(); ++i) {
+            if (benchTops[i].first == 0) {
+                // if exactly the same vectors
+                error += 1;
+            } else  {
+                error += tops[i].first / benchTops[i].first;
+            }
+        }
+        return error / benchTops.size();
+    }
 };
 
 /**

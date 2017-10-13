@@ -90,10 +90,10 @@ class Query {
         }
 };
 
-void updateQueries(vector<Query*> queries, const vector<vector<float>>& items, int itemStartIdx) {
+void updateQueries(vector<Query*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
     for (auto& query: queries) {
-        for (int i = 0; i < items.size(); ++i) {
-            query->evaluate(items[i], itemStartIdx + i);
+        for (int i = 0; i < itemsPtr->size(); ++i) {
+            query->evaluate((*itemsPtr)[i], itemStartIdx + i);
         }
     }
 }
@@ -107,24 +107,35 @@ void updateAll(vector<Query>& queries, const vector<vector<float>>& items, int i
     while(queryIdx < queries.size()) {
         queryLinks.push_back(&queries[queryIdx++]);
         if (queryLinks.size() == numQueriesPerThread) {
-            threads.push_back(thread(updateQueries, queryLinks, items, itemStartIdx));
+            threads.push_back(thread(updateQueries, queryLinks, &items, itemStartIdx));
             queryLinks.clear();
         }
     }
-    threads.push_back(thread(updateQueries, queryLinks, items, itemStartIdx));
+    threads.push_back(thread(updateQueries, queryLinks, &items, itemStartIdx));
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
     }
 }
 int main(int argc, char** argv) {
-    if (argc != 5 && argc != 6) {
-        cout << "usage: program base_file.fvecs query_file.fvecs K groundtruth_file.ivecs num_threads=4" << endl;
+    if (argc != 6 && argc != 7) {
+        cout << "usage: program base_file.fvecs query_file.fvecs K groundtruth_file.lshbox groundtruth_file.ivecs num_threads=4" << endl;
         return 0;
     }
+
+    const char* baseFileName = argv[1];
+    const char* queryFileName = argv[2];
     int K = std::atoi(argv[3]);
-    ifstream queryFin(argv[2], ios::binary);
+    const char* lshboxBenchFileName = argv[4];
+    const char* ivecsBenchFileName = argv[5];
+    int numThreads = 4;
+    if (argc >= 7)
+        numThreads = stoi(argv[6]);
+
+    int itemBatchSize = 1000000;
+
+    ifstream queryFin(queryFileName, ios::binary);
     if (!queryFin) {
-        cout << "query File "  << argv[2] << " does not exist "<< endl;
+        cout << "query File "  << queryFileName << " does not exist "<< endl;
         return 0;
     }
     vector<vector<float>> queryVecs;
@@ -137,9 +148,9 @@ int main(int argc, char** argv) {
     }
     queryFin.close();
 
-    ifstream baseFin(argv[1], ios::binary);
+    ifstream baseFin(baseFileName, ios::binary);
     if (!baseFin) {
-        cout << "base File " << argv[1] << " does not exist" << endl;
+        cout << "base File " << baseFileName << " does not exist" << endl;
         return 0;
     }
 
@@ -149,10 +160,6 @@ int main(int argc, char** argv) {
         queryObjs.push_back(Query(queryVecs[i], K));
     }
 
-    int itemBatchSize = 1000000;
-    int numThreads = 4;
-    if (argc == 6) 
-        numThreads = stoi(argv[5]);
     int itemStartIdx = 0;
     vector<vector<float>> items;
     items.reserve(itemBatchSize);
@@ -176,16 +183,33 @@ int main(int argc, char** argv) {
 
     baseFin.close();
 
-    ofstream fout(argv [4], ios::binary);
-    cout << queryObjs.size() << "\t" << K << endl;
+    // lshbox file
+    ofstream lshboxFout(lshboxBenchFileName);
+    if (!lshboxFout) {
+        cout << "cannot create output file " << lshboxBenchFileName << endl;
+    }
+    lshboxFout << queryObjs.size() << "\t" << K << endl;
+    for (int i = 0; i < queryObjs.size(); ++i) {
+        lshboxFout << i << "\t";
+        vector<IdAndDstPair> topker = queryObjs[i].getTopK();
+        for (int idx = 0; idx < topker.size(); ++idx) {
+            lshboxFout << topker[idx].id << "\t" << topker[idx].distance << "\t";
+        }
+        lshboxFout << endl;
+    }
+    lshboxFout.close();
+
+    // ivecs file
+    ofstream fout(ivecsBenchFileName, ios::binary);
+    if (!fout) {
+        cout << "cannot create output file " << ivecsBenchFileName << endl;
+    }
     for (int i = 0; i < queryObjs.size(); ++i) {
         fout.write((char*)&K, sizeof(int));
         vector<IdAndDstPair> topker = queryObjs[i].getTopK();
         for (int idx = 0; idx < topker.size(); ++idx) {
             fout.write((char*)&topker[idx].id, sizeof(int));
-            cout << topker[idx].id << "\t" << topker[idx].distance << "\t";
         }
-        cout << endl;
     }
     fout.close();
     return 0;
