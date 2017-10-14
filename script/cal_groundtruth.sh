@@ -9,14 +9,14 @@ if [ "$log" != "" ]; then
 fi
 mkdir groundtruth
 
-dataset="glove2.2m"
-topk=1000
+dataset="sift1m"
+topk=20
 numThreads=20;
 
-benchmark_file="./groundtruth/${dataset}_groundtruth.ivecs"
-lshbox_ben_file="./groundtruth/${dataset}_groundtruth.lshbox"
+ivecs_bench_file="./groundtruth/${dataset}_groundtruth.ivecs"
+lshbox_bench_file="./groundtruth/${dataset}_groundtruth.lshbox"
 
 base_file="../data/${dataset}/${dataset}_base.fvecs"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 
-../build/bin/cal_groundtruth $base_file $query_file $topk $benchmark_file $numThreads > $lshbox_ben_file
+../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $numThreads

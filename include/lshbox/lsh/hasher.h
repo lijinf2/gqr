@@ -35,6 +35,13 @@ public:
 
     Hasher() {}
 
+
+    virtual vector<float>  getHashFloats(unsigned k, const DATATYPE* domin) {
+        std::cout << "invoke getHashFloats but not override" << std::endl;
+        assert(false);
+        return vector<float>();
+    }; 
+
     virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) = 0;
 
     virtual vector<bool> quantization(const vector<float>& hashFloats);

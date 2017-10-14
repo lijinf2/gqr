@@ -214,12 +214,12 @@ public:
      */
     void genTopk()
     {
-        unsigned total = heap.size();
-        for (unsigned i = 0; i != total; ++i)
+        auto curHeap = this->heap;
+        this->tops.resize(curHeap.size());
+
+        for (unsigned i = 0; i < this->tops.size(); ++i)
         {
-            std::pair<float, unsigned> top;
-            heap.deleteMax(top);
-            tops.push_back(top);
+            curHeap.deleteMax(this->tops[i]);
         }
         std::reverse(tops.begin(), tops.end());
     }
@@ -237,42 +237,51 @@ public:
     {
         return tops;
     }
+
     /**
      * Calculate the recall vale with another heap.
-     * @param  topk another TopK.
+     * should genCurTopk in advance
      */
-    const float recall(const Topk &topk) const
+    float recall(const Topk &bench) const
     {
-        const std::vector<std::pair<float, unsigned> >& tops = getTopk();
-        const std::vector<std::pair<float, unsigned> >& benchTops = topk.getTopk();
-        unsigned matched = 0; // the matched should ignore itself
-        for (const auto& top : tops) {
-            for (const auto& benchTop: benchTops) {
-                if (top.second == benchTop.second) {
-                    matched++;
-                    break;
-                }
+        const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
+
+        unsigned matched = 0;
+        int ith = 0;
+        for (int j = 0; j < benchTops.size(); ++j) {
+            if (ith >= this->tops.size()) {
+                break;
+            } 
+            if (this->tops[ith].second == benchTops[j].second
+                    || this->tops[ith].first < 0.00001) {
+                ith++;
+                matched++;
             }
         }
+
         float result = (float) matched / (float) benchTops.size();
         return result;
     }
 
-    const float error(const Topk &topk) const
+    // return -1 if no candidates are found
+    float error(const Topk &bench) const
     {
-        const std::vector<std::pair<float, unsigned> >& tops = getTopk();
-        const std::vector<std::pair<float, unsigned> >& benchTops = topk.getTopk();
+        if (this->tops.size() == 0) return -1;
+        const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
+
         float error = 0;
-        assert (tops.size() == benchTops.size());
-        for (int i = 0; i < benchTops.size(); ++i) {
-            if (benchTops[i].first == 0) {
-                // if exactly the same vectors
+        // handle exception of errors
+        assert (tops.size() <= benchTops.size());
+        for (int i = 0; i < tops.size(); ++i) {
+            if (benchTops[i].first < 0.00001) {
+                // if exactly the same vectors, must fetched
+                assert(tops[i].first < 0.00001);
                 error += 1;
             } else  {
                 error += tops[i].first / benchTops[i].first;
             }
         }
-        return error / benchTops.size();
+        return error / tops.size();
     }
 };
 
@@ -327,10 +336,11 @@ public:
     /**
      * TopK results.
      */
-    Topk &topk()
+    Topk &getMutableTopk()
     {
-        return topk_;
+        return this->topk_;
     }
+
     /**
      * Update the current query by scanning key, this is normally invoked by the LSH
      * index structure.

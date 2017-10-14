@@ -1,7 +1,8 @@
 PROJECT(APPS)
 
 SET(APPS
-    create_benchmark
+    sample_queries
+    cal_groundtruth
     hasher
     benchhasher
     search

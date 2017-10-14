@@ -56,18 +56,20 @@ vector<bool> selection(unsigned n, unsigned k) {
 
 template<typename ScannerT, typename AnswerT>
 bool setStat(
-        // lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> scanner, 
-        ScannerT scanner, 
+        ScannerT queryScanner, 
         const AnswerT& ans, 
         lshbox::Stat& recall,
         lshbox::Stat& error) {
 
-    scanner.topk().genTopk(); // must getTopk for scanner, other wise will wrong
-    float thisRecall = scanner.topk().recall(ans);
-    float thisError = scanner.topk().error(ans);;
+    auto& queryTopk = queryScanner.getMutableTopk();
+    queryTopk.genTopk(); // must getTopk for scanner, other wise will wrong
+    float thisRecall = queryTopk.recall(ans);
+    float thisError = queryTopk.error(ans);;
 
     recall << thisRecall;
-    error << thisError;
+    if (thisError >= 1) {
+        error << thisError;
+    }
 
     if (thisRecall > 0.9999) return true;
     else return false;

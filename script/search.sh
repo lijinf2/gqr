@@ -19,24 +19,24 @@ codelength=16
 # base_format="fvecs"
 # cardinality=53387
 # dimension=192
-# num_queries=200
-# topk=20
-
-# # gist
-# dataset="gist"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=960
 # num_queries=1000
 # topk=20
 
-#sift1m
-dataset="sift1m"
+# # gist
+dataset="gist"
 base_format="fvecs"
 cardinality=1000000
-dimension=128
+dimension=960
 num_queries=1000
 topk=20
+
+#sift1m
+# dataset="sift1m"
+# base_format="fvecs"
+# cardinality=1000000
+# dimension=128
+# num_queries=1000
+# topk=20
 
 
 # #tiny5m
@@ -75,7 +75,6 @@ model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^
 base_file="../data/${dataset}/${dataset}_base.fvecs"
 base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}b_${num_tables}tb.txt"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
-# benchmark_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
 ../build/bin/search\

@@ -12,6 +12,7 @@
 #include <lshbox/utils.h>
 #include <lshbox/lsh/benchhasher.h>
 
+#include "search.h"
 using std::unordered_map;
 using std::string;
 int main(int argc, const char **argv)
@@ -72,85 +73,17 @@ int main(int argc, const char **argv)
     }
 
     // load bench
-    // transform ivecs bench to lshbox bench 
-    std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
     lshbox::Benchmark bench;
-    std::string benchmark(lshboxBenchFile);
-    bench.load(benchmark);
-    unsigned K = bench.getK();
+    if (benchFile.find("lshbox") == string::npos) {
+        std::cout << "only lshbox benchmark file is supported" << std::endl;
+        assert(false);
+    } else {
+        bench.load(benchFile.c_str());
+    }
 
     // load model
-    std::cout << "load model ..." << std::endl;
-    timer.restart();
     lshbox::BenchHasher<DATATYPE> mylsh;
     mylsh.loadModel(modelFile, baseBitsFile, queryBitsFile, query, bench);
-    std::cout << "load model time: " << timer.elapsed() << "s." << std::endl;
 
-    // initialize scanner
-    lshbox::Matrix<DATATYPE>::Accessor accessor(data);
-    lshbox::Metric<DATATYPE> metric(data.getDim(), L2_DIST);
-    lshbox::Scanner<lshbox::Matrix<DATATYPE>::Accessor> initScanner(
-        accessor,
-        metric,
-        K
-    );
-    std::cout << "LOADING TIME: " << timer.elapsed() << "s." << std::endl;
-    std::cout << "RUNING QUERY ..." << std::endl;
-    timer.restart();
-
-    // initialize prober
-    // typedef HashLookup<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-    typedef HammingRanking<lshbox::Matrix<DATATYPE>::Accessor> PROBER;
-
-    void* raw_memory = operator new[]( 
-        sizeof(PROBER) * bench.getQ());
-    PROBER* probers = static_cast<PROBER*>(raw_memory);
-    for (int i = 0; i < bench.getQ(); ++i) {
-        new(&probers[i]) PROBER(
-            query[bench.getQuery(i)],
-            initScanner,
-            mylsh);
-    }
-
-    double initTime = timer.elapsed();
-    std::cout << "init time: " << initTime << std::endl;
-
-    std::cout << "probed items, " << "overall query time, " 
-        << "avg recall, " << "avg precision" <<"\n";
-
-    timer.restart();
-    int numAllItems = data.getSize();
-    for (unsigned numItems = 1; true ; numItems *= 2) { //  # of probed items must be the power of two
-        if (numItems > numAllItems) 
-            numItems = numAllItems;
-
-        // numItems = 131072;
-        // // numItems = 16;
-        // numAllItems = numItems;
-
-        lshbox::Stat recall, precision;
-        for (unsigned i = 0; i != bench.getQ(); ++i)
-        {
-            // queries are applied incrementally, i.e. the result of this round depends on the last round
-            mylsh.KItemByProber(query[bench.getQuery(i)], probers[i], numItems);
-
-            // collect accuracy information
-            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, precision);
-        }
-        double retTime = timer.elapsed();
-        std::cout << numItems << ", " << retTime <<", "
-            << recall.getAvg() << ", " << precision.getAvg() << "\n";
-        if (numItems == numAllItems)
-            break;
-    }
-
-    // release memory of prober;
-    std::cout << "bench.getQ: " << bench.getQ() << std::endl;
-    for (unsigned i = bench.getQ() - 1; i !=0; --i) {
-        probers[i].~PROBER();
-    }
-
-    std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
-    std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
-    std::cout << "end of program" << std::endl;
+    search("HR", data, query, mylsh, bench, params);
 }

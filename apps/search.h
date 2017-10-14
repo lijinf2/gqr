@@ -2,11 +2,20 @@
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/losslookup.h>
 #include <string>
+#include <unordered_map>
+
 using std::string;
+using std::unordered_map;
 template<typename DATATYPE, typename LSHTYPE, typename PROBERTYPE>
-void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYPE>& query, LSHTYPE& mylsh, const lshbox::Benchmark& bench, PROBERTYPE* probers) {
+void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYPE>& query, LSHTYPE& mylsh, const lshbox::Benchmark& bench, PROBERTYPE* probers, const unordered_map<string, string>& params) {
+    int numQueries = bench.getQ();
+    auto it =  params.find("num_queries");
+    if (it != params.end()) {
+        numQueries = atoi((it->second).c_str());
+    }
+
     std::cout << "probed items, " << "overall query time, " 
-        << "avg recall, " << "avg precision" <<"\n";
+        << "avg recall, " << "avg error ratio" <<"\n";
 
     lshbox::timer timer;
     timer.restart();
@@ -15,22 +24,23 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         if (numItems > numAllItems) 
             numItems = numAllItems;
 
-        // numItems = 16384;
+        // numItems = 65536;
         // // numItems = 16;
         // numAllItems = numItems;
 
-        lshbox::Stat recall, precision;
-        for (unsigned i = 0; i != bench.getQ(); ++i)
+        lshbox::Stat recall, error;
+        // for (unsigned i = 0; i != bench.getQ(); ++i)
+        for (unsigned i = 0; i != numQueries; ++i)
         {
             // queries are applied incrementally, i.e. the result of this round depends on the last round
             mylsh.KItemByProber(query[bench.getQuery(i)], probers[i], numItems);
 
             // collect accuracy information
-            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, precision);
+            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, error);
         }
         double retTime = timer.elapsed();
         std::cout << numItems << ", " << retTime <<", "
-            << recall.getAvg() << ", " << precision.getAvg() << "\n";
+            << recall.getAvg() << ", " << error.getAvg() << "\n";
         if (numItems == numAllItems)
             break;
     }
@@ -52,7 +62,8 @@ void search_gqr(
     const lshbox::Matrix<DATATYPE>& query,
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
-    SCANNER initScanner) {
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
 
     // initialized tree lookup
     typedef TreeLookup<typename lshbox::Matrix<DATATYPE>::Accessor> GQRT;
@@ -68,7 +79,7 @@ void search_gqr(
             mylsh,
             &fvs);// for non losslookup probers
     }
-    annQuery(data, query, mylsh, bench, probers);
+    annQuery(data, query, mylsh, bench, probers, params);
 }
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
@@ -77,7 +88,8 @@ void search_hr(
     const lshbox::Matrix<DATATYPE>& query,
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
-    SCANNER initScanner) {
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
 
     typedef HammingRanking<typename lshbox::Matrix<DATATYPE>::Accessor> HRT;
 
@@ -90,7 +102,7 @@ void search_hr(
             initScanner,
             mylsh);// for non losslookup probers
     }
-    annQuery(data, query, mylsh, bench, probers);
+    annQuery(data, query, mylsh, bench, probers, params);
 }
 template<typename DATATYPE, typename LSHTYPE>
 void search(
@@ -98,7 +110,8 @@ void search(
     const lshbox::Matrix<DATATYPE>& data,
     const lshbox::Matrix<DATATYPE>& query,
     LSHTYPE& mylsh,
-    const lshbox::Benchmark& bench) {
+    const lshbox::Benchmark& bench,
+    const unordered_map<string, string>& params) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
@@ -110,9 +123,9 @@ void search(
     );
 
     if (method == "GQR") {
-        search_gqr(data, query, mylsh, bench, initScanner);
+        search_gqr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "HR") {
-        search_hr(data, query, mylsh, bench, initScanner);
+        search_hr(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);

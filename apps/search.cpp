@@ -1,4 +1,4 @@
-#include <cstdlib>
+#include <cstdlib> 
 #include <fstream>
 #include <unordered_map>
 
@@ -13,6 +13,7 @@
 #include <lshbox/lsh/pcarr.h>
 #include <lshbox/lsh/sph.h>
 #include <lshbox/lsh/isoh.h>
+#include <lshbox/lsh/pcamd.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -77,30 +78,41 @@ int main(int argc, const char **argv)
 
     // load bench
     // transform ivecs bench to lshbox bench 
-    std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
+    
     lshbox::Benchmark bench;
-    bench.load(lshboxBenchFile);
-
+    // std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
+    // bench.load(lshboxBenchFile);
+    if (benchFile.find("lshbox") == string::npos) {
+        std::cout << "only lshbox benchmark file is supported" << std::endl;
+        assert(false);
+    } else {
+        bench.load(benchFile.c_str());
+    }
+    
     // load model
     if (hashMethod == "PCAH") {
-        lshbox::PCAH<DATATYPE> mylsh;
-        mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench);
+        lshbox::PCAH<DATATYPE> pcah;
+        pcah.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, pcah, bench, params);
     } else if (hashMethod == "ITQ") {
-        lshbox::ITQ<DATATYPE> mylsh;
-        mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench);
+        lshbox::ITQ<DATATYPE> itq;
+        itq.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, itq, bench, params);
     } else if (hashMethod == "PCARR") {
-        lshbox::PCARR<DATATYPE> mylsh;
-        mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench);
+        lshbox::PCARR<DATATYPE> pcarr;
+        pcarr.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, pcarr, bench, params);
     } else if (hashMethod == "SpH") {
-        lshbox::SpH<DATATYPE> mylsh;
-        mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench);
+        lshbox::SpH<DATATYPE> sph;
+        sph.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, sph, bench, params);
     } else if (hashMethod == "IsoH") {
-        lshbox::IsoH<DATATYPE> mylsh;
-        mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench);
+        lshbox::IsoH<DATATYPE> isoh;
+        isoh.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, isoh, bench, params);
+    } else if (hashMethod == "PCAMD") {
+        lshbox::PCAMD<DATATYPE> pcamd;
+        pcamd.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, pcamd, bench, params);
     }
 }
