@@ -185,7 +185,7 @@ private:
     unsigned K;
     MaxHeap<std::pair<float, unsigned> > heap;
     std::vector<std::pair<float, unsigned> > tops;
-    unordered_set<unsigned> ivecs;
+    // unordered_set<unsigned> ivecs;
 public:
     Topk(): K(0) {}
     /**
@@ -205,8 +205,7 @@ public:
     void push(unsigned key, float dist)
     {
         std::pair<float, unsigned> item(dist, key);
-        unsigned S = heap.size();
-        if (S < K)
+        if (heap.size() < K)
         {
             heap.insert(item);
         }
@@ -219,7 +218,7 @@ public:
     /**
      * generate TopK.
      */
-    void genTopk()
+    const vector<pair<float, unsigned>>& genTopk()
     {
         auto curHeap = this->heap;
         this->tops.resize(curHeap.size());
@@ -230,10 +229,11 @@ public:
         }
         std::reverse(this->tops.begin(), this->tops.end());
 
-        this->ivecs.clear();
-        for (const auto& p : this->tops) {
-            this->ivecs.insert(p.second);
-        }
+        // this->ivecs.clear();
+        // for (const auto& p : this->tops) {
+        //     this->ivecs.insert(p.second);
+        // }
+        return this->tops;
     }
     /**
      * Get the std::vector<std::pair<float, unsigned> > instance which contains the nearest keys and distances.
@@ -250,46 +250,46 @@ public:
         return tops;
     }
 
-    /**
-     * Calculate the recall vale with another heap.
-     * should genCurTopk in advance
-     */
-    float recall(const Topk &bench) const
-    {
-        const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
-
-        unsigned matched = 0;
-        std::vector<std::pair<float, unsigned> >::const_iterator it = benchTops.begin();
-        while(it != benchTops.end()) {
-            if (this->ivecs.find(it->second) != this->ivecs.end()) {
-                matched++;
-            }
-            ++it;
-        }
-
-        return (float) matched / (float) benchTops.size();
-    }
-
-    // return -1 if no candidates are found
-    float error(const Topk &bench) const
-    {
-        if (this->tops.size() == 0) return -1;
-        const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
-
-        float error = 0;
-        // handle exception of errors
-        int size = std::min(tops.size(), benchTops.size());
-        for (int i = 0; i < size; ++i) {
-            if (benchTops[i].first < 0.00001) {
-                // if exactly the same vectors, must fetched
-                assert(tops[i].first < 0.00001);
-                error += 1;
-            } else  {
-                error += tops[i].first / benchTops[i].first;
-            }
-        }
-        return error / size;
-    }
+    // /**
+    //  * Calculate the recall vale with another heap.
+    //  * should genCurTopk in advance
+    //  */
+    // float recall(const Topk &bench) const
+    // {
+    //     const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
+    //
+    //     unsigned matched = 0;
+    //     std::vector<std::pair<float, unsigned> >::const_iterator it = benchTops.begin();
+    //     while(it != benchTops.end()) {
+    //         if (this->ivecs.find(it->second) != this->ivecs.end()) {
+    //             matched++;
+    //         }
+    //         ++it;
+    //     }
+    //
+    //     return (float) matched / (float) benchTops.size();
+    // }
+    //
+    // // return -1 if no candidates are found
+    // float error(const Topk &bench) const
+    // {
+    //     if (this->tops.size() == 0) return -1;
+    //     const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
+    //
+    //     float error = 0;
+    //     // handle exception of errors
+    //     int size = std::min(tops.size(), benchTops.size());
+    //     for (int i = 0; i < size; ++i) {
+    //         if (benchTops[i].first < 0.00001) {
+    //             // if exactly the same vectors, must fetched
+    //             assert(tops[i].first < 0.00001);
+    //             error += 1;
+    //         } else  {
+    //             error += tops[i].first / benchTops[i].first;
+    //         }
+    //     }
+    //     return error / size;
+    // }
 };
 
 /**
@@ -357,29 +357,28 @@ public:
         if (accessor_.mark(key))
         {
             ++cnt_;
-            // float dist = metric_.dist(query_, accessor_(key));
-            // topk_.push(key, dist);
+            topk_.push(key, metric_.dist(query_, accessor_(key)));
 
-            float distPower = 0;
-            for (int i = 0; i < metric_.dim(); ++i) {
-                distPower +=
-                    (query_[i] - accessor_(key)[i]) *
-                    (query_[i] - accessor_(key)[i]); 
-            }
-            this->opqResult.emplace_back(std::make_pair(distPower, key));
+            // float distPower = 0;
+            // for (int i = 0; i < metric_.dim(); ++i) {
+            //     distPower +=
+            //         (query_[i] - accessor_(key)[i]) *
+            //         (query_[i] - accessor_(key)[i]); 
+            // }
+            // this->opqResult.emplace_back(std::make_pair(distPower, key));
         }
     }
     unsigned getK() {
         return K_;
     }
 
-    const vector<pair<float, int>>& getOpqResult() const {
-        return this->opqResult;
-    }
-
-    void opqReserve(int size) {
-        this->opqResult.reserve(size);
-    }
+    // const vector<pair<float, int>>& getOpqResult() const {
+    //     return this->opqResult;
+    // }
+    //
+    // void opqReserve(int size) {
+    //     this->opqResult.reserve(size);
+    // }
 private:
     ACCESSOR accessor_;
     Metric<DATATYPE> metric_;
@@ -388,6 +387,6 @@ private:
     unsigned K_;
     unsigned cnt_;
 
-    vector<pair<float, int>> opqResult; // L2_DIST^2
+    // vector<pair<float, int>> opqResult; // L2_DIST^2
 };
 }

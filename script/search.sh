@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="ITQ"
+hash_method="PCHA"
 query_method="GQR"
 num_tables=1
 codelength=18

@@ -34,6 +34,7 @@
 #include <random>
 #include <fstream>
 #include <algorithm>
+#include <iostream>
 #include <functional>
 #include "lshbox/topk.h"
 namespace lshbox
@@ -170,6 +171,10 @@ public:
     void load(const std::string &path)
     {
         std::ifstream is(path.c_str());
+        if (!is) {
+            std::cerr << "cannot open benchmark file: " << path << std::endl;
+            assert(false);
+        }
         load(is);
         is.close();
     }

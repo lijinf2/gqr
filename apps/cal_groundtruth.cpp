@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
     if (argc >= 7)
         numThreads = stoi(argv[6]);
 
-    int itemBatchSize = 1000000;
+    int itemBatchSize = 200000;
 
     ifstream queryFin(queryFileName, ios::binary);
     if (!queryFin) {
@@ -166,6 +166,7 @@ int main(int argc, char** argv) {
     int itemStartIdx = 0;
     vector<vector<float>> items;
     items.reserve(itemBatchSize);
+    int numBatched = 0;
     while (baseFin.read((char*)&dimension, sizeof(int))) {
         vector<float> vec;
         vec.resize(dimension);
@@ -174,6 +175,9 @@ int main(int argc, char** argv) {
 
         if (items.size() == itemBatchSize) {
             updateAll(queryObjs, items, itemStartIdx, numThreads);
+            numBatched++;
+            cout << numBatched * itemBatchSize << " items have been evaluated" << endl;
+
             itemStartIdx += items.size();
             items.clear();
         }

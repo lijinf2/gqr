@@ -9,14 +9,20 @@ if [ "$log" != "" ]; then
 fi
 mkdir groundtruth
 
-dataset="tiny5m"
 topk=20
 numThreads=20;
 
-ivecs_bench_file="./groundtruth/${dataset}_groundtruth.ivecs"
-lshbox_bench_file="./groundtruth/${dataset}_groundtruth.lshbox"
+iter=0
+# for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
+for dataset in "sift10m"
+do
+    iter=`expr $iter + 1`
 
-base_file="../data/${dataset}/${dataset}_base.fvecs"
-query_file="../data/${dataset}/${dataset}_query.fvecs"
+    ivecs_bench_file="./groundtruth/${dataset}_groundtruth.ivecs"
+    lshbox_bench_file="./groundtruth/${dataset}_groundtruth.lshbox"
 
-../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $numThreads
+    base_file="../data/${dataset}/${dataset}_base.fvecs"
+    query_file="../data/${dataset}/${dataset}_query.fvecs"
+
+    ../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $numThreads
+done

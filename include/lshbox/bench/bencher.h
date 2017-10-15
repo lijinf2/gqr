@@ -22,6 +22,7 @@ public:
         ifstream fin(benchFile);
         if (!benchFile) {
             cout << "cannot open benchFile: " << benchFile << endl;
+            assert(false);
         }
         int numQueries;
         int K;
