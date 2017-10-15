@@ -63,8 +63,8 @@ bool setStat(
 
     auto& queryTopk = queryScanner.getMutableTopk();
     queryTopk.genTopk(); // must getTopk for scanner, other wise will wrong
-    float thisRecall = queryTopk.recall(ans);
-    float thisError = queryTopk.error(ans);;
+    float thisRecall = ans.recall(queryTopk);
+    float thisError = ans.error(queryTopk);
 
     recall << thisRecall;
     if (thisError >= 1) {

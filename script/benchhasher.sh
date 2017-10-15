@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ../build 
-# cmake ../ -DCMAKE_BUILD_TYPE=Debug
-cmake ../ -DCMAKE_BUILD_TYPE=Release
+cmake ../ -DCMAKE_BUILD_TYPE=Debug
+# cmake ../ -DCMAKE_BUILD_TYPE=Release
 make benchhasher 2>&1 | tee ../script/log.txt
 cd ../script
 log=`grep error log.txt`
@@ -20,26 +20,26 @@ fi
 # topk=20
 
 # #audio
-# method="ITQ"
-# num_tables=1
-# codelength=16
-# dataset="audio"
-# base_format="fvecs"
-# cardinality=53387
-# dimension=192
-# num_queries=2
-# topk=20
-
-# # gist
 method="ITQ"
 num_tables=1
 codelength=16
-dataset="gist"
+dataset="audio"
 base_format="fvecs"
-cardinality=1000000
-dimension=960
-num_queries=1000
+cardinality=53387
+dimension=192
+num_queries=200
 topk=20
+
+# # gist
+# method="ITQ"
+# num_tables=1
+# codelength=16
+# dataset="gist"
+# base_format="fvecs"
+# cardinality=1000000
+# dimension=960
+# num_queries=1000
+# topk=20
 
 # #sift1m
 # method="ITQ"
@@ -81,7 +81,7 @@ query_file="../data/${dataset}/${dataset}_query.fvecs"
 query_bits_file="../learn/${method}/hashingCodeTXT/${method}query${dataset^^}${codelength}b_${num_tables}tb.txt"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
-../build/bin/benchhasher \
+gdb --args ../build/bin/benchhasher \
     --base_format=$base_format \
     --cardinality=$cardinality \
     --dimension=$dimension \

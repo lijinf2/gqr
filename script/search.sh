@@ -10,25 +10,25 @@ if [ "$log" != "" ]; then
 fi
 
 hash_method="ITQ"
-query_method="HR"
+query_method="GQR"
 num_tables=1
-codelength=16
+codelength=18
 
 #audio
 # dataset="audio"
 # base_format="fvecs"
 # cardinality=53387
 # dimension=192
-# num_queries=1000
+# num_queries=200
 # topk=20
 
 # # gist
-dataset="gist"
-base_format="fvecs"
-cardinality=1000000
-dimension=960
-num_queries=1000
-topk=20
+# dataset="gist"
+# base_format="fvecs"
+# cardinality=1000000
+# dimension=960
+# num_queries=1000
+# topk=20
 
 #sift1m
 # dataset="sift1m"
@@ -40,12 +40,12 @@ topk=20
 
 
 # #tiny5m
-# dataset="tiny5m"
-# base_format="fvecs"
-# cardinality=50000000
-# dimension=384
-# num_queries=1000
-# topk=20
+dataset="tiny5m"
+base_format="fvecs"
+cardinality=50000000
+dimension=384
+num_queries=1000
+topk=20
 
 #sift10m
 # dataset="sift10m"

@@ -31,6 +31,12 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <utility>
+#include <unordered_set>
+#include "lshbox/metric.h"
+using std::unordered_set;
+using std::pair;
+using std::vector;
 namespace lshbox
 {
 /**
@@ -179,6 +185,7 @@ private:
     unsigned K;
     MaxHeap<std::pair<float, unsigned> > heap;
     std::vector<std::pair<float, unsigned> > tops;
+    unordered_set<unsigned> ivecs;
 public:
     Topk(): K(0) {}
     /**
@@ -221,7 +228,12 @@ public:
         {
             curHeap.deleteMax(this->tops[i]);
         }
-        std::reverse(tops.begin(), tops.end());
+        std::reverse(this->tops.begin(), this->tops.end());
+
+        this->ivecs.clear();
+        for (const auto& p : this->tops) {
+            this->ivecs.insert(p.second);
+        }
     }
     /**
      * Get the std::vector<std::pair<float, unsigned> > instance which contains the nearest keys and distances.
@@ -247,20 +259,15 @@ public:
         const std::vector<std::pair<float, unsigned> >& benchTops = bench.getTopk();
 
         unsigned matched = 0;
-        int ith = 0;
-        for (int j = 0; j < benchTops.size(); ++j) {
-            if (ith >= this->tops.size()) {
-                break;
-            } 
-            if (this->tops[ith].second == benchTops[j].second
-                    || this->tops[ith].first < 0.00001) {
-                ith++;
+        std::vector<std::pair<float, unsigned> >::const_iterator it = benchTops.begin();
+        while(it != benchTops.end()) {
+            if (this->ivecs.find(it->second) != this->ivecs.end()) {
                 matched++;
             }
+            ++it;
         }
 
-        float result = (float) matched / (float) benchTops.size();
-        return result;
+        return (float) matched / (float) benchTops.size();
     }
 
     // return -1 if no candidates are found
@@ -271,8 +278,8 @@ public:
 
         float error = 0;
         // handle exception of errors
-        assert (tops.size() <= benchTops.size());
-        for (int i = 0; i < tops.size(); ++i) {
+        int size = std::min(tops.size(), benchTops.size());
+        for (int i = 0; i < size; ++i) {
             if (benchTops[i].first < 0.00001) {
                 // if exactly the same vectors, must fetched
                 assert(tops[i].first < 0.00001);
@@ -281,7 +288,7 @@ public:
                 error += tops[i].first / benchTops[i].first;
             }
         }
-        return error / tops.size();
+        return error / size;
     }
 };
 
@@ -350,11 +357,21 @@ public:
         if (accessor_.mark(key))
         {
             ++cnt_;
-            topk_.push(key, metric_.dist(query_, accessor_(key)));
+            float dist = metric_.dist(query_, accessor_(key);
+            topk_.push(key, dist));
+            result.push_back(std::make_pair(dist, key));
         }
     }
     unsigned getK() {
         return K_;
+    }
+
+    const vector<pair<float, int>>& getResult() const {
+        return this->result;
+    }
+
+    void reserveResult(int size) {
+        this->result.reserve(size);
     }
 private:
     ACCESSOR accessor_;
@@ -363,5 +380,7 @@ private:
     Value query_;
     unsigned K_;
     unsigned cnt_;
+
+    vector<pair<float, int>> result;
 };
 }

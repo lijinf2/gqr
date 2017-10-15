@@ -35,6 +35,7 @@
 #include <fstream>
 #include <algorithm>
 #include <functional>
+#include "lshbox/topk.h"
 namespace lshbox
 {
 /**

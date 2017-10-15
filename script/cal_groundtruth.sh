@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
 fi
 mkdir groundtruth
 
-dataset="sift1m"
+dataset="tiny5m"
 topk=20
 numThreads=20;
 

@@ -6,6 +6,7 @@ SET(APPS
     hasher
     benchhasher
     search
+    opq_evaluate
 )
 
 FOREACH(APP ${APPS})

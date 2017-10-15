@@ -3,6 +3,7 @@
 #include <lshbox/query/losslookup.h>
 #include <string>
 #include <unordered_map>
+#include "apps/opq_evaluate.cpp"
 
 using std::string;
 using std::unordered_map;
@@ -17,8 +18,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     std::cout << "probed items, " << "overall query time, " 
         << "avg recall, " << "avg error ratio" <<"\n";
 
+    double runtime = 0;
     lshbox::timer timer;
-    timer.restart();
     int numAllItems = data.getSize();
     for (unsigned numItems = 1; true ; numItems *= 2) { //  # of probed items must be the power of two
         if (numItems > numAllItems) 
@@ -28,19 +29,26 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         // // numItems = 16;
         // numAllItems = numItems;
 
-        lshbox::Stat recall, error;
-        // for (unsigned i = 0; i != bench.getQ(); ++i)
-        for (unsigned i = 0; i != numQueries; ++i)
-        {
-            // queries are applied incrementally, i.e. the result of this round depends on the last round
+        timer.restart();
+        // queries are applied incrementally, i.e. the result of this round depends on the last round
+        for (unsigned i = 0; i != numQueries; ++i) {
             mylsh.KItemByProber(query[bench.getQuery(i)], probers[i], numItems);
-
-            // collect accuracy information
-            setStat(probers[i].getScanner(), bench.getAnswer(i), recall, error);
         }
-        double retTime = timer.elapsed();
-        std::cout << numItems << ", " << retTime <<", "
+        double roundTime= timer.elapsed();
+        runtime += roundTime;
+
+        // collect accuracy information
+        lshbox::Stat recall, error;
+        vector<vector<pair<float, int>>& results;
+        results.reserve(numQueries);
+
+        // for (unsigned i = 0; i != numQueries; ++i) {
+        //     setStat(probers[i].getScanner(), bench.getAnswer(i), recall, error);
+        // }
+        
+        std::cout << numItems << ", " << runtime <<", "
             << recall.getAvg() << ", " << error.getAvg() << "\n";
+
         if (numItems == numAllItems)
             break;
     }
