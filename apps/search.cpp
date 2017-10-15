@@ -114,5 +114,8 @@ int main(int argc, const char **argv)
         lshbox::PCAMD<DATATYPE> pcamd;
         pcamd.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, pcamd, bench, params);
+    } else {
+        cout << "parameters are not corrected, please double check and give correct parameters" << endl;
+        return -1;
     }
 }

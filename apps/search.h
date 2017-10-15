@@ -33,10 +33,6 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         // // numItems = 16;
         // numAllItems = numItems;
 
-        for (unsigned i = 0; i != numQueries; ++i) {
-            probers[i].getScanner().opqReserve(2* numItems);
-        }
-
         timer.restart();
         // queries are applied incrementally, i.e. the result of this round depends on the last round
         for (unsigned i = 0; i != numQueries; ++i) {
@@ -44,22 +40,20 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         }
         double roundTime= timer.elapsed();
         runtime += roundTime;
-
-        // // collect accuracy information
-        // lshbox::Stat recall, error;
-        // for (unsigned i = 0; i != numQueries; ++i) {
-        //     setStat(probers[i].getScanner(), bench.getAnswer(i), recall, error);
-        // }
-        // std::cout << numItems << ", " << runtime / numQueries <<", "
-        //     << recall.getAvg() << ", " << error.getAvg() << "\n";
         
-        vector<vector<pair<float, int>>> results;
-        results.reserve(numQueries);
+        vector<vector<pair<unsigned, float>>> benchResult;
+        benchResult.reserve(numQueries);
         for (unsigned i = 0; i != numQueries; ++i) {
-            results.push_back(probers[i].getScanner().getOpqResult());
+            const vector<pair<float, unsigned>>& src = probers[i].getScanner().getMutableTopk().genTopk(); 
+            vector<pair<unsigned, float>> dst(src.size()); 
+            for (int j = 0; j < src.size(); ++j) {
+                dst[j].first = src[j].second;
+                dst[j].second = src[j].first;
+            }
+            benchResult.emplace_back(dst);
         }
-        std::cout << numItems << ", " << runtime / numQueries <<", "
-            << cal_opq_avg_recall(opqBencher, results) << ", " << cal_opq_avg_error(opqBencher, results) << "\n";
+        std::cout << numItems << ", " << runtime <<", "
+            << cal_avg_recall(opqBencher, benchResult, true) << ", " << cal_avg_error(opqBencher, benchResult, true) << "\n";
 
 
         if (numItems == numAllItems)

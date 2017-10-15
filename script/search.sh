@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="PCHA"
+hash_method="IsoH"
 query_method="GQR"
 num_tables=1
 codelength=18
@@ -40,12 +40,12 @@ codelength=18
 
 
 # #tiny5m
-dataset="tiny5m"
-base_format="fvecs"
-cardinality=50000000
-dimension=384
-num_queries=1000
-topk=20
+# dataset="tiny5m"
+# base_format="fvecs"
+# cardinality=50000000
+# dimension=384
+# num_queries=1000
+# topk=20
 
 #sift10m
 # dataset="sift10m"
@@ -56,12 +56,12 @@ topk=20
 # topk=20
 
 # #glove2.2m
-# dataset="glove2.2m"
-# base_format="fvecs"
-# cardinality=2196017
-# dimension=300
-# num_queries=1000
-# topk=20
+dataset="glove2.2m"
+base_format="fvecs"
+cardinality=2196017
+dimension=300
+num_queries=1000
+topk=20
 #
 # deep1m
 # dataset="deep1M"
