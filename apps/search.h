@@ -4,11 +4,15 @@
 #include <string>
 #include <unordered_map>
 #include "apps/opq_evaluate.cpp"
+#include "lshbox/bench/bencher.h"
 
 using std::string;
 using std::unordered_map;
 template<typename DATATYPE, typename LSHTYPE, typename PROBERTYPE>
 void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYPE>& query, LSHTYPE& mylsh, const lshbox::Benchmark& bench, PROBERTYPE* probers, const unordered_map<string, string>& params) {
+    string benchFile = params.find("benchmark_file")->second; 
+    Bencher opqBencher(benchFile.c_str());
+
     int numQueries = bench.getQ();
     auto it =  params.find("num_queries");
     if (it != params.end()) {
@@ -29,6 +33,10 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         // // numItems = 16;
         // numAllItems = numItems;
 
+        for (unsigned i = 0; i != numQueries; ++i) {
+            probers[i].getScanner().opqReserve(2* numItems);
+        }
+
         timer.restart();
         // queries are applied incrementally, i.e. the result of this round depends on the last round
         for (unsigned i = 0; i != numQueries; ++i) {
@@ -37,17 +45,22 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         double roundTime= timer.elapsed();
         runtime += roundTime;
 
-        // collect accuracy information
-        lshbox::Stat recall, error;
-        vector<vector<pair<float, int>>& results;
-        results.reserve(numQueries);
-
+        // // collect accuracy information
+        // lshbox::Stat recall, error;
         // for (unsigned i = 0; i != numQueries; ++i) {
         //     setStat(probers[i].getScanner(), bench.getAnswer(i), recall, error);
         // }
+        // std::cout << numItems << ", " << runtime / numQueries <<", "
+        //     << recall.getAvg() << ", " << error.getAvg() << "\n";
         
-        std::cout << numItems << ", " << runtime <<", "
-            << recall.getAvg() << ", " << error.getAvg() << "\n";
+        vector<vector<pair<float, int>>> results;
+        results.reserve(numQueries);
+        for (unsigned i = 0; i != numQueries; ++i) {
+            results.push_back(probers[i].getScanner().getOpqResult());
+        }
+        std::cout << numItems << ", " << runtime / numQueries <<", "
+            << cal_opq_avg_recall(opqBencher, results) << ", " << cal_opq_avg_error(opqBencher, results) << "\n";
+
 
         if (numItems == numAllItems)
             break;

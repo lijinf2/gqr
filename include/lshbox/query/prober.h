@@ -22,7 +22,7 @@ public:
         totalItems_ = mylsh.getBaseSize();
     }
 
-    const lshbox::Scanner<ACCESSOR>& getScanner(){
+    lshbox::Scanner<ACCESSOR>& getScanner(){
         return scanner_;
     }
 

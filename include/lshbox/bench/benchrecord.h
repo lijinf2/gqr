@@ -7,17 +7,36 @@ using std::pair;
 using std::unordered_set;
 class BenchRecord {
 public:
-    BenchRecord(unsigned qId){
-        this->queryId = qId;
-    }
     
-    void add(unsigned nbid, float dist) {
-        this->knn.push_back(std::make_pair(nbid, dist));
-        this->knnIvecs.insert(nbid);
+    BenchRecord(unsigned qId, const vector<pair<unsigned, float>>& nbs, bool sorted = false){
+        // initialized queryId
+        this->queryId = qId;
+
+        // initialized knn
+        if (sorted) {
+            this->knn = nbs;
+        } else {
+            std::sort(this->knn.begin(), this->knn.end(),
+                [](const pair<unsigned, float>& a, const pair<unsigned, float>& b) {
+                    if (fabs(a.second - b.second) > 0.000001)
+                        return a.second < b.second;
+                    else 
+                        return a.first < b.first;
+                });
+            this->knn = nbs;
+        }
+
+        // initialized knnIvecs
+        this->knnIvecs.reserve(this->knn.size());
+        for (const auto& p : this->knn) {
+            this->knnIvecs.insert(p.first);
+        }
     }
 
-    void reserve(unsigned size) {
-        this->knn.reserve(size);
+    void push_back(unsigned nbid, float dist) {
+        assert(dist >= this->knn.back().second);
+        this->knn.push_back(std::make_pair(nbid, dist));
+        this->knnIvecs.insert(nbid);
     }
 
     unsigned getId() const {
@@ -39,6 +58,11 @@ public:
     float error(const BenchRecord& other) const {
         return error(other.getId(), other.getKNN());
     }
+
+private:
+    unsigned queryId;
+    vector<pair<unsigned, float>> knn;
+    unordered_set<unsigned> knnIvecs;
 
     float recall(unsigned qId, const vector<pair<unsigned, float>>& givenKNN) const {
         assert(this->queryId == qId);
@@ -71,15 +95,15 @@ public:
         int idxGiven = 0;
         int count = 0;
         while(idx < size && idxGiven < size) {
-            if (this->knn[idx].second < 0.0001 && givenKNN[idxGiven].second > 0.0001) {
+            if (this->knn[idx].second == 0 && givenKNN[idxGiven].second > 0.000001) {
                 idx++;
                 continue;
             }
-            if (this->knn[idx].second > 0.0001 && givenKNN[idxGiven].second < 0.0001) {
+            if (this->knn[idx].second > 0.000001 && givenKNN[idxGiven].second < 0.000001) {
                 assert(false);
             }
 
-            if (this->knn[idx].second < 0.0001 && givenKNN[idxGiven].second < 0.0001) {
+            if (this->knn[idx].second < 0.000001 && givenKNN[idxGiven].second < 0.000001) {
                 error += 1;
             } else {
                 float thisError = givenKNN[idxGiven].second / this->knn[idx].second;
@@ -94,9 +118,5 @@ public:
         if (count == 0) return -1;
         else return error / count;
     }
-private:
-    unsigned queryId;
-    vector<pair<unsigned, float>> knn;
-    unordered_set<unsigned> knnIvecs;
 };
 

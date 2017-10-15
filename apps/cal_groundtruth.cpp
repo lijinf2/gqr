@@ -20,7 +20,10 @@ class IdAndDstPair {
 class MaxHeapCMP{
     public:
         bool operator()(const IdAndDstPair& a, const IdAndDstPair& b) {
-            return a.distance < b.distance;
+            if (fabs(a.distance - b.distance) > 0.000001)
+                return a.distance < b.distance;
+            else 
+                return a.id < b.id;
         }
 };
 
@@ -47,13 +50,7 @@ class TopK {
                 results.push_back(heap.top());
                 heap.pop();
             }
-            std::sort(results.begin(), results.end()
-                , [](const IdAndDstPair& a, IdAndDstPair& b) {
-                    if (fabs(a.distance - b.distance) > 0.00001)
-                        return a.distance < b.distance;
-                    else 
-                        return a.id < b.id;
-                });
+            std::sort(results.begin(), results.end(), MaxHeapCMP());
             return results;
         }
     private:

@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
 #include <utility>
 #include "benchrecord.h"
 using std::vector;
@@ -29,51 +30,28 @@ public:
         nns.reserve(numQueries);
 
         unsigned qid;
-        unsigned nbid;
-        float dist;
         for (int i = 0; i < numQueries; ++i) {
             fin >> qid;
-            BenchRecord record(qid);
-            record.reserve(K);
+
+            vector<pair<unsigned, float>> record;
+            record.resize(K);
             for (int j = 0; j < K; ++j) {
-                fin >> nbid >> dist;
-                record.add(nbid, dist);
+                fin >> record[j].first >> record[j].second;
             }
-            nns.emplace_back(record);
+            nns.emplace_back(BenchRecord(qid, record, true));
         }
         fin.close();
     }
 
-    Bencher (const vector<vector<pair<unsigned, float>>>& source) {
+    Bencher (const vector<vector<pair<unsigned, float>>>& source, bool isSorted = false) {
         int numQueries = source.size();
         nns.reserve(numQueries);
 
         unsigned qid;
-        unsigned nbid;
-        float dist;
         for (int i = 0; i < numQueries; ++i) {
-            auto src = source[i];
             qid = i;
-            BenchRecord record(qid);
-
-            // sort record by float
-            std::sort(src.begin(), src.end()
-                , [](const pair<unsigned, float>&a, const pair<unsigned, float>&b ) {
-                    return a.second < b.second;
-                });
-
-            int K = src.size();
-            for (int idx = 0; idx < K; ++idx) {
-                nbid =  src[idx].first;
-                dist = src[idx].second;
-                record.add(nbid, dist);
-            }
-            nns.emplace_back(record);
+            nns.emplace_back(BenchRecord(qid, source[i], isSorted));
         }
-    }
-
-    const BenchRecord& getRecord(unsigned qId) const {
-        return this->nns[qId];
     }
 
     unsigned size() const {
@@ -81,21 +59,24 @@ public:
     }
 
     float avg_recall(const Bencher& given) const {
-        assert(this->nns.size() == given.size());
+        assert(this->size() >= given.size());
 
+        unsigned size = std::min(this->size(), given.size());
         float sumRecall = 0;
-        for (int i = 0; i < this->nns.size(); ++i) {
+        for (int i = 0; i < size; ++i) {
             const BenchRecord& givenRecord = given.getRecord(i);
             sumRecall += this->nns[i].recall(givenRecord);
         }
-        return sumRecall / this->nns.size();
+        return sumRecall / size;
     }
 
     float avg_error(const Bencher& given) const {
-        assert(this->nns.size() == given.size());
+        assert(this->size() >= given.size());
         float sumError = 0;
         int count = 0;
-        for (int i = 0; i < this->nns.size(); ++i) {
+
+        int size = std::min(this->size(), given.size());
+        for (int i = 0; i < size; ++i) {
             const BenchRecord& givenRecord = given.getRecord(i);;
             float er = this->nns[i].error(givenRecord);
             if (er >= 1){ 
@@ -108,4 +89,8 @@ public:
     }
 private:
     vector<BenchRecord> nns;
+    const BenchRecord& getRecord(unsigned qId) const {
+        return this->nns[qId];
+    }
+
 };

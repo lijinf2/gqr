@@ -8,6 +8,9 @@ using namespace std;
 using std::vector;
 using std::pair;
 
+/*
+ * queryId, dist^2
+ * */
 Bencher opq_to_bencher(const vector<vector<pair<float, int>>>& result) {
     vector<vector<pair<unsigned, float>>> target;
     for (int i = 0; i < result.size(); ++i) {
@@ -29,9 +32,9 @@ Bencher opq_to_bencher(const vector<vector<pair<float, int>>>& result) {
                     return a.first < b.first; 
             });
 
-        target.push_back(dst);
+        target.emplace_back(dst);
     }
-    return Bencher(target);
+    return Bencher(target, true);
 }
 
 

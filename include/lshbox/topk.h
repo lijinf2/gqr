@@ -357,21 +357,28 @@ public:
         if (accessor_.mark(key))
         {
             ++cnt_;
-            float dist = metric_.dist(query_, accessor_(key);
-            topk_.push(key, dist));
-            result.push_back(std::make_pair(dist, key));
+            // float dist = metric_.dist(query_, accessor_(key));
+            // topk_.push(key, dist);
+
+            float distPower = 0;
+            for (int i = 0; i < metric_.dim(); ++i) {
+                distPower +=
+                    (query_[i] - accessor_(key)[i]) *
+                    (query_[i] - accessor_(key)[i]); 
+            }
+            this->opqResult.emplace_back(std::make_pair(distPower, key));
         }
     }
     unsigned getK() {
         return K_;
     }
 
-    const vector<pair<float, int>>& getResult() const {
-        return this->result;
+    const vector<pair<float, int>>& getOpqResult() const {
+        return this->opqResult;
     }
 
-    void reserveResult(int size) {
-        this->result.reserve(size);
+    void opqReserve(int size) {
+        this->opqResult.reserve(size);
     }
 private:
     ACCESSOR accessor_;
@@ -381,6 +388,6 @@ private:
     unsigned K_;
     unsigned cnt_;
 
-    vector<pair<float, int>> result;
+    vector<pair<float, int>> opqResult; // L2_DIST^2
 };
 }
