@@ -12,7 +12,15 @@ fi
 hash_method="IsoH"
 query_method="GQR"
 num_tables=1
-codelength=18
+codelength=20
+
+#cifar60k
+# dataset="cifar60k"
+# base_format="fvecs"
+# cardinality=60000
+# dimension=512
+# num_queries=1000
+# topk=20
 
 #audio
 # dataset="audio"
@@ -48,20 +56,20 @@ codelength=18
 # topk=20
 
 #sift10m
-# dataset="sift10m"
-# base_format="fvecs"
-# cardinality=10000000
-# dimension=128
-# num_queries=1000
-# topk=20
-
-# #glove2.2m
-dataset="glove2.2m"
+dataset="sift10m"
 base_format="fvecs"
-cardinality=2196017
-dimension=300
+cardinality=10000000
+dimension=128
 num_queries=1000
 topk=20
+
+# #glove2.2m
+# dataset="glove2.2m"
+# base_format="fvecs"
+# cardinality=2196017
+# dimension=300
+# num_queries=1000
+# topk=20
 #
 # deep1m
 # dataset="deep1M"
