@@ -1,6 +1,7 @@
 #include <lshbox.h>
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/losslookup.h>
+#include <lshbox/query/hashlookupPP.h>
 #include <string>
 #include <unordered_map>
 #include "apps/opq_evaluate.cpp"
@@ -33,6 +34,9 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         // // numItems = 16;
         // numAllItems = numItems;
 
+        // for (unsigned i = 0; i != numQueries; ++i) {
+        //     probers[i].getScanner().opqReserve(numItems); 
+        // }
         timer.restart();
         // queries are applied incrementally, i.e. the result of this round depends on the last round
         for (unsigned i = 0; i != numQueries; ++i) {
@@ -44,6 +48,7 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         vector<vector<pair<unsigned, float>>> benchResult;
         benchResult.reserve(numQueries);
         for (unsigned i = 0; i != numQueries; ++i) {
+            // const vector<pair<float, unsigned>>& src = probers[i].getScanner().getOpqResult(); 
             const vector<pair<float, unsigned>>& src = probers[i].getScanner().getMutableTopk().genTopk(); 
             vector<pair<unsigned, float>> dst(src.size()); 
             for (int j = 0; j < src.size(); ++j) {
@@ -119,6 +124,32 @@ void search_hr(
     }
     annQuery(data, query, mylsh, bench, probers, params);
 }
+
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_ghr(
+    const lshbox::Matrix<DATATYPE>& data,
+    const lshbox::Matrix<DATATYPE>& query,
+    LSHTYPE& mylsh,
+    const lshbox::Benchmark& bench,
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
+
+    typedef HashLookupPP<typename lshbox::Matrix<DATATYPE>::Accessor> GHRT;
+    FV fvs(mylsh.getCodeLength());
+
+    void* raw_memory = operator new[]( 
+        sizeof(GHRT) * bench.getQ());
+    GHRT * probers = static_cast<GHRT*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) GHRT(
+            query[bench.getQuery(i)],
+            initScanner,
+            mylsh,
+            &fvs);// for non losslookup probers
+    }
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
 template<typename DATATYPE, typename LSHTYPE>
 void search(
     string method,
@@ -141,6 +172,8 @@ void search(
         search_gqr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "HR") {
         search_hr(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "GHR" || method == "HL") {
+        search_ghr(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);

@@ -348,6 +348,11 @@ public:
         return this->topk_;
     }
 
+    unsigned getK() {
+        return K_;
+    }
+
+
     /**
      * Update the current query by scanning key, this is normally invoked by the LSH
      * index structure.
@@ -357,25 +362,25 @@ public:
         if (accessor_.mark(key))
         {
             ++cnt_;
+
             topk_.push(key, metric_.dist(query_, accessor_(key)));
 
-            // float distPower = 0;
-            // for (int i = 0; i < metric_.dim(); ++i) {
-            //     distPower +=
-            //         (query_[i] - accessor_(key)[i]) *
-            //         (query_[i] - accessor_(key)[i]); 
-            // }
-            // this->opqResult.emplace_back(std::make_pair(distPower, key));
+            // float dist = metric_.dist(query_, accessor_(key));
+            // this->opqResult.emplace_back(std::make_pair(dist, key));
         }
     }
-    unsigned getK() {
-        return K_;
-    }
 
-    // const vector<pair<float, int>>& getOpqResult() const {
+    // const vector<pair<float, unsigned>>& getOpqResult() {
+    //     std::sort(this->opqResult.begin(), this->opqResult.end()
+    //         , [](const pair<float, unsigned>& a, const pair<float, unsigned>&b) {
+    //             if (fabs(a.first - b.first) > 0.000001)
+    //                 return a.first < b.first;
+    //             else 
+    //                 return a.second < b.second;
+    //         });
     //     return this->opqResult;
     // }
-    //
+
     // void opqReserve(int size) {
     //     this->opqResult.reserve(size);
     // }
@@ -387,6 +392,6 @@ private:
     unsigned K_;
     unsigned cnt_;
 
-    // vector<pair<float, int>> opqResult; // L2_DIST^2
+    // vector<pair<float, unsigned>> opqResult;
 };
 }
