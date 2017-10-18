@@ -9,10 +9,58 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="IsoH"
-query_method="GQR"
+hash_method="PCAH"
+query_method="GHR"
 num_tables=1
-codelength=20
+codelength=16
+
+#msong 
+dataset="msong"
+base_format="fvecs"
+cardinality=994185
+dimension=420
+num_queries=1000
+topk=20
+
+#glove1.2m
+# dataset="glove1.2m"
+# base_format="fvecs"
+# cardinality=1193514
+# dimension=200
+# num_queries=1000
+# topk=20
+
+# #imagenet
+# dataset="imagenet"
+# base_format="fvecs"
+# cardinality=2340373
+# dimension=150
+# num_queries=200
+# topk=20
+
+#nuswide
+# dataset="nuswide"
+# base_format="fvecs"
+# cardinality=268643
+# dimension=500
+# num_queries=200
+# topk=20
+
+#ukbench
+dataset="ukbench"
+base_format="fvecs"
+cardinality=1097907
+dimension=128
+num_queries=200
+topk=20
+
+#enron
+# dataset="enron"
+# base_format="fvecs"
+# cardinality=94987
+# dimension=1369
+# num_queries=200
+# topk=20
 
 #cifar60k
 # dataset="cifar60k"
@@ -30,7 +78,7 @@ codelength=20
 # num_queries=200
 # topk=20
 
-# # gist
+# # # gist
 # dataset="gist"
 # base_format="fvecs"
 # cardinality=1000000
@@ -56,12 +104,12 @@ codelength=20
 # topk=20
 
 #sift10m
-dataset="sift10m"
-base_format="fvecs"
-cardinality=10000000
-dimension=128
-num_queries=1000
-topk=20
+# dataset="sift10m"
+# base_format="fvecs"
+# cardinality=10000000
+# dimension=128
+# num_queries=1000
+# topk=20
 
 # #glove2.2m
 # dataset="glove2.2m"

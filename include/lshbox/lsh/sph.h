@@ -42,7 +42,7 @@ vector<float> SpH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
         for (unsigned idx = 0; idx < pivots[k][i].size(); ++idx) {
             hashFloats[i] += (pivots[k][i][idx] - domin[idx]) * (pivots[k][i][idx] - domin[idx]);
         }
-        hashFloats[i] = sqrt(hashFloats[i]);
+        // hashFloats[i] = sqrt(hashFloats[i]);
     }
 
     for (int i = 0; i < hashFloats.size(); ++i) {

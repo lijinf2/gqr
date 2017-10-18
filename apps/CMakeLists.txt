@@ -4,6 +4,7 @@ SET(APPS
     sample_queries
     cal_groundtruth
     bin_to_fvecs
+    doublebin_to_fvecs
     hasher
     benchhasher
     search

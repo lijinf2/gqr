@@ -1,10 +1,11 @@
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
+#include <limits>
 using namespace std;
 int main(int argc, char** argv) {
     if (argc <= 1) {
-        cout << "Usage: bin_to_fvecs binary_file_path output_fvecs_file_path dimension" << endl;
+        cout << "Usage: doublebin_to_fvecs binary_file_path output_fvecs_file_path dimension" << endl;
         return -1;
     }
     const char* binaryPath = argv[1];
@@ -23,10 +24,14 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    char* buffer = new char[sizeof(float) * dimension];
-    while(fin.read(buffer, sizeof(float) * dimension)) {
-        fout.write((char*)&dimension, sizeof(int));
-        fout.write(buffer, sizeof(float) * dimension);
+    double* buffer = new double[dimension];
+    float floatWord;
+    while(fin.read((char*)buffer, sizeof(double) * dimension)) {
+        fout.write((char*)(&dimension), sizeof(int));
+        for(int i = 0; i < dimension; ++i) {
+            floatWord = (float) buffer[i];
+            fout.write((char*)(&floatWord), sizeof(float));
+        }
     }
 
     fin.close();

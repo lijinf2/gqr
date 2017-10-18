@@ -14,7 +14,7 @@ numThreads=20;
 
 iter=0
 # for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "cifar60k"
+for dataset in "msong"
 do
     iter=`expr $iter + 1`
 
