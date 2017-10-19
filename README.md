@@ -36,12 +36,14 @@ Configurations are integrated into **search.sh** in the **script** folder to fac
 * hash_method  
   - PCAH   - PCA hashing
   - ITQ    - Iterative Quantization
+  - KMH    - K-means Hashing
   
 * query_method   
   - GQR    - Generate-to-probe Quantization Ranking   
   - GHR/HL - Generate-to-probe Hamming Ranking    
   - QR     - Quantization Ranking  
   - HR     - Hamming Ranking
+  - MIH    - Multi-index Hashing
   
 * codelength    
   - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally verify that the above settings is almost optimal.
