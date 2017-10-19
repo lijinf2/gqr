@@ -1,3 +1,8 @@
+audio_base = LoadVecsFile('/path/to/data/audio_base.fvecs')';
+[centers_table, R, sample_mean, codeXtrainingKMH] = my_demo(double(audio_base), 16, 1, false);
+serialization('hashingCodeTXT/', 'AUDIO', codeXtrainingKMH, 1, centers_table, R, sample_mean);
+clear audio_base;
+
 cifar60k_base = LoadVecsFile('/path/to/data/cifar60k_base.fvecs')';
 [centers_table, R, sample_mean, codeXtrainingKMH] = my_demo(double(cifar60k_base), 8, 1, false);
 serialization('hashingCodeTXT/', 'CIFAR60K', codeXtrainingKMH, 1, centers_table, R, sample_mean);
