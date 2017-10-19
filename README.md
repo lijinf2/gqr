@@ -7,6 +7,8 @@ GQR
 - CMake
 - Matlab
 
+Please use the command "git clone --recursive" to include the submodules
+
 # Run
 - cd learn/PCAH 
 - mkdir hashingCodeTXT && matlab < pcah.m
