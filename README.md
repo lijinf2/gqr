@@ -59,5 +59,7 @@ Configurations are integrated into **search.sh** in the **script** folder to fac
   - hash functions learned from dataset using hash_method mentioned above.
   
 # Experiments
-
   
+
+# Acknowledgement
+GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 

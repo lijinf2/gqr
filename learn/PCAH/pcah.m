@@ -2,10 +2,11 @@ addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
 dataset = 'audio';
-method = 'PCAH'
-codelength = 16;            
+codelength = 12;            
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
-    
+
+
+method = 'PCAH'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

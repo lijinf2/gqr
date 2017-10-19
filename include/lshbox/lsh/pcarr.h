@@ -6,7 +6,6 @@
 #include <eigen/Eigen/Dense>
 #include <cmath>
 #include <lshbox/utils.h>
-#include "probing.h"
 #include "hasher.h"
 
 using std::vector;
