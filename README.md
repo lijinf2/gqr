@@ -9,13 +9,19 @@ GQR
 
 # Run
 Step 1: train models, which are stored under folder hashingCodeTXT
+
     cd learn/PCAH
+
     mkdir hashingCodeTXT && matlab < pcah.m
+
     cd ../../
 ```
 Step 2: make app and run 
+
     mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
+
     make search
+
     cd ../script && sh search.sh
 ```
 You can refer to script/readme.txt for detailed explanation of configuration in search.sh.
