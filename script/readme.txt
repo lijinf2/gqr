@@ -13,6 +13,7 @@ cal_groundtruth.sh
 3. Run cal_groundtruth.sh (using base_file & query_file as parameters) to produce benchmark_file
 4. Train model using Matlab code. Do not forget to "mkdir hashingCodeTXT" first, otherwise error would occur.
    Make sure that the parameters in Matlab code is consistent with configuration in search.sh
+   Otherwise you may get "Invalid file identifier" error in MATLAB
 5. Run search.sh
 
 ***************************************************************************************
@@ -46,3 +47,6 @@ topk
 model_file & base_bits_file
     - model learned from dataset using hash_method mentioned above.
     
+
+
+K-Means Hashing requires other scirpts to run, please refer to folder ../learn/KMH/readme.txt for details.
