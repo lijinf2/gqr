@@ -25,7 +25,7 @@ Training:
 Searching:
 
 1. Edit search.sh to set parameters and the dataset to use
-2. Run `./search.sh`
+2. Run `./kmh_search.sh`
 
 Acknowledgement:
 
