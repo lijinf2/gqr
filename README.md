@@ -27,3 +27,6 @@ Please use the command "git clone --recursive" to include the submodules
     GHR/HL - Generate-to-probe Hamming Ranking,
     QR - Quantization Ranking,
     HR - Hamming Ranking.
+
+# Acknowledgement
+GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 
