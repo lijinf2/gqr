@@ -6,6 +6,7 @@
 #include <lshbox/query/fv.h>
 #include <lshbox/query/hammingranking.h>
 #include <lshbox/query/hashlookupPP.h>
+#include <lshbox/query/mih.h>
 #include <lshbox/query/lossranking.h>
 #include <lshbox/utils.h>
 #include <lshbox/lsh/pcah.h>
