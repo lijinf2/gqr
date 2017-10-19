@@ -20,8 +20,8 @@ do
     base_file="../data/${dataset}/${dataset}_base.fvecs"
     query_file="../data/${dataset}/${dataset}_query.fvecs"
 
-    ivecs_bench_file="../data/${dataset}_groundtruth.ivecs"
-    lshbox_bench_file="../data/${dataset}_groundtruth.lshbox"
+    ivecs_bench_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
+    lshbox_bench_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
     ../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $numThreads
 done
