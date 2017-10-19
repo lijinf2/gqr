@@ -8,17 +8,15 @@ GQR
 - Matlab
 
 # Run
-Use the command "git clone --recursive" to include the submodules.
+Step 1: train models, which are stored under folder hashingCodeTXT
+    cd learn/PCAH
+    mkdir hashingCodeTXT && matlab < pcah.m
+    cd ../../
 ```
-git clone --recursive https://github.com/$user/gqr.git
-```
-```
-cd learn/PCAH
-mkdir hashingCodeTXT && matlab < pcah.m
-cd ../../
-mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
-make search
-cd ../script && sh search.sh
+Step 2: make app and run 
+    mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
+    make search
+    cd ../script && sh search.sh
 ```
 You can refer to script/readme.txt for detailed explanation of configuration in search.sh.
   
