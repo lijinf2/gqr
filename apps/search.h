@@ -185,6 +185,51 @@ void search_qr(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_mih(
+    const lshbox::Matrix<DATATYPE>& data,
+    const lshbox::Matrix<DATATYPE>& query,
+    LSHTYPE& mylsh,
+    const lshbox::Benchmark& bench,
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
+
+    typedef unsigned long long BIDTYPE;
+    typedef MIH<typename lshbox::Matrix<DATATYPE>::Accessor> MIH_;
+
+    // Currently only work with single hash table, although it can be extended to support multiple hash tables
+    assert(mylsh.tables.size() == 1);
+
+    // Number of substrings is hardcoded here
+    const unsigned substringNum = 2;
+    unsigned substringLen = mylsh.codelength / substringNum;
+    BIDTYPE mask = (1 << substringLen) - 1;
+
+    std::vector<std::unordered_map<BIDTYPE, std::vector<BIDTYPE> > > subtables(substringNum);
+
+    for (auto item : mylsh.tables[0]) {
+        BIDTYPE bid = item.first;
+        for (int i = substringNum - 1; i >= 0; --i) {
+            BIDTYPE subBID = bid & mask;
+            subtables[i][subBID].push_back(item.first);
+            bid >>= substringLen;
+        }
+    }
+
+    void* raw_memory = operator new[](
+        sizeof(MIH_) * bench.getQ());
+    MIH_* probers = static_cast<MIH_*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) MIH_(
+            query[bench.getQuery(i)],
+            initScanner,
+            mylsh,
+            subtables,
+            substringNum);
+    }
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
 template<typename DATATYPE, typename LSHTYPE>
 void search(
     string method,
@@ -211,6 +256,8 @@ void search(
         search_ghr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "QR") {
         search_qr(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "MIH") {
+        search_mih(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);
