@@ -12,7 +12,15 @@ fi
 hash_method="PCAH"
 query_method="GQR"
 num_tables=1
-codelength=16
+codelength=12
+
+#audio
+dataset="audio"
+base_format="fvecs"
+cardinality=53387
+dimension=192
+num_queries=200
+topk=20
 
 #msong 
 # dataset="msong"
@@ -69,14 +77,6 @@ codelength=16
 # dimension=512
 # num_queries=1000
 # topk=20
-
-#audio
-dataset="audio"
-base_format="fvecs"
-cardinality=53387
-dimension=192
-num_queries=200
-topk=20
 
 # # # gist
 # dataset="gist"
