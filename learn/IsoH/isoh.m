@@ -2,9 +2,9 @@ addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
 % single PCA and multiple rotations
-dataset = 'gist';
+dataset = 'audio';
 method = 'IsoH'
-codelength = 16;
+codelength = 12;
 nHashTable = 1;
 
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

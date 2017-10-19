@@ -2,9 +2,9 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'gist';
+dataset = 'audio';
 method = 'SpH'
-codelength = 16;            
+codelength = 12;            
 nHashTable = 1;
 
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
