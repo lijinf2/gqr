@@ -116,12 +116,18 @@ void search_hr(
     void* raw_memory = operator new[]( 
         sizeof(HRT) * bench.getQ());
     HRT* probers = static_cast<HRT*>(raw_memory);
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
     for (int i = 0; i < bench.getQ(); ++i) {
         new(&probers[i]) HRT(
             query[bench.getQuery(i)],
             initScanner,
             mylsh);// for non losslookup probers
     }
+    construct_time= timer.elapsed();
+    std::cout << "HR constructing time : " << construct_time << "." << std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
@@ -150,6 +156,35 @@ void search_ghr(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_qr(
+    const lshbox::Matrix<DATATYPE>& data,
+    const lshbox::Matrix<DATATYPE>& query,
+    LSHTYPE& mylsh,
+    const lshbox::Benchmark& bench,
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
+
+    typedef LossRanking<typename lshbox::Matrix<DATATYPE>::Accessor> QR;
+
+    void* raw_memory = operator new[]( 
+        sizeof(QR) * bench.getQ());
+    QR* probers = static_cast<QR*>(raw_memory);
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) QR(
+            query[bench.getQuery(i)],
+            initScanner,
+            mylsh);// for non losslookup probers
+    }
+    construct_time= timer.elapsed();
+    std::cout << "QR constructing time : " << construct_time << "." << std::endl;
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
 template<typename DATATYPE, typename LSHTYPE>
 void search(
     string method,
@@ -174,6 +209,8 @@ void search(
         search_hr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "GHR" || method == "HL") {
         search_ghr(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "QR") {
+        search_qr(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);

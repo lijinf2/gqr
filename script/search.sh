@@ -10,7 +10,7 @@ if [ "$log" != "" ]; then
 fi
 
 hash_method="PCAH"
-query_method="GHR"
+query_method="GQR"
 num_tables=1
 codelength=16
 
