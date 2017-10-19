@@ -30,9 +30,6 @@ disp([method,' ',num2str(codelength),'bit ',dataset,' nTable=',num2str(nHashTabl
 disp('==============================');
 
 
-time_train = 0;
-time_test = 0;
-
 [cardinality, dimension] = size(trainset)
 numQueries = size(testset, 1)
 
@@ -96,6 +93,4 @@ fclose(modelFid)
 fclose(baseCodeFid);
 fclose(queryCodeFid);
 disp('==============================');
-disp(['Total training time: ',num2str(time_train)]);
-disp(['Total testing time: ',num2str(time_test)]);
 

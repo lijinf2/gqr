@@ -16,9 +16,6 @@ testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
 trainset = trainset';
 testset = testset';
 
-time_train = 0;
-time_test = 0;            
-
 [cardinality, dimension] = size(trainset)
 numQueries = size(testset, 1)
 
@@ -34,9 +31,6 @@ for j =1:nHashTable
     eval(trainStr);
     eval(testStr);
                     
-    time_train = time_train + train_elapse;
-    time_test = time_test + test_elapse;
-   
     % save model
     for i = 1 : size(model.centers,1);
         fprintf(modelFid,'%f ',model.centers(i,:));
@@ -63,5 +57,3 @@ fclose(modelFid)
 fclose(baseCodeFid);
 fclose(queryCodeFid);
 disp('==============================');
-disp(['Total training time: ',num2str(time_train)]);
-disp(['Total testing time: ',num2str(time_test)]);

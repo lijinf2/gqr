@@ -30,8 +30,6 @@ disp([method,' ',num2str(codelength),'bit ',dataset,' nTable=',num2str(nHashTabl
 disp('==============================');
 
 
-time_train = 0;
-time_test = 0;            
 
 [cardinality, dimension] = size(trainset)
 numQueries = size(testset, 1)
@@ -49,9 +47,6 @@ for j =1:nHashTable
     testStr = ['[testB,test_elapse] = ',method,'_compress(testset, model);'];
     eval(trainStr);
     eval(testStr);
-                    
-    time_train = time_train + train_elapse;
-    time_test = time_test + test_elapse;
    
     % save model
     for i = 1 : size(model.pc, 1);
@@ -75,6 +70,4 @@ fclose(modelFid)
 fclose(baseCodeFid);
 fclose(queryCodeFid);
 disp('==============================');
-disp(['Total training time: ',num2str(time_train)]);
-disp(['Total testing time: ',num2str(time_test)]);
 
