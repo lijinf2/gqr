@@ -10,7 +10,7 @@ GQR
 # Run
 Use the command "git clone --recursive" to include the submodules.
 ```
-git clone --recursive https://github.com/lijinf2/gqr.git
+git clone --recursive https://github.com/$user/gqr.git
 ```
 ```
 cd learn/PCAH

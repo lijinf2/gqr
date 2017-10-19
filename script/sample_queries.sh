@@ -7,12 +7,11 @@ log=`grep error log.txt`
 if [ "$log" != "" ]; then
     exit
 fi
-mkdir sample 
 
 
-dataset="msong"
+dataset="cifar60k"
 num_queries=1000
 base_file="../data/${dataset}/${dataset}_base.fvecs"
-query_file="./sample/${dataset}_query.fvecs"
+query_file="../data/${dataset}_query.fvecs"
 
 ../build/bin/sample_queries $base_file $num_queries $query_file
