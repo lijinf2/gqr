@@ -36,7 +36,6 @@ Configurations are integrated into **search.sh** in the **script** folder to fac
 * hash_method  
   - PCAH   - PCA hashing
   - ITQ    - Iterative Quantization
-  - KMH    - K-means Hashing
   
 * query_method   
   - GQR    - Generate-to-probe Quantization Ranking   
