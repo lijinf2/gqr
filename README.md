@@ -8,6 +8,7 @@ GQR
 - Matlab
 
 # Run
+```
 Step 1: train models, which are stored under folder hashingCodeTXT
 
     cd learn/PCAH
