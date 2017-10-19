@@ -8,23 +8,16 @@ GQR
 - Matlab
 
 # Run
-Download the latest source code of GQR, and use the command "git clone --recursive" to include the submodules.
+Use the command "git clone --recursive" to include the submodules.
 ```
 git clone --recursive https://github.com/lijinf2/gqr.git
 ```
-Create a build directory, and do a out-of-source build using CMake:
 ```
-cd gqr
-mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
-make search   # we will use it later
-```
-Create model file and base-bits file using Matlab:
-```
-cd ../learn/PCAH 
+cd learn/PCAH
 mkdir hashingCodeTXT && matlab < pcah.m
-```
-Run the search program (search.sh contains all the configurations)
-```
+cd ../../
+mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
+make search
 cd ../script && sh search.sh
 ```
 
@@ -58,8 +51,6 @@ Configurations are integrated into **search.sh** in the **script** folder to fac
   
 * model_file & base_bits_file
   - hash functions learned from dataset using hash_method mentioned above.
-  
-# Experiments
   
 
 # Acknowledgement
