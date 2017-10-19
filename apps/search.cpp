@@ -13,7 +13,6 @@
 #include <lshbox/lsh/pcarr.h>
 #include <lshbox/lsh/sph.h>
 #include <lshbox/lsh/isoh.h>
-#include <lshbox/lsh/pcamd.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -110,10 +109,6 @@ int main(int argc, const char **argv)
         lshbox::IsoH<DATATYPE> isoh;
         isoh.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, isoh, bench, params);
-    } else if (hashMethod == "PCAMD") {
-        lshbox::PCAMD<DATATYPE> pcamd;
-        pcamd.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcamd, bench, params);
     } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;
