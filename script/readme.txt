@@ -32,8 +32,7 @@ query_method
     - MIH - Multi-index Hashing
     
 codelength
-    - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally
-    verify that the above settings is almost optimal.
+    - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally verify that the above settings is almost optimal.
 
 base_format
     - For now, fvecs is the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
