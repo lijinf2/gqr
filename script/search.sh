@@ -15,12 +15,12 @@ num_tables=1
 codelength=16
 
 #msong 
-dataset="msong"
-base_format="fvecs"
-cardinality=994185
-dimension=420
-num_queries=1000
-topk=20
+# dataset="msong"
+# base_format="fvecs"
+# cardinality=994185
+# dimension=420
+# num_queries=1000
+# topk=20
 
 #glove1.2m
 # dataset="glove1.2m"
@@ -47,12 +47,12 @@ topk=20
 # topk=20
 
 #ukbench
-dataset="ukbench"
-base_format="fvecs"
-cardinality=1097907
-dimension=128
-num_queries=200
-topk=20
+# dataset="ukbench"
+# base_format="fvecs"
+# cardinality=1097907
+# dimension=128
+# num_queries=200
+# topk=20
 
 #enron
 # dataset="enron"
@@ -71,12 +71,12 @@ topk=20
 # topk=20
 
 #audio
-# dataset="audio"
-# base_format="fvecs"
-# cardinality=53387
-# dimension=192
-# num_queries=200
-# topk=20
+dataset="audio"
+base_format="fvecs"
+cardinality=53387
+dimension=192
+num_queries=200
+topk=20
 
 # # # gist
 # dataset="gist"
