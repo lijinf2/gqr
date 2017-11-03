@@ -1,0 +1,1 @@
+/data/opt/brew/bin/c++    -std=c++11 -lpthread -O3 -DNDEBUG   CMakeFiles/doublebin_to_fvecs.dir/doublebin_to_fvecs.cpp.o  -o ../bin/doublebin_to_fvecs -rdynamic 

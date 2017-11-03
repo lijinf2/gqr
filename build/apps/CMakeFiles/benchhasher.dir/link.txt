@@ -1,0 +1,1 @@
+/data/opt/brew/bin/c++    -std=c++11 -lpthread -O3 -DNDEBUG   CMakeFiles/benchhasher.dir/benchhasher.cpp.o  -o ../bin/benchhasher -rdynamic 

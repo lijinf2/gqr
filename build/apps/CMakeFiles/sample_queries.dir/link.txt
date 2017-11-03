@@ -1,0 +1,1 @@
+/data/opt/brew/bin/c++    -std=c++11 -lpthread -O3 -DNDEBUG   CMakeFiles/sample_queries.dir/sample_queries.cpp.o  -o ../bin/sample_queries -rdynamic 
