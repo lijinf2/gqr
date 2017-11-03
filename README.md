@@ -8,8 +8,13 @@ GQR
 - Matlab
 
 # Run
+-Step 1: clone the repository
 
--Step 1: train models, which are stored under folder hashingCodeTXT
+    git clone --recursive https://github.com/lijinf2/gqr.git
+
+    cd gqr
+
+-Step 2: train models, which are stored under folder hashingCodeTXT
 
     cd learn/PCAH
 
@@ -17,7 +22,7 @@ GQR
 
     cd ../../
 
--Step 2: make app and run 
+-Step 3: make app and run 
 
     mkdir build && cd ./build && cmake ../ -DCMAKE_BUILD_TYPE=Release
 
