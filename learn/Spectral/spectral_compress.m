@@ -1,4 +1,4 @@
-function [B, elapse] = compressSH(X, SHparam)
+function [B, elapse] = spectral__compress(X, SHparam)
 %
 % [B, elapse] = compressSH(X, SHparam)
 %

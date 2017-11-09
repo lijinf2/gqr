@@ -1,4 +1,4 @@
-function [model, B,elapse] = PCAH_learn(A, maxbits)
+function [model, B,elapse] = spectral_learn(A, maxbits)
 %
 % Input
 %   X = features matrix [Nsamples, Nfeatures]
