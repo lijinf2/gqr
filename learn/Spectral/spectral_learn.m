@@ -50,7 +50,7 @@ model.pc = pc;
 model.mn = mn;
 model.mx = mx;
 model.mx = mx;
-model.nbits = maxbits
+model.nbits = nbits
 model.modes = modes;
 
 [B el] = spectral_compress(X, model);
