@@ -53,7 +53,7 @@ model.mx = mx;
 model.nbits = maxbits
 model.modes = modes;
 
-[B, el] = spectral_compress(X, model);
+[B el] = spectral_compress(X, model);
 
 elapse = toc(tmp_T);
 end
