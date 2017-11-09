@@ -16,6 +16,7 @@ nbits = maxbits;
 
 % algo:
 % 1) PCA
+origin_X = X;
 npca = min(nbits, Ndim);
 [pc, l] = eigs(cov(X), npca);
 X = X * pc; % no need to remove the mean
@@ -53,7 +54,7 @@ model.mx = mx;
 model.nbits = maxbits
 model.modes = modes;
 
-[B el] = spectral_compress(X, model);
+[B el] = spectral_compress(origin_X, model);
 
 elapse = toc(tmp_T);
 end
