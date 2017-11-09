@@ -52,7 +52,7 @@ model.mx = mx;
 model.mx = mx;
 model.modes = modes;
 
-[B,U] = compressSH(X, model);
+[B,U] = spectral__compress(X, model);
 
 elapse = toc(tmp_T);
 end
