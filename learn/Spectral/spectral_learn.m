@@ -1,4 +1,4 @@
-function [model, B,elapse] = spectral_learn(A, maxbits)
+function [model, B,elapse] = spectral_learn(X, maxbits)
 %
 % Input
 %   X = features matrix [Nsamples, Nfeatures]
@@ -51,6 +51,8 @@ model.mn = mn;
 model.mx = mx;
 model.mx = mx;
 model.modes = modes;
+
+[B,U] = compressSH(X, model);
 
 elapse = toc(tmp_T);
 end
