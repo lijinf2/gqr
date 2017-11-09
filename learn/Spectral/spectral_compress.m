@@ -21,7 +21,9 @@ tmp_T = tic;
 
 [Nsamples Ndim] = size(X);
 nbits = SHparam.nbits;
-
+disp('==============================');
+disp([' Nsamples ',num2str(Nsamples),' Ndim ',Ndim]);
+disp('==============================');
 X = X*SHparam.pc;
 X = X-repmat(SHparam.mn, [Nsamples 1]);
 omega0=pi./(SHparam.mx-SHparam.mn);
