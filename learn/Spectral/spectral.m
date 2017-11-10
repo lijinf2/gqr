@@ -53,7 +53,7 @@ for j =1:nHashTable
         fprintf(modelFid,'%f ',model.pc(i,:));
         fprintf(modelFid,'\n');
     end
-    for i = 1 : size(model.modes);
+    for i = 1 : size(model.modes, 1);
         fprintf(modelFid,'%f ',model.modes(i,:));
         fprintf(modelFid,'\n');
     end
