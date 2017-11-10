@@ -37,7 +37,8 @@ for i=1:nbits
     U(:,i)=yi;    
 end
 
-B = compactbit(U>0);
+B = (U>0)
+% B = compactbit(U>0);
 elapse = toc(tmp_T);
 
 
