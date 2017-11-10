@@ -155,7 +155,7 @@ void lshbox::spectral<DATATYPE>::loadModel(const string& modelFile, const string
         vector<float >& curMX = this->mx[tableIndex];
 
         curPcs.resize(tableCodelen);
-        modes.resize(tableCodelen);
+        curModes.resize(tableCodelen);
         curMN.resize(tableCodelen);
         curMX.resize(tableCodelen);
 
