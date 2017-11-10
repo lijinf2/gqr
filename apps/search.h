@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include "apps/opq_evaluate.cpp"
 #include "lshbox/bench/bencher.h"
+#include <lshbox/query/mih.h>
 
 using std::string;
 using std::unordered_map;

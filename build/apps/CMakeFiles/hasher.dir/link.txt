@@ -1,1 +1,0 @@
-/data/opt/brew/bin/c++    -std=c++11 -lpthread -O3 -DNDEBUG   CMakeFiles/hasher.dir/hasher.cpp.o  -o ../bin/hasher -rdynamic 
