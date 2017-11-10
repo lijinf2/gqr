@@ -58,7 +58,9 @@ for j =1:nHashTable
         fprintf(modelFid,'\n');
     end
     fprintf(modelFid,'%f ',model.mn);
+    fprintf(modelFid,'\n');
     fprintf(modelFid,'%f ',model.mx);
+    fprintf(modelFid,'\n');
 
 
     % save base codes 
