@@ -60,7 +60,8 @@ vector<float> lshbox::spectral<DATATYPE>::getHashFloats(unsigned k, const DATATY
     {
         for (unsigned j = 0; j != pcsAll[k][i].size(); ++j)
         {
-            domin_pc[i] += (domin[j])* pcsAll[k][i][j];
+		domin_pc[i] += (domin[j] - mean[j] )* pcsAll[k][i][j];
+            //	domin_pc[i] += (domin[j])* pcsAll[k][i][j];
         }
     }
     // X = X-repmat(SHparam.mn, [Nsamples 1]);
@@ -102,7 +103,7 @@ void lshbox::spectral<DATATYPE>::initOmegas() {
 
         for (int row = 0; row < this->nbits; ++row) {
             for (int col = 0; col < this->nbits; ++col) {
-                curOmegas[row][col] = curModes[row][col] - deviation[col];
+                curOmegas[row][col] = curModes[row][col] * deviation[col];
             }
         }
     }
