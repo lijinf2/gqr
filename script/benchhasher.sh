@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ../build 
-cmake ../ -DCMAKE_BUILD_TYPE=Debug
-# cmake ../ -DCMAKE_BUILD_TYPE=Release
+# cmake ../ -DCMAKE_BUILD_TYPE=Debug
+cmake ../ -DCMAKE_BUILD_TYPE=Release
 make benchhasher 2>&1 | tee ../script/log.txt
 cd ../script
 log=`grep error log.txt`
@@ -20,9 +20,9 @@ fi
 # topk=20
 
 # #audio
-method="ITQ"
+method="PCAH"
 num_tables=1
-codelength=16
+codelength=12
 dataset="audio"
 base_format="fvecs"
 cardinality=53387
@@ -81,7 +81,7 @@ query_file="../data/${dataset}/${dataset}_query.fvecs"
 query_bits_file="../learn/${method}/hashingCodeTXT/${method}query${dataset^^}${codelength}b_${num_tables}tb.txt"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
-gdb --args ../build/bin/benchhasher \
+../build/bin/benchhasher \
     --base_format=$base_format \
     --cardinality=$cardinality \
     --dimension=$dimension \
