@@ -15,6 +15,7 @@
 #include <lshbox/lsh/sph.h>
 #include <lshbox/lsh/isoh.h>
 #include <lshbox/lsh/kmh.h>
+#include <lshbox/lsh/spectral.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -115,6 +116,10 @@ int main(int argc, const char **argv)
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mylsh, bench, params);
+    } else if (hashMethod == "spectral") {
+        lshbox::spectral<DATATYPE > spectralHashing;
+        spectralHashing.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, spectralHashing, bench, params);
     } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;

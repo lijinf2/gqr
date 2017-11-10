@@ -53,6 +53,13 @@ for j =1:nHashTable
         fprintf(modelFid,'%f ',model.pc(i,:));
         fprintf(modelFid,'\n');
     end
+    for i = 1 : size(model.modes);
+        fprintf(modelFid,'%f ',model.modes(i,:));
+        fprintf(modelFid,'\n');
+    end
+    fprintf(modelFid,'%f ',model.mn);
+    fprintf(modelFid,'%f ',model.mx);
+
 
     % save base codes 
     for i = 1 : size(trainB,1);
