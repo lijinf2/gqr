@@ -91,8 +91,8 @@ void lshbox::spectral<DATATYPE>::initMegas() {
         vector<vector<float> >& curPcs = this->pcsAll[tableIndex];
         vector<vector<float> >& curModes = this->modes[tableIndex];
         vector<vector<float> >& curOmegas = this->curOmegas[tableIndex];
-        vector<float >& curMN = this->mn(tableIndex);
-        vector<float >& curMX = this->mx(tableIndex);
+        vector<float >& curMN = this->mn[tableIndex];
+        vector<float >& curMX = this->mx[tableIndex];
 
         vector<float > deviation(this->nbits);
 
@@ -151,8 +151,8 @@ void lshbox::spectral<DATATYPE>::loadModel(const string& modelFile, const string
 
         vector<vector<float> >& curPcs = this->pcsAll[tableIndex];
         vector<vector<float> >& curModes = this->modes[tableIndex];
-        vector<float >& curMN = this->mn(tableIndex);
-        vector<float >& curMX = this->mx(tableIndex);
+        vector<float >& curMN = this->mn[tableIndex];
+        vector<float >& curMX = this->mx[tableIndex];
 
         curPcs.resize(tableCodelen);
         modes.resize(tableCodelen);
@@ -181,22 +181,26 @@ void lshbox::spectral<DATATYPE>::loadModel(const string& modelFile, const string
             }
         }
 
-        getline(modelFin, line);
-        istringstream iss(line);
-        for (int cIndex = 0; cIndex < tableCodelen; ++i) {
-            iss >> curMN[cIndex];
+        {
+            getline(modelFin, line);
+            istringstream iss(line);
+            for (int cIndex = 0; cIndex < tableCodelen; ++cIndex) {
+                iss >> curMN[cIndex];
+            }
         }
 
-        getline(modelFin, line);
-        istringstream iss(line);
-        for (int cIndex = 0; cIndex < tableCodelen; ++cIndex) {
-            iss >> curMX[cIndex];
+        {
+            getline(modelFin, line);
+            istringstream iss(line);
+            for (int cIndex = 0; cIndex < tableCodelen; ++cIndex) {
+                iss >> curMX[cIndex];
+            }
         }
 
     }
     modelFin.close();
 
-    this->initOmegas();
+    this->initMegas();
 
     // initialized numTotalItems and tables
     this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen);
