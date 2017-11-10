@@ -46,7 +46,7 @@ namespace lshbox
         vector<vector<vector<float> > > modes;
         int nbits;
 
-        void initOmegas();
+        void initMegas();
     };
 }
 
@@ -83,10 +83,10 @@ vector<float> lshbox::spectral<DATATYPE>::getHashFloats(unsigned k, const DATATY
 }
 
 template<typename DATATYPE>
-void lshbox::spectral<DATATYPE>::initOmegas() {
+void lshbox::spectral<DATATYPE>::initMegas() {
     this->omegas = this->modes;
 
-    for(size_t tableIndex = 0; i<this->omegas.size(); i++) {
+    for(size_t tableIndex = 0; tableIndex<this->omegas.size(); tableIndex++) {
 
         vector<vector<float> >& curPcs = this->pcsAll[tableIndex];
         vector<vector<float> >& curModes = this->modes[tableIndex];
@@ -176,7 +176,7 @@ void lshbox::spectral<DATATYPE>::loadModel(const string& modelFile, const string
         for (int modes = 0; modes < tableCodelen; ++modes) {
             getline(modelFin, line);
             istringstream iss(line);
-            for (int cIndex = 0; cIndex < tableCodelen; ++cIdx) {
+            for (int cIndex = 0; cIndex < tableCodelen; ++cIndex) {
                 iss >> curModes[modes][cIndex];
             }
         }
