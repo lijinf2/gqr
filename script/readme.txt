@@ -18,7 +18,7 @@ cal_groundtruth.sh
 
 ***************************************************************************************
 
-Configurations in search.sh
+## Configurations in search.sh
 
 hash_method
     - PCAH - PCA hashing
@@ -47,5 +47,12 @@ model_file & base_bits_file
     - model learned from dataset using hash_method mentioned above.
     
 
+## More scripts
 
-K-Means Hashing requires other scirpts to run, please refer to folder ../learn/KMH/readme.txt for details.
+### Data transformation
+
+    GQR only takes fvecs as input formats. However, many datasets such as Glove and Tiny have their own format. We provide applications for dataset transformation under folder data_to_fvecs.
+
+### K-Means hashing
+
+    K-Means Hashing requires other scirpts to run, please refer to folder ../learn/KMH/readme.txt for details.
