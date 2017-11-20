@@ -115,7 +115,7 @@ int main(int argc, const char **argv)
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mylsh, bench, params);
-    } else if (hashMethod == "spectral") {
+    } else if (hashMethod == "SH") {
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, spectralHashing, bench, params);

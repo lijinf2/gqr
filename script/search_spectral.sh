@@ -9,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="spectral"
+hash_method="SH"
 query_method="GQR"
 num_tables=1
 codelength=12
