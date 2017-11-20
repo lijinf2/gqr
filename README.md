@@ -31,7 +31,7 @@ GQR
     cd ../script && sh search.sh
 
 ```
-You can refer to script/readme.txt for detailed explanation of configuration in search.sh.
+You may refer to script/readme.txt for detailed explanations and more instructions.
   
 
 # Acknowledgement
