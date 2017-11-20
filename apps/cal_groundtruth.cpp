@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <thread>
+#include <math.h>
 using namespace std;
 class IdAndDstPair {
     public:
@@ -85,7 +86,26 @@ class Query {
 
         void evaluate(const vector<float>& item, int itemId) {
             float distance = calL2Dst(item);
+            //float distance = calCosDst(item);
             topk.insert(IdAndDstPair(itemId, distance));
+        }
+
+        float calCosDst(const vector<float>& item) {
+            float cosDst = 0;
+            assert(this->content.size() == item.size());
+            float qNorm = 0;
+            float iNorm = 0;
+            for (int i = 0; i < this->content.size(); ++i) {
+                qNorm += this->content[i] * this->content[i];
+                iNorm += item[i] * item[i];
+            }
+            qNorm = sqrt(qNorm);
+            iNorm = sqrt(iNorm);
+            for (int i = 0; i < this->content.size(); ++i) {
+                cosDst += this->content[i] * item[i];
+            } 
+            cosDst /= (qNorm * iNorm); 
+            return acos(cosDst);
         }
 
         vector<IdAndDstPair> getTopK() {
