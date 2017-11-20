@@ -1,5 +1,8 @@
 ***************************************************************************************
 
+## Usages
+
+```
 sample_queries.sh
     input: $base_file, $num_queries
     output: $query_file
@@ -7,6 +10,7 @@ sample_queries.sh
 cal_groundtruth.sh
     input: $base_file, $query_file, $topk, $numThreads
     output: $benchmark_file
+```
 
 1. Prepare base_file (fvecs as defined in TEXMEX(http://corpus-texmex.irisa.fr/))
 2. Run sample_queries.sh on base_file to produce query_file
