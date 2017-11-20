@@ -84,6 +84,12 @@ class Query {
             return sqrt(l2Dst);
         }
 
+        void evaluate(const vector<float>& item, int itemId) {
+            float distance = calL2Dst(item);
+            //float distance = calCosDst(item);
+            topk.insert(IdAndDstPair(itemId, distance));
+        }
+
         float calCosDst(const vector<float>& item) {
             float cosDst = 0;
             assert(this->content.size() == item.size());
@@ -95,17 +101,11 @@ class Query {
             }
             qNorm = sqrt(qNorm);
             iNorm = sqrt(iNorm);
-            float combined = qNorm * iNorm;
             for (int i = 0; i < this->content.size(); ++i) {
-                cosDst += this->content[i] * item[i] / combined;
-            }  
+                cosDst += this->content[i] * item[i];
+            } 
+            cosDst /= (qNorm * iNorm); 
             return acos(cosDst);
-        }
-
-        void evaluate(const vector<float>& item, int itemId) {
-            float distance = calL2Dst(item);
-            //float distance = calCosDst(item);
-            topk.insert(IdAndDstPair(itemId, distance));
         }
 
         vector<IdAndDstPair> getTopK() {
