@@ -10,10 +10,12 @@ fi
 
 topk=20
 numThreads=8;
+metric="euclidean"
+# metric="angular"
 
 iter=0
 # for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "cifar60k"
+for dataset in "audio"
 do
     iter=`expr $iter + 1`
 
@@ -22,6 +24,11 @@ do
 
     ivecs_bench_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
     lshbox_bench_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
+    if [ $metric != "euclidean" ]
+    then
+        ivecs_bench_file="../data/${dataset}/${dataset}_${metric}_groundtruth.ivecs"
+        lshbox_bench_file="../data/${dataset}/${dataset}_${metric}_groundtruth.lshbox"
+    fi
 
-    ../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $numThreads
+    ../build/bin/cal_groundtruth $base_file $query_file $topk $lshbox_bench_file $ivecs_bench_file $metric $numThreads
 done

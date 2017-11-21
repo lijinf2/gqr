@@ -2,7 +2,9 @@
 #include <fstream>
 #include <vector>
 #include <queue>
+#include <string>
 #include <algorithm>
+#include <functional>
 #include <cmath>
 #include <thread>
 #include <math.h>
@@ -67,45 +69,51 @@ void test() {
     toker.insert(IdAndDstPair(2, 1.1));
 }
 
+float calEuclideanDist(const vector<float>& query, const vector<float>& item) {
+    float l2Dst = 0;
+    assert(query.size() == item.size());
+    for (int i = 0; i < query.size(); ++i) {
+        l2Dst += (query[i] - item[i]) * (query[i] - item[i]);
+    }
+    return sqrt(l2Dst);
+}
+
+static float calAngularDist(const vector<float>& query, const vector<float>& item) {
+    float cosDst = 0;
+    assert(query.size() == item.size());
+    float qNorm = 0;
+    float iNorm = 0;
+    for (int i = 0; i < query.size(); ++i) {
+        qNorm += query[i] * query[i];
+        iNorm += item[i] * item[i];
+    }
+    qNorm = sqrt(qNorm);
+    iNorm = sqrt(iNorm);
+    for (int i = 0; i < query.size(); ++i) {
+        cosDst += query[i] * item[i];
+    } 
+    cosDst /= (qNorm * iNorm); 
+    return acos(cosDst);
+}
+
 class Query {
     public: 
         vector<float> content;
         TopK topk;
-        Query(const vector<float>& cont, int K) : topk(K){
-            this->content = cont;
-        }
+        std::function<float(const vector<float>&, const vector<float>&)> distor;
 
-        float calL2Dst(const vector<float>& item) {
-            float l2Dst = 0;
-            assert(this->content.size() == item.size());
-            for (int i = 0; i < this->content.size(); ++i) {
-                l2Dst += (this->content[i] - item[i]) * (this->content[i] - item[i]);
-            }
-            return sqrt(l2Dst);
+        Query(const vector<float>& cont, int K, std::function<float(const vector<float>&, const vector<float>&)> functor) : topk(K){
+            this->content = cont;
+            this->distor = functor;
         }
 
         void evaluate(const vector<float>& item, int itemId) {
-            float distance = calL2Dst(item);
-            //float distance = calCosDst(item);
+            float distance;
+            distance = distor(this->content, item);
             topk.insert(IdAndDstPair(itemId, distance));
         }
 
         float calCosDst(const vector<float>& item) {
-            float cosDst = 0;
-            assert(this->content.size() == item.size());
-            float qNorm = 0;
-            float iNorm = 0;
-            for (int i = 0; i < this->content.size(); ++i) {
-                qNorm += this->content[i] * this->content[i];
-                iNorm += item[i] * item[i];
-            }
-            qNorm = sqrt(qNorm);
-            iNorm = sqrt(iNorm);
-            for (int i = 0; i < this->content.size(); ++i) {
-                cosDst += this->content[i] * item[i];
-            } 
-            cosDst /= (qNorm * iNorm); 
-            return acos(cosDst);
         }
 
         vector<IdAndDstPair> getTopK() {
@@ -140,7 +148,7 @@ void updateAll(vector<Query>& queries, const vector<vector<float>>& items, int i
     }
 }
 int main(int argc, char** argv) {
-    if (argc != 6 && argc != 7) {
+    if (argc != 7 && argc != 8) {
         cout << "usage: program base_file.fvecs query_file.fvecs K groundtruth_file.lshbox groundtruth_file.ivecs num_threads=4" << endl;
         return 0;
     }
@@ -150,9 +158,10 @@ int main(int argc, char** argv) {
     int K = std::atoi(argv[3]);
     const char* lshboxBenchFileName = argv[4];
     const char* ivecsBenchFileName = argv[5];
+    string metric = argv[6];
     int numThreads = 4;
-    if (argc >= 7)
-        numThreads = stoi(argv[6]);
+    if (argc >= 8)
+        numThreads = stoi(argv[7]);
 
     int itemBatchSize = 200000;
 
@@ -180,7 +189,13 @@ int main(int argc, char** argv) {
     // vector<Query> queryObjs(queryVecs.size());
     vector<Query> queryObjs;
     for (int i = 0; i < queryVecs.size(); ++i) {
-        queryObjs.push_back(Query(queryVecs[i], K));
+        if (metric == "euclidean") {
+            queryObjs.push_back(Query(queryVecs[i], K, calEuclideanDist));
+        } else if (metric == "angular") {
+            queryObjs.push_back(Query(queryVecs[i], K, calAngularDist));
+        } else {
+            assert(false);
+        }
     }
 
     int itemStartIdx = 0;
