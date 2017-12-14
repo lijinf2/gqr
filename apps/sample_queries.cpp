@@ -44,7 +44,7 @@ int main(int argc, char ** argv) {
             indexFout << queryIdx << " -> " << i << endl;
             queryIdx++;
 
-            fout.write((char*)&dimension, sizeof(int));
+            fout.write((char*)&i, sizeof(int));
             fout.write((char*)data[i], dimension * sizeof(float));
         }
     }
