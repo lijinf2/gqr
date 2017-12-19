@@ -7,6 +7,20 @@ GQR
 - CMake
 - Matlab
 
+# Hashing Algorithms
+- ITQ: Iterative quantization
+- PCAH: PCA Hashing
+- PCARR: PCA hashing with random rotation
+- SH: Spectral Hashing
+- SpH: Spherical Hashing
+- KMH: Kmeans Hashing
+- IsoH: isotropic Hashing
+
+# Query Algorithms
+- HR: Hamming Ranking
+- HL: Hash Lookup
+- GQR: Generate-to-probe quantization ranking
+
 # Run
 -Step 1: clone the repository
 
