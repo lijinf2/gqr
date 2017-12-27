@@ -15,6 +15,7 @@
 #include <lshbox/lsh/isoh.h>
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
+#include <lshbox/lsh/sip.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -119,6 +120,10 @@ int main(int argc, const char **argv)
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, spectralHashing, bench, params);
+    } else if (hashMethod == "SIP") {
+        lshbox::SIPH<DATATYPE > symmetricInnerProduct;
+        symmetricInnerProduct.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, symmetricInnerProduct, bench, params);
     } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;
