@@ -123,7 +123,7 @@ int main(int argc, const char **argv)
     } else if (hashMethod == "SIP") {
         lshbox::SIPH<DATATYPE > symmetricInnerProduct;
         symmetricInnerProduct.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, symmetricInnerProduct, bench, params);
+        search(queryMethod, data, query, symmetricInnerProduct, bench, params, AG_DIST);
     } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;

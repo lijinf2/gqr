@@ -239,10 +239,23 @@ void search(
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params) {
+    
+    search(method, data, query, mylsh, bench, params, L2_DIST)
+}
+
+template<typename DATATYPE, typename LSHTYPE>
+void search(
+    string method,
+    const lshbox::Matrix<DATATYPE>& data,
+    const lshbox::Matrix<DATATYPE>& query,
+    LSHTYPE& mylsh,
+    const lshbox::Benchmark& bench,
+    const unordered_map<string, string>& params,
+    const unsigned TYPE_DIST) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
-    lshbox::Metric<DATATYPE> metric(data.getDim(), L2_DIST);
+    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
     lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
         accessor,
         metric,
