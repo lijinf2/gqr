@@ -103,7 +103,7 @@ public:
                 norm_1 += sqr(vec1[i]);
                 norm_2 += sqr(vec2[i]);
             }
-            return 1 - dist_/std::sqrt(norm_1*norm_2);
+            return acos( dist_ / std::sqrt(norm_1*norm_2) );
         }
         default:
         {
