@@ -21,8 +21,6 @@ trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
 testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);
 
-% add a normlize term for every row
-% [max_norm] = precess(trainset, testset)
 
 if codelength > 128
     disp(['codelenth ',num2str(codelength),' not supported yet!']);

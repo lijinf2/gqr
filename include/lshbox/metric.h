@@ -107,7 +107,7 @@ public:
         }
         default:
         {
-            return -1;
+            assert(false);
         }
         }
     }
