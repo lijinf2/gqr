@@ -81,10 +81,10 @@ void lshbox::SIMH<DATATYPE>::loadModel(const string& modelFile, const string& ba
 
     // mean and pcsAll
     mean.resize(tableDim);
-//    getline(modelFin, line);
-//    istringstream meanIss(line);
+    getline(modelFin, line);
+    istringstream meanIss(line);
     for (int i = 0; i < mean.size(); ++i) {
-        mean[i] = 0.0;
+        meanIss >> mean[i];
     }
 
     this->pcsAll.resize(numTables);

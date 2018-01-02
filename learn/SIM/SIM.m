@@ -15,7 +15,10 @@ modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelengt
 trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
 testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
 trainset = trainset';
+meanTrainset = mean(trainset);
+trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
 testset = testset';
+testset = testset - repmat(meanTrainset, size(testset, 1), 1);
 
 % add a normlize term for every row
 % [max_norm] = precess(trainset, testset)
