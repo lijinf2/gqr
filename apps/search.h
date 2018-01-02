@@ -240,7 +240,7 @@ void search(
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params) {
     
-    search(method, data, query, mylsh, bench, params, L2_DIST)
+    search(method, data, query, mylsh, bench, params, L2_DIST);
 }
 
 template<typename DATATYPE, typename LSHTYPE>
