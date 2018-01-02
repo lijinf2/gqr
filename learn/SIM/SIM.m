@@ -6,7 +6,7 @@ codelength = 12;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 
-method = 'SIP'
+method = 'SIM'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
@@ -21,7 +21,7 @@ testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);
 
 % add a normlize term for every row
-[max_norm] = precess(trainset, testset)
+% [max_norm] = precess(trainset, testset)
 
 if codelength > 128
     disp(['codelenth ',num2str(codelength),' not supported yet!']);

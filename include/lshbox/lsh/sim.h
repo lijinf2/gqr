@@ -22,13 +22,13 @@ namespace lshbox
 
 template<typename DATATYPE = float>
     // symmetric inner product hasher
-class SIPH: public Hasher<DATATYPE>
+class SIMH: public Hasher<DATATYPE>
 {
 public:
 
     typedef typename Hasher<DATATYPE>::BIDTYPE BIDTYPE;
 
-    SIPH() : Hasher<DATATYPE>() {};
+    SIMH() : Hasher<DATATYPE>() {};
 
     vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
 
@@ -43,7 +43,7 @@ private:
 }
 
 template<typename DATATYPE>
-vector<float> lshbox::SIPH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+vector<float> lshbox::SIMH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
 {
     // zero-centered first
     vector<float> domin_pc(pcsAll[k].size());
@@ -58,7 +58,7 @@ vector<float> lshbox::SIPH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::SIPH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::SIMH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
 {
     vector<float> hashFloats = getHashFloats(k, domin);
     vector<bool> hashBits = this->quantization(hashFloats);
@@ -66,7 +66,7 @@ vector<bool> lshbox::SIPH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *dom
 }
 
 template<typename DATATYPE>
-void lshbox::SIPH<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
+void lshbox::SIMH<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
     string line;
     // initialized statistics and model
     ifstream modelFin(modelFile.c_str());
