@@ -75,10 +75,10 @@ int main(int argc, const char **argv)
         }
     }
 
-
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
     }
+    std::cout<<"dist type "<<TYPE_DIST;
     std::cout << std::endl;
     std::cout << std::endl;
     lshbox::timer timer;
