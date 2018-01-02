@@ -240,7 +240,7 @@ void search(
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params,
-    const unsigned TYPE_DIST=L2_DIST) {
+    const unsigned TYPE_DIST) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
