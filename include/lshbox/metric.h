@@ -32,6 +32,7 @@ namespace lshbox
 {
 #define L1_DIST 1
 #define L2_DIST 2
+#define AG_DIST 3    // angular distance
 /**
  * The calculation of square.
  */
@@ -92,9 +93,21 @@ public:
             }
             return std::sqrt(dist_);
         }
+        case AG_DIST:
+        {
+            float norm_1 = 0.0;
+            float norm_2 = 0.0;
+            for (unsigned i = 0; i != dim_; ++i)
+            {
+                dist_ += vec1[i] * vec2[i];
+                norm_1 += sqr(vec1[i]);
+                norm_2 += sqr(vec2[i]);
+            }
+            return acos( dist_ / std::sqrt(norm_1*norm_2) );
+        }
         default:
         {
-            return -1;
+            assert(false);
         }
         }
     }

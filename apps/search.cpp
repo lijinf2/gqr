@@ -15,7 +15,8 @@
 #include <lshbox/lsh/isoh.h>
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
-#include <lshbox/lsh/sip.h>
+#include <lshbox/lsh/sim.h>
+#include <bits/unordered_map.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -62,9 +63,22 @@ int main(int argc, const char **argv)
     string queryFile = params["query_file"];
     string benchFile = params["benchmark_file"];
 
+    unsigned TYPE_DIST = L2_DIST;
+    if(params.find("TYPE_DIST")!=params.end()) {
+        string type_dist_str = params["TYPE_DIST"];
+        if(type_dist_str=="AG") {
+            TYPE_DIST = AG_DIST;
+        } else if (type_dist_str=="L2") {
+            TYPE_DIST = L2_DIST;
+        } else if (type_dist_str=="L1") {
+            TYPE_DIST = L1_DIST;
+        }
+    }
+
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
     }
+    std::cout<<"dist type "<<TYPE_DIST;
     std::cout << std::endl;
     std::cout << std::endl;
     lshbox::timer timer;
@@ -95,35 +109,35 @@ int main(int argc, const char **argv)
     if (hashMethod == "PCAH") {
         lshbox::PCAH<DATATYPE> pcah;
         pcah.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcah, bench, params);
+        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST);
     } else if (hashMethod == "ITQ") {
         lshbox::ITQ<DATATYPE> itq;
         itq.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, itq, bench, params);
+        search(queryMethod, data, query, itq, bench, params, TYPE_DIST);
     } else if (hashMethod == "PCARR") {
         lshbox::PCARR<DATATYPE> pcarr;
         pcarr.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcarr, bench, params);
+        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST);
     } else if (hashMethod == "SpH") {
         lshbox::SpH<DATATYPE> sph;
         sph.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sph, bench, params);
+        search(queryMethod, data, query, sph, bench, params, TYPE_DIST);
     } else if (hashMethod == "IsoH") {
         lshbox::IsoH<DATATYPE> isoh;
         isoh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, isoh, bench, params);
+        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST);
     } else if (hashMethod == "KMH") {
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench, params);
+        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST);
     } else if (hashMethod == "SH") {
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, spectralHashing, bench, params);
-    } else if (hashMethod == "SIP") {
-        lshbox::SIPH<DATATYPE > symmetricInnerProduct;
-        symmetricInnerProduct.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, symmetricInnerProduct, bench, params);
+        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST);
+    } else if (hashMethod == "SIM") {
+        lshbox::SIMH<DATATYPE > sim;
+        sim.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
     } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;
