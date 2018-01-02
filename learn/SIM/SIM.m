@@ -16,6 +16,7 @@ trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs'])
 testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
 trainset = trainset';
 meanTrainset = mean(trainset);
+meanTrainset = meanTrainset-meanTrainset;
 trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
 testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);
@@ -39,7 +40,7 @@ numQueries = size(testset, 1)
 
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries
-fprintf(modelFid,'%d %d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
+fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
 fprintf(modelFid, '%f ', meanTrainset);
 fprintf(modelFid, '\n');
 baseCodeFid = fopen(baseCodeFile,'wt');
