@@ -231,17 +231,6 @@ void search_mih(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
-template<typename DATATYPE, typename LSHTYPE>
-void search(
-    string method,
-    const lshbox::Matrix<DATATYPE>& data,
-    const lshbox::Matrix<DATATYPE>& query,
-    LSHTYPE& mylsh,
-    const lshbox::Benchmark& bench,
-    const unordered_map<string, string>& params) {
-    
-    search(method, data, query, mylsh, bench, params, L2_DIST);
-}
 
 template<typename DATATYPE, typename LSHTYPE>
 void search(
@@ -251,7 +240,7 @@ void search(
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params,
-    const unsigned TYPE_DIST) {
+    const unsigned TYPE_DIST=L2_DIST) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
