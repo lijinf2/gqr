@@ -30,7 +30,7 @@ GQR
 
     cd ../script && sh search.sh
 
-You may refer to script/readme.txt for detailed explanations and more instructions.
+You may refer to folder `./script` for detailed explanations and more instructions.
   
 # Support
 ## Hashing Algorithms

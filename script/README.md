@@ -59,8 +59,8 @@ cal_groundtruth.sh
 
 ### Data generation or transformation
 
-GQR only takes fvecs as input formats. We can generate random datasets or transform existing datasets under folder data_to_fvecs.
+GQR only takes fvecs as input formats. We can generate random datasets or transform existing datasets under folder `./data_to_fvecs`.
 
 ### K-Means hashing
 
-K-Means Hashing requires other scirpts to run, please refer to folder ../learn/KMH/readme.txt for details.
+K-Means Hashing requires other scirpts to run, please refer to folder `../learn/KMH` for details.
