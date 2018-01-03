@@ -7,20 +7,6 @@ GQR
 - CMake
 - Matlab
 
-# Hashing Algorithms
-- ITQ: Iterative quantization
-- PCAH: PCA Hashing
-- PCARR: PCA hashing with random rotation
-- SH: Spectral Hashing
-- SpH: Spherical Hashing
-- KMH: Kmeans Hashing
-- IsoH: isotropic Hashing
-
-# Query Algorithms
-- HR: Hamming Ranking
-- HL: Hash Lookup
-- GQR: Generate-to-probe quantization ranking
-
 # Run
 -Step 1: clone the repository
 
@@ -44,9 +30,22 @@ GQR
 
     cd ../script && sh search.sh
 
-```
 You may refer to script/readme.txt for detailed explanations and more instructions.
   
+# Support
+## Hashing Algorithms
+- ITQ: Iterative quantization
+- PCAH: PCA Hashing
+- PCARR: PCA hashing with random rotation
+- SH: Spectral Hashing
+- SpH: Spherical Hashing
+- KMH: Kmeans Hashing
+- IsoH: isotropic Hashing
+
+## Query Algorithms
+- HR: Hamming Ranking
+- HL: Hash Lookup
+- GQR: Generate-to-probe quantization ranking
 
 # Acknowledgement
 GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 

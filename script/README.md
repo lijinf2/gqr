@@ -57,9 +57,9 @@ cal_groundtruth.sh
 
 ## More scripts
 
-### Data transformation
+### Data generation or transformation
 
-GQR only takes fvecs as input formats. However, many datasets such as Glove and Tiny have their own format. We provide applications for dataset transformation under folder data_to_fvecs.
+GQR only takes fvecs as input formats. We can generate random datasets or transform existing datasets under folder data_to_fvecs.
 
 ### K-Means hashing
 
