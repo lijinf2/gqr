@@ -18,12 +18,17 @@ int main (int argc, char** argv) {
     unsigned seed = chrono::system_clock::now().time_since_epoch().count();
     default_random_engine generator(seed);
 
-    normal_distribution<float> distribution(mean, stdDev);
+    normal_distribution<float> mean_distribution(mean, stdDev);
     
     ofstream fout(outputFile, ios::binary);
     float number;
     for (int i = 0; i < numRecord; ++i) {
         fout.write((char*)&dimension, sizeof(dimension));
+
+        float record_mean = mean_distribution(generator);
+        normal_distribution<float> distribution(record_mean, stdDev);
+        
+
         for (int j = 0; j < dimension; ++j) {
             number = distribution(generator);
             fout.write((char*)&number, sizeof(number));
