@@ -6,7 +6,7 @@ codelength = 12;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 
-method = 'MIP'
+method = 'SimpleLSH'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

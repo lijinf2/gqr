@@ -16,7 +16,7 @@
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
-#include <lshbox/lsh/mip.h>
+#include <lshbox/lsh/simpleLSH.h>
 #include <bits/unordered_map.h>
 
 #include "search.h"
@@ -139,8 +139,8 @@ int main(int argc, const char **argv)
         lshbox::SIMH<DATATYPE > sim;
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
-    } else if (hashMethod == "MIP") {
-        lshbox::MIPH<DATATYPE > mip;
+    } else if (hashMethod == "SimpleLSH") {
+        lshbox::SimpleLSH<DATATYPE > mip;
         mip.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mip, bench, params, TYPE_DIST);
     }
