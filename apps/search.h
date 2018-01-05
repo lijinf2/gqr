@@ -22,7 +22,7 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     }
 
     std::cout << "probed items, " << "overall query time, " 
-        << "avg recall, " << "avg error ratio" <<"\n";
+        << "avg recall, " << "avg precision, " << "avg error ratio" <<"\n";
 
     double runtime = 0;
     lshbox::timer timer;
@@ -46,9 +46,13 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         double roundTime= timer.elapsed();
         runtime += roundTime;
         
+        vector<unsigned> numItemProbed;
+        numItemProbed.reserve(numQueries);
         vector<vector<pair<unsigned, float>>> benchResult;
         benchResult.reserve(numQueries);
         for (unsigned i = 0; i != numQueries; ++i) {
+            numItemProbed.push_back(probers[i].getNumItemsProbed());
+
             // const vector<pair<float, unsigned>>& src = probers[i].getScanner().getOpqResult(); 
             const vector<pair<float, unsigned>>& src = probers[i].getScanner().getMutableTopk().genTopk(); 
             vector<pair<unsigned, float>> dst(src.size()); 
@@ -59,7 +63,9 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
             benchResult.emplace_back(dst);
         }
         std::cout << numItems << ", " << runtime <<", "
-            << cal_avg_recall(opqBencher, benchResult, true) << ", " << cal_avg_error(opqBencher, benchResult, true) << "\n";
+            << cal_avg_recall(opqBencher, benchResult, true) << ", "
+            << cal_avg_precision(opqBencher, benchResult, numItemProbed, true) << ", " 
+            << cal_avg_error(opqBencher, benchResult, true) << "\n";
 
 
         if (numItems == numAllItems)

@@ -85,3 +85,9 @@ float cal_avg_recall(const Bencher& bench, const vector<vector<pair<unsigned, fl
     Bencher res(results, formatted);
     return bench.avg_recall(res);
 }
+
+float cal_avg_precision(const Bencher& bench, const vector<vector<pair<unsigned, float>>>& results, const vector<unsigned>&numItemProbed, bool formatted) {
+    assert(formatted == true);
+    Bencher res(results, formatted);
+    return bench.avg_precision(res, numItemProbed);
+}
