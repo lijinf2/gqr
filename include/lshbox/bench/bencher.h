@@ -71,6 +71,18 @@ public:
         return sumRecall / size;
     }
 
+    float avg_precision(const Bencher& given, const vector<unsigned>& numItemProbed) const {
+        assert(this->size() >= given.size());
+
+        unsigned size = std::min(this->size(), given.size());
+        float sumPrecision = 0;
+        for (int i = 0; i < size; ++i) {
+            const BenchRecord& givenRecord = given.getRecord(i);
+            sumPrecision += this->nns[i].precision(givenRecord, numItemProbed[i]);
+        }
+        return sumPrecision / size;
+    }
+
     float avg_error(const Bencher& given) const {
         assert(this->size() >= given.size());
         float sumError = 0;

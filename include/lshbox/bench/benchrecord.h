@@ -51,6 +51,10 @@ public:
         return this->knn.size();
     }
 
+    float precision(const BenchRecord& other, unsigned numProbed) const {
+        return precision(other.getId(), other.getKNN(), numProbed);
+    }
+
     float recall(const BenchRecord& other) const {
         return recall(other.getId(), other.getKNN());
     }
@@ -64,25 +68,25 @@ private:
     vector<pair<unsigned, float>> knn;
     unordered_set<unsigned> knnIvecs;
 
-    float recall(unsigned qId, const vector<pair<unsigned, float>>& givenKNN) const {
-        assert(this->queryId == qId);
-        vector<unsigned> ivecs;
-        ivecs.resize(givenKNN.size());
-        for (int i = 0; i < givenKNN.size(); ++i) {
-            ivecs[i] = givenKNN[i].first;
-        }
-        return recall_ivecs(qId, ivecs);
+    float precision(unsigned qId, const vector<pair<unsigned, float>>& givenKNN, unsigned numProbed) const {
+        unsigned numMatched = numRetrieved(qId, this->extractIvecs(givenKNN));
+        return (float) numMatched / numProbed;
     }
 
-    float recall_ivecs(unsigned qId, const vector<unsigned>& ivecs) const {
+    float recall(unsigned qId, const vector<pair<unsigned, float>>& givenKNN) const {
+        unsigned numMatched = numRetrieved(qId, this->extractIvecs(givenKNN));
+        return numMatched / float(this->knn.size());
+    }
+
+    unsigned numRetrieved(unsigned qId, const vector<unsigned>& ivecs) const {
         assert(this->queryId == qId);
-        int matched = 0;
+        unsigned matched = 0;
         for (vector<unsigned>::const_iterator it = ivecs.begin(); it != ivecs.end(); ++it) {
             if (this->knnIvecs.find(*it) != this->knnIvecs.end()) {
                 matched++;
             }
         }
-        return matched / float(this->knn.size());
+        return matched;
     }
 
     float error(unsigned qId, const vector<pair<unsigned, float>>& givenKNN) const {
@@ -117,6 +121,15 @@ private:
         
         if (count == 0) return -1;
         else return error / count;
+    }
+
+    vector<unsigned> extractIvecs(const vector<pair<unsigned, float>>& givenKNN) const {
+        vector<unsigned> ivecs;
+        ivecs.resize(givenKNN.size());
+        for (int i = 0; i < givenKNN.size(); ++i) {
+            ivecs[i] = givenKNN[i].first;
+        }
+        return ivecs;
     }
 };
 
