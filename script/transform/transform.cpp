@@ -12,12 +12,12 @@ int sample(const char* inputSampleFile, const char* outputSampleFile, float max_
 
     ofstream fout(outputSampleFile, ios::binary);
     if (!fout) {
-        std::cout << "cannot open file " << outputFile << std::endl;
+        std::cout << "cannot open file " << outputSampleFile << std::endl;
         assert(false);
     }
     ifstream fin(inputSampleFile, ios::binary);
     if (!fin) {
-        std::cout << "cannot open file " << inputFile << std::endl;
+        std::cout << "cannot open file " << inputSampleFile << std::endl;
         assert(false);
     }
 
