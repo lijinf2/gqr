@@ -247,7 +247,7 @@ void search(
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params,
     const unsigned TYPE_DIST,
-    const unsigned invalid_dim=0) {
+    const int invalid_dim=0) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);

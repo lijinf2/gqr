@@ -76,9 +76,9 @@ int main(int argc, const char **argv)
         }
     }
 
-    unsigned invalid_dim = 0;
+    int invalid_dim = 0;
     if (params.find("invalid_dim")!=params.end()) {
-        invalid_dim = atoi(params["invalid_dim"]);
+        invalid_dim = atoi(params["invalid_dim"].c_str());
     }
 
     for (int i = 0; i < argc; ++i) {
