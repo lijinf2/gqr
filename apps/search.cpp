@@ -77,8 +77,8 @@ int main(int argc, const char **argv)
     }
 
     unsigned invalid_dim = 0;
-    if (params.find("invalid_bit")!=params.end()) {
-        invalid_dim = atoi(params["invalid_bit"]);
+    if (params.find("invalid_dim")!=params.end()) {
+        invalid_dim = atoi(params["invalid_dim"]);
     }
 
     for (int i = 0; i < argc; ++i) {
