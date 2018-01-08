@@ -8,55 +8,60 @@
 #include "lshbox/utils.h"
 using namespace std;
 
-int sample(const vector<float*>& data, int dimension, const char* outputFile, int num_samples) {
-   
-    for (int i = 0; i < data.size(); ++i)
-    {
-        float * buffer = data[i];
-        buffer[dimension-1] = buffer[dimension-2];
-        buffer[dimension-2] = 0.0;
-    }
+int sample(const char* inputSampleFile, const char* outputSampleFile, float max_norm) {
 
-    vector<bool> selected = selection(data.size(), num_samples);
-    ofstream fout(outputFile, ios::binary);
+    ofstream fout(outputSampleFile, ios::binary);
     if (!fout) {
-        cout << "cannot open file " << outputFile << endl;
+        std::cout << "cannot open file " << outputFile << std::endl;
+        assert(false);
+    }
+    ifstream fin(inputSampleFile, ios::binary);
+    if (!fin) {
+        std::cout << "cannot open file " << inputFile << std::endl;
+        assert(false);
     }
 
-    string logFileName(outputFile);
-    logFileName += ".idx.txt";
-    ofstream indexFout(logFileName.c_str());
-    cout << "selected items: " << endl;
-    indexFout << "selected items: " << endl;
-    int queryIdx = 0;
-    for (int i = 0; i < data.size(); ++i) {
-        if (selected[i]) {
-            cout << queryIdx << " -> " << i << endl;
-            indexFout << queryIdx << " -> " << i << endl;
-            queryIdx++;
+    int originDim;
+    int dimension;
 
-            fout.write((char*)&dimension, sizeof(int));
-            fout.write((char*)data[i], dimension * sizeof(float));
+
+    while (fin.read((char*)(&originDim), sizeof(int))) {
+
+        dimension = originDim + 2;
+
+        float * buffer = new float[dimension];
+        fin.read((char *)(buffer), sizeof(float) * originDim);
+
+        // calculate the norm of a row of data
+        float norm = 0.0;
+        for (int index_dim = 0; index_dim < originDim; index_dim++) {
+            norm += buffer[index_dim] * buffer[index_dim];
         }
+        buffer[dimension-1] = sqrt( max_norm - norm > 0.0 ? max_norm - norm : 0.0);
+        buffer[dimension-2] = 0.0;
+
+
+        fout.write((char*)&dimension, sizeof(int));
+        fout.write((char*)buffer, dimension * sizeof(float));
     }
+
+
     
     fout.close();
-   
-    indexFout.close();
+    fin.close();
     return 0;
 }
 
 int main (int argc, char** argv) {
     if (argc != 5) {
-        cout << "Usage: transform.bin ${inputFile} ${outputFile} ${sampleFile} ${num_samples} " << endl;
+        cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} ${outputSampleFile} " << endl;
         return 0;
     }
     
     const char* inputFile = argv[1];
     const char* outputFile = argv[2];
-    const char* sampleFile = argv[3];
-    
-    int num_samples = atoi(argv[4]);
+    const char* inputSampleFile = argv[3];
+    const char* outputSampleFile = argv[4];
 
 
     ofstream fout(outputFile, ios::binary);
@@ -113,7 +118,7 @@ int main (int argc, char** argv) {
     fout.close();
 
 
-    sample(data, dimension, sampleFile, num_samples);
+    sample(dimension, sampleFile, max_norm);
 
     for (auto& v : data) {
         delete v;
