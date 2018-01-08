@@ -65,7 +65,7 @@ int main(int argc, const char **argv)
     string benchFile = params["benchmark_file"];
 
     unsigned TYPE_DIST = L2_DIST;
-    if(params.find("TYPE_DIST")!=params.end()) {
+    if (params.find("TYPE_DIST")!=params.end()) {
         string type_dist_str = params["TYPE_DIST"];
         if(type_dist_str=="AG") {
             TYPE_DIST = AG_DIST;
@@ -74,6 +74,11 @@ int main(int argc, const char **argv)
         } else if (type_dist_str=="L1") {
             TYPE_DIST = L1_DIST;
         }
+    }
+
+    unsigned invalid_dim = 0;
+    if (params.find("invalid_bit")!=params.end()) {
+        invalid_dim = atoi(params["invalid_bit"]);
     }
 
     for (int i = 0; i < argc; ++i) {
@@ -110,39 +115,39 @@ int main(int argc, const char **argv)
     if (hashMethod == "PCAH") {
         lshbox::PCAH<DATATYPE> pcah;
         pcah.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "ITQ") {
         lshbox::ITQ<DATATYPE> itq;
         itq.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, itq, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, itq, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "PCARR") {
         lshbox::PCARR<DATATYPE> pcarr;
         pcarr.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SpH") {
         lshbox::SpH<DATATYPE> sph;
         sph.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sph, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, sph, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "IsoH") {
         lshbox::IsoH<DATATYPE> isoh;
         isoh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "KMH") {
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SH") {
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SIM") {
         lshbox::SIMH<DATATYPE > sim;
         sim.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, sim, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SimpleLSH") {
         lshbox::SimpleLSH<DATATYPE > mip;
         mip.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mip, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, mip, bench, params, TYPE_DIST, invalid_dim);
     }
     else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
