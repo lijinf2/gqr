@@ -10,13 +10,13 @@
 #include <vector>
 #include "lshbox/utils.h"
 
-#define NORM(X) ( (X) + (X)*(X) +0.25f)
 #define SQRT(X) ( (X)>0 ? sqrt(X) : 0.0f)
+#define SQUARE(X) ( (X)*(X) )
 
 using namespace std;
 
 
-int sample(const char* inputSampleFile, const char* outputSampleFile, float max_norm) {
+int sample(const char* inputSampleFile, const char* outputSampleFile, float max_norm_square) {
 
     ofstream fout(outputSampleFile, ios::binary);
     if (!fout) {
@@ -31,7 +31,7 @@ int sample(const char* inputSampleFile, const char* outputSampleFile, float max_
 
     int originDim;
     int dimension;
-
+    float scale = max_norm_square+0.5f;
 
     while (fin.read((char*)(&originDim), sizeof(int))) {
 
@@ -41,15 +41,16 @@ int sample(const char* inputSampleFile, const char* outputSampleFile, float max_
         fin.read((char *)(buffer), sizeof(float) * originDim);
 
         // calculate the norm of a row of data
-        float norm = 0.0;
+        float norm_square = 0.0;
         for (int index_dim = 0; index_dim < originDim; index_dim++) {
-            norm += buffer[index_dim] * buffer[index_dim];
+            norm_square += buffer[index_dim] * buffer[index_dim];
         }
 
-        buffer[dimension-4] = -0.5f;
-        buffer[dimension-3] = norm;
+        buffer[dimension-4] = -0.5f / scale;
+        buffer[dimension-3] = norm_square / scale;;
         buffer[dimension-2] = 0;
-        buffer[dimension-1] = SQRT(NORM(max_norm) - NORM(norm));
+        buffer[dimension-1] = SQRT( 1.0f - SQUARE((norm_square+0.5f)/(max_norm_square+0.5f)) );
+
 
         fout.write( (char*) &dimension, sizeof(int));
         fout.write( (char*) buffer, dimension * sizeof(float));
@@ -89,7 +90,7 @@ int main (int argc, char** argv) {
     int originDim = -1;
     int dimension = -1;
     int transformed_dimension = 4;
-    float max_norm = 0;
+    float max_norm_square = 0;
     vector<float*> data; // save buffered data
 
     while (fin.read((char*)(&originDim), sizeof(int))) {
@@ -101,32 +102,43 @@ int main (int argc, char** argv) {
         fin.read((char *)(buffer), sizeof(float) * originDim);
 
         // calculate the norm of a row of data
-        float norm = 0.0;
+        float norm_square = 0.0;
         for (int index_dim = 0; index_dim < originDim; index_dim++) {
-            norm += buffer[index_dim] * buffer[index_dim];
+            norm_square += buffer[index_dim] * buffer[index_dim];
         }
         //update max_norm
-        if (norm>max_norm)
-            max_norm = norm;
+        if (norm_square>max_norm_square)
+            max_norm_square = norm_square;
 
         // save norm momentarily
         // save buffer in vector
-        buffer[dimension-1] = norm;
+        buffer[dimension-1] = norm_square;
         data.push_back(buffer);
     }
 
     if (originDim < 0 || dimension < 0 )
         cout << "read nothing" << endl;
 
+    // 3rdTerm = sqrt( M^4 + M^2 + 1/4 - (X^4 + x^2 + 1/4) ) = sqrt( ( M^2+1/2)^2 - (X^2+1/2)^2)
+    // x -> x, |x|^2, -1/2, 3rdTerm , 0
+    // scale = (M^4 + M^2 + 1/4) ^ (1/2) = M^2 + 1/2
+    // calculate :  /=  scale
+    // note: M^2 = max_norm_square
+    // note: |x|^2 = norm_square
+    // note: 3rdTerm / scale = sqrt( ( M^2+1/2)^2 - (X^2+1/2)^2) / (M^2 + 1/2)
+    //                       = sqrt( 1 - [(X^2+1/2)/(M^2 + 1/2)]^2 )
+    float scale = max_norm_square+0.5f;
     for (int i = 0; i < data.size(); ++i)
     {
         float * buffer = data[i];
-        float norm = buffer[dimension-1];
+        float norm_square = buffer[dimension-1];
 
-
-        buffer[dimension-4] = norm;
-        buffer[dimension-3] = -0.5f;
-        buffer[dimension-2] = sqrt(NORM(max_norm) - NORM(norm));
+        for (int j = 0; j < originDim; ++j) {
+            buffer[j] /= scale;
+        }
+        buffer[dimension-4] = norm_square / scale;
+        buffer[dimension-3] = -0.5f / scale;
+        buffer[dimension-2] = sqrt(1.0f - SQUARE((norm_square+0.5f)/(max_norm_square+0.5f)));
         buffer[dimension-1] = 0;
 
         fout.write((char*)&dimension, sizeof(int));
@@ -136,7 +148,7 @@ int main (int argc, char** argv) {
     fout.close();
 
 
-    sample(inputSampleFile, outputSampleFile, max_norm);
+    sample(inputSampleFile, outputSampleFile, max_norm_square);
 
     for (auto& v : data) {
         delete v;
