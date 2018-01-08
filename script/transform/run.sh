@@ -13,4 +13,4 @@ new_base_file="../../data/${new_dataset}/${new_dataset}_base.fvecs"
 origin_query="../../data/${origin_dataset}/${origin_dataset}_query.fvecs"
 origin_file="../../data/${origin_dataset}/${origin_dataset}_base.fvecs"
 
-./transform.bin ${origin_file} ${new_base_file} ${new_query_file} ${origin_query} ${new_query_file}
+./transform.bin ${origin_file} ${new_base_file} ${origin_query} ${new_query_file}
