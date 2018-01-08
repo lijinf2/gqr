@@ -118,7 +118,7 @@ int main (int argc, char** argv) {
     fout.close();
 
 
-    sample(dimension, sampleFile, max_norm);
+    sample(inputSampleFile, outputSampleFile, max_norm);
 
     for (auto& v : data) {
         delete v;
