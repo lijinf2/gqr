@@ -1,12 +1,12 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'audio';
+dataset = 'random_53387_192_0_10';
 codelength = 12;            
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 
-method = 'SIM'
+method = 'SimpleLSH'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
@@ -15,10 +15,13 @@ modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelengt
 trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
 testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
 trainset = trainset';
+testset = testset';
+[max_norm, trainset, testset] = preprocess(trainset, testset);
+
 meanTrainset = mean(trainset);
+% no translation for MIP
 % meanTrainset = meanTrainset-meanTrainset;
 trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
-testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);
 
 
@@ -38,7 +41,7 @@ numQueries = size(testset, 1)
 
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries
-fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
+fprintf(modelFid,'%d %d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries, max_norm);
 fprintf(modelFid, '%f ', meanTrainset);
 fprintf(modelFid, '\n');
 baseCodeFid = fopen(baseCodeFile,'wt');

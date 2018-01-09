@@ -246,11 +246,12 @@ void search(
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params,
-    const unsigned TYPE_DIST) {
+    const unsigned TYPE_DIST,
+    const int invalid_dim=0) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
-    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
+    lshbox::Metric<DATATYPE> metric(data.getDim()-invalid_dim, TYPE_DIST);
     lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
         accessor,
         metric,
