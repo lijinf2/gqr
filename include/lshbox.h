@@ -35,11 +35,3 @@
 #include <lshbox/metric.h>
 #include <lshbox/topk.h>
 #include <lshbox/eval.h>
-#include <lshbox/lsh/rbslsh.h>
-#include <lshbox/lsh/rhplsh.h>
-#include <lshbox/lsh/thlsh.h>
-#include <lshbox/lsh/psdlsh.h>
-#include <lshbox/lsh/shlsh.h>
-#include <lshbox/lsh/itqlsh.h>
-#include <lshbox/lsh/dbqlsh.h>
-#include <lshbox/lsh/kdbqlsh.h>
