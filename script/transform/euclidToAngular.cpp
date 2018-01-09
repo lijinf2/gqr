@@ -46,6 +46,9 @@ int sample(const char* inputSampleFile, const char* outputSampleFile, float max_
             norm_square += buffer[index_dim] * buffer[index_dim];
         }
 
+        for (int j = 0; j < originDim; ++j) {
+            buffer[j] /= scale;
+        }
         buffer[dimension-4] = -0.5f / scale;
         buffer[dimension-3] = norm_square / scale;;
         buffer[dimension-2] = 0;
