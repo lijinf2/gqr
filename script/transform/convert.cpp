@@ -170,6 +170,9 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
 
 int dumpText(const char* file, vector<float*>& data, int dimension) {
 
+
+    std::cout << "dump data " << file << std::endl;
+
     ofstream fout(file);
     if (!fout) {
         std::cout << "cannot open file " << file << std::endl;
@@ -179,13 +182,15 @@ int dumpText(const char* file, vector<float*>& data, int dimension) {
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
 
-        for (int i = 0; i < dimension; ++i) {
-            fout << buffer[i] << "\t";
+        for (int j = 0; j < dimension; ++j) {
+            fout << buffer[j] << "\t";
         }
         fout << endl;
     }
 
     fout.close();
+
+    std::cout << "dump data, done " << file << std::endl;
 }
 
 
@@ -268,7 +273,7 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     // calculate sum, max, min
     for (int i = 0; i < data.size(); ++i) {
         for (int dim = 0; dim < dimension; ++dim) {
-            sum_[dim] += (double)data[i][dim];
+            sum_[dim] += (double)(data[i])[dim];
 
             if((data[i][dim]) > max_[i])
                 max_[i] = (data[i][dim]);
