@@ -1,8 +1,8 @@
-origin_dataset="audio"
+origin_dataset="random"
 
 
 
-g++ -I ../../include --std=c++11 -O3 fvecs_to_txt.cpp -o ./fvecs_to_txt.bin 
+g++ -I ../../include --std=c++11 -O3 binaryReader.cpp -o ./binaryReader.bin
 
 
 input_file="../../data/${origin_dataset}/${origin_dataset}_base.fvecs"
