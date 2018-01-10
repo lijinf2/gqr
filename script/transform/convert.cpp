@@ -250,51 +250,51 @@ void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) 
 
 void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
-    double* sum = new double[dimension];
-    float* mean = new float[dimension];
-    float* max = new float[dimension];
-    float* min = new float[dimension];
+    double* sum_ = new double[dimension];
+    float* mean_ = new float[dimension];
+    float* max_ = new float[dimension];
+    float* min_ = new float[dimension];
 
     std::cout << "----[statistic] " << std::endl;
 
 
     for (int i = 0; i < dimension; ++i) {
-        sum[i] = 0.0;
-        max[i] = std::numeric_limits<float >::max();
-        min[i] = std::numeric_limits<float >::min();
+        sum_[i] = 0.0;
+        max_[i] = std::numeric_limits<float >::max();
+        min_[i] = std::numeric_limits<float >::min();
     }
 
     std::cout << "----[statistic] sum, max, min" << std::endl;
     // calculate sum, max, min
     for (int i = 0; i < data.size(); ++i) {
         for (int dim = 0; dim < dimension; ++dim) {
-            sum[dim] += (double)data[i][dim];
+            sum_[dim] += (double)data[i][dim];
 
-            if((data[i][dim]) > max[i])
-                max[i] = (data[i][dim]);
-            if ((data[i][dim]) < min[i])
-                min[i] = (data[i][dim]);
+            if((data[i][dim]) > max_[i])
+                max_[i] = (data[i][dim]);
+            if ((data[i][dim]) < min_[i])
+                min_[i] = (data[i][dim]);
         }
     }
     std::cout << "----[statistic] mean" << std::endl;
     // calculate mean
     for (int i = 0; i < dimension; ++i) {
-        mean[i] = (float)(sum[i] / data.size()) ;
+        mean_[i] = (float)(sum_[i] / data.size()) ;
     }
 
     std::cout << "----[statistic] calculated" << std::endl;
     vector<float*> statistics ;
     std::cout << "----[statistic] mean" << std::endl;
-    statistics.push_back(mean);
+    statistics.push_back(mean_);
     std::cout << "----[statistic] max" << std::endl;
-    statistics.push_back(max);
+    statistics.push_back(max_);
     std::cout << "----[statistic] min" << std::endl;
-    statistics.push_back(min);
+    statistics.push_back(min_);
 
     std::cout << "----[statistic] write log" << std::endl;
     dumpText("data.statistic.log", statistics, dimension);
 
-    delete[] sum;
+    delete[] sum_;
     std::cout << "----[statistic] clear" << std::endl;
     freeVectors(statistics);
 }
@@ -328,7 +328,7 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
-    // statistic(data, sampleData, dimension);
+     statistic(data, sampleData, dimension);
 
     if (PRE_MEAN) {
         preMean(data, sampleData, dimension);
