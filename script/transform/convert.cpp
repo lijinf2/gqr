@@ -11,12 +11,8 @@
 #include "lshbox/utils.h"
 #include <climits>
 
-#define SQRT(X) ( (X)>0 ? sqrt(X) : 0.0f)
-#define SQUARE(X) ( (X)*(X) )
 #define ENABLE_SCALE (1)
 #define SCALE_TO     (1.0f)
-#define PRE_MEAN    (0)
-#define PRE_SCALE    (0)
 
 using namespace std;
 
@@ -35,7 +31,6 @@ float inline calNormSquare(float* data, int dimension) {
     }
     return norm_square;
 }
-
 
 float calMaxNormSquare(vector<float* >& data, int dimension) {
 
@@ -194,65 +189,6 @@ int dumpText(const char* file, vector<float*>& data, int dimension) {
 }
 
 
-void preScale(vector<float* >& data, vector<float* >& sampleData, int dimension) {
-
-    std::cout << "----[preprocess] pre scale data" << std::endl;
-
-    float max_norm = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
-    float scale = max_norm / PRE_SCALE;
-
-    for (int line = 0; line < data.size(); ++line) {
-        for (int dim = 0; dim < dimension; ++dim) {
-            data[line][dim] /= scale;
-        }
-    }
-
-    std::cout << "----[preprocess] pre scale query" << std::endl;
-
-    for (int line = 0; line < sampleData.size(); ++line) {
-        for (int dim = 0; dim < dimension; ++dim) {
-            data[line][dim] /= scale;
-        }
-    }
-    std::cout << "----[preprocess] pre scale, done" << std::endl;
-
-}
-
-
-void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) {
-
-    double* mean = new double[dimension];
-    for (int i = 0; i < dimension; ++i) {
-        mean[i] = 0.0;
-    }
-    // calculate sum
-    for (int i = 0; i < data.size(); ++i) {
-
-        for (int dim = 0; dim < dimension; ++dim) {
-            mean[dim] += (double)data[i][dim];
-        }
-    }
-    // calculate mean
-    for (int i = 0; i < dimension; ++i) {
-        mean[i] /= (double (data.size()));
-    }
-
-    // substrate mean
-    for (int i = 0; i < data.size(); ++i) {
-        for (int dim = 0; dim < dimension; ++dim) {
-            data[i][dim] -= mean[dim];
-        }
-    }
-
-    for (int i = 0; i < sampleData.size(); ++i) {
-        for (int dim = 0; dim < dimension; ++dim) {
-            sampleData[i][dim] -= mean[dim];
-        }
-    }
-
-}
-
-
 void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
     double* sum_ = new double[dimension];
@@ -330,15 +266,8 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
-     statistic(data, sampleData, dimension);
+    statistic(data, sampleData, dimension);
 
-    if (PRE_MEAN) {
-        preMean(data, sampleData, dimension);
-    }
-
-    if (PRE_SCALE) {
-        preScale(data, sampleData, dimension);
-    }
 
     string e2m("e2m");
     string m2a("m2a");
