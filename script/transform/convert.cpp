@@ -249,6 +249,7 @@ void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) 
 
 
 void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+
     double* sum = new double[dimension];
     float* mean = new float[dimension];
     float* max = new float[dimension];
@@ -278,7 +279,7 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     std::cout << "----[statistic] mean" << std::endl;
     // calculate mean
     for (int i = 0; i < dimension; ++i) {
-        mean[i] = (float)(sum[i]/data.size()) ;
+        mean[i] = (float)(sum[i] / data.size()) ;
     }
 
     std::cout << "----[statistic] calculated" << std::endl;
@@ -325,7 +326,7 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
-    statistic(data, sampleData, dimension);
+    // statistic(data, sampleData, dimension);
 
     if (PRE_MEAN) {
         preMean(data, sampleData, dimension);
