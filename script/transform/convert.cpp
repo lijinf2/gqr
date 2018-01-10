@@ -20,6 +20,14 @@
 
 using namespace std;
 
+template <typename T>
+
+void freeVectors(vector<T*>& data) {
+    for (int i = 0; i < data.size(); ++i) {
+        delete[] data[i];
+    }
+}
+
 float inline calNormSquare(float* data, int dimension) {
     float norm_square = 0.0f;
     for (int index_dim = 0; index_dim < dimension; index_dim++) {
@@ -246,13 +254,17 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     float* max = new float[dimension];
     float* min = new float[dimension];
 
+    std::cout << "----[statistic] " << std::endl;
+
+
     for (int i = 0; i < dimension; ++i) {
         sum[i] = 0.0;
         max[i] = std::numeric_limits<float >::max();
         min[i] = std::numeric_limits<float >::min();
     }
 
-    // calculate sum
+    std::cout << "----[statistic] sum, max, min" << std::endl;
+    // calculate sum, max, min
     for (int i = 0; i < data.size(); ++i) {
         for (int dim = 0; dim < dimension; ++dim) {
             sum[dim] += (double)data[i][dim];
@@ -263,6 +275,7 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
                 min[i] = (data[i][dim]);
         }
     }
+    std::cout << "----[statistic] mean" << std::endl;
     // calculate mean
     for (int i = 0; i < dimension; ++i) {
         mean[i] = (float)sum[i] / data.size();
@@ -273,7 +286,11 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     statistics.push_back(max);
     statistics.push_back(min);
 
+    std::cout << "----[statistic] write log" << std::endl;
     dumpText("data.statistic.log", statistics, dimension);
+
+    delete[] sum;
+    freeVectors(statistics);
 }
 
 int main(int argc, char** argv) {
@@ -333,6 +350,9 @@ int main(int argc, char** argv) {
 
     dumpData(outputFile, data, dimension);
     dumpData(outputSampleFile, sampleData, dimension);
+
+    freeVectors(data);
+    freeVectors(sampleData);
 
     return 0;
 }
