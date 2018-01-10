@@ -12,7 +12,8 @@
 
 #define SQRT(X) ( (X)>0 ? sqrt(X) : 0.0f)
 #define SQUARE(X) ( (X)*(X) )
-#define MAX(a, b) ( (a)>(b) ? (a) : (b))
+#define ENABLE_SCALE (1)
+#define SCALE_TO (1.0f)
 
 using namespace std;
 
@@ -59,6 +60,7 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
         buffer[dimension] = -0.5f;
     }
 
+
     std::cout << "[euclidToMIP] transforming data, done" << std::endl;
 
     return dimension+2;
@@ -69,7 +71,7 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
 
     std::cout << "[mipToAngular] transforming data" << std::endl;
 
-    float max_norm_square = MAX( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
+    float max_norm_square = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
 
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
@@ -85,6 +87,24 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
 
         buffer[dimension] = 0.0f;
         buffer[dimension+1] = sqrt(max_norm_square - norm_square);
+    }
+
+    if (ENABLE_SCALE) {
+
+        float scale = sqrt(max_norm_square) / SCALE_TO;
+        std::cout << "scale = " << sqrt(max_norm_square) << "/" <<  SCALE_TO << " = " << scale << std::endl;
+        for (int line = 0; line < data.size(); ++line) {
+            for (int dim = 0; dim < dimension+2; ++dim) {
+                data[line][dim] /= scale;
+            }
+
+        }
+
+        for (int line = 0; line < sampleData.size(); ++line) {
+            for (int dim = 0; dim < dimension+2; ++dim) {
+                data[line][dim] /= scale;
+            }
+        }
     }
 
     std::cout << "[mipToAngular] transforming data, done" << std::endl;
