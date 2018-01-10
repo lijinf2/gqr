@@ -18,11 +18,13 @@ using namespace std;
 
 template <typename T>
 
+
 void freeVectors(vector<T*>& data) {
     for (int i = 0; i < data.size(); ++i) {
         delete[] data[i];
     }
 }
+
 
 float inline calNormSquare(float* data, int dimension) {
     float norm_square = 0.0f;
@@ -32,23 +34,23 @@ float inline calNormSquare(float* data, int dimension) {
     return norm_square;
 }
 
+
 float calMaxNormSquare(vector<float* >& data, int dimension) {
 
     float max_norm_square = 0.0f;
 
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
-        // calculate the norm of a row of data
         float norm_square = calNormSquare(buffer, dimension);
-        //update max_norm
-        if (norm_square>max_norm_square)
+        if (norm_square > max_norm_square)
             max_norm_square = norm_square;
     }
+
     return max_norm_square;
 }
 
 
-int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+int euclidToMIP(vector<float* >& data, vector<float* >& queryData, int dimension) {
 
     std::cout << "----[euclidToMIP] transforming data" << std::endl;
 
@@ -59,8 +61,8 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
         buffer[dimension+1] = -0.5f;
     }
 
-    for (int j = 0; j < sampleData.size(); ++j) {
-        float * buffer = sampleData[j];
+    for (int j = 0; j < queryData.size(); ++j) {
+        float * buffer = queryData[j];
         float norm_square = calNormSquare(buffer, dimension);
         buffer[dimension+1] = norm_square;
         buffer[dimension] = -0.5f;
@@ -73,11 +75,11 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
 }
 
 
-int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+int mipToAngular(vector<float* >& data, vector<float* >& queryData, int dimension) {
 
     std::cout << "----[mipToAngular] transforming data" << std::endl;
 
-    float max_norm_square = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
+    float max_norm_square = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(queryData, dimension) );
 
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
@@ -87,8 +89,8 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
         buffer[dimension+1] = 0.0f;
     }
 
-    for (int j = 0; j < sampleData.size(); ++j) {
-        float * buffer = sampleData[j];
+    for (int j = 0; j < queryData.size(); ++j) {
+        float * buffer = queryData[j];
         float norm_square = calNormSquare(buffer, dimension);
 
         buffer[dimension] = 0.0f;
@@ -106,7 +108,7 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
 
         }
 
-        for (int line = 0; line < sampleData.size(); ++line) {
+        for (int line = 0; line < queryData.size(); ++line) {
             for (int dim = 0; dim < dimension+2; ++dim) {
                 data[line][dim] /= scale;
             }
@@ -119,6 +121,13 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
 }
 
 
+/**
+ * load data from fvecs file.
+ * @param file
+ * @param data
+ * @param placeholder
+ * @return
+ */
 int loadData(const char* file, vector<float*>& data, int placeholder) {
 
     ifstream fin(file, ios::binary);
@@ -142,7 +151,13 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
     return originDim;
 }
 
-
+/**
+ * write data to binary file as file.fvecs format.
+ * @param file
+ * @param data
+ * @param dimension
+ * @return
+ */
 int dumpData(const char* file, vector<float*>& data, int dimension) {
     ofstream fout(file, ios::binary);
     if (!fout) {
@@ -162,7 +177,13 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
     return dimension;
 }
 
-
+/**
+ * write data to text file.
+ * @param file
+ * @param data
+ * @param dimension
+ * @return
+ */
 int dumpText(const char* file, vector<float*>& data, int dimension) {
 
 
@@ -189,60 +210,14 @@ int dumpText(const char* file, vector<float*>& data, int dimension) {
 }
 
 
-void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension) {
-
-    double* sum_ = new double[dimension];
-    float* mean_ = new float[dimension];
-    float* max_ = new float[dimension];
-    float* min_ = new float[dimension];
-
-    std::cout << "----[statistic] " << std::endl;
-
-
-    for (int i = 0; i < dimension; ++i) {
-        sum_[i] = 0.0;
-        max_[i] = std::numeric_limits<float >::max();
-        min_[i] = std::numeric_limits<float >::min();
-    }
-
-    std::cout << "----[statistic] sum, max, min" << std::endl;
-    // calculate sum, max, min
-    for (int i = 0; i < data.size(); ++i) {
-        for (int dim = 0; dim < dimension; ++dim) {
-            sum_[dim] += (double)(data[i])[dim];
-
-            if((data[i][dim]) > max_[i])
-                max_[dim] = (data[i][dim]);
-            if ((data[i][dim]) < min_[i])
-                min_[dim] = (data[i][dim]);
-        }
-    }
-    std::cout << "----[statistic] mean" << std::endl;
-    // calculate mean
-    for (int i = 0; i < dimension; ++i) {
-        mean_[i] = (float)(sum_[i] / data.size()) ;
-    }
-
-    std::cout << "----[statistic] calculated" << std::endl;
-    vector<float*> statistics ;
-    statistics.push_back(mean_);
-    statistics.push_back(max_);
-    statistics.push_back(min_);
-
-    std::cout << "----[statistic] write log" << std::endl;
-    dumpText("data.statistic.log", statistics, dimension);
-    std::cout << "----[statistic] clear sum" << std::endl;
-    delete[] sum_;
-    std::cout << "----[statistic] clear" << std::endl;
-    freeVectors(statistics);
-}
-
 int main(int argc, char** argv) {
 
     int transform_arg = 5;
 
     if (argc < transform_arg) {
-        cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} ${outputSampleFile} ${mipToAngular|euclidToMIP}" << endl;
+        cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} "
+             <<"${outputSampleFile} ${mipToAngular|euclidToMIP}"
+             << endl;
         return 0;
     }
 
@@ -252,21 +227,19 @@ int main(int argc, char** argv) {
     const char* outputSampleFile = argv[4];
 
     vector<float* > data ;
-    vector<float* > sampleData ;
+    vector<float* > queryData ;
     int dimension;
-    int sampleDimension;
+    int queryDimension;
 
     dimension = loadData(inputFile, data, 4);
-    sampleDimension = loadData(inputSampleFile, sampleData, 4);
+    queryDimension = loadData(inputSampleFile, queryData, 4);
 
-    if(dimension<0 || sampleDimension<0 || dimension!=sampleDimension) {
+    if(dimension<0 || queryDimension<0 || dimension!=queryDimension) {
         std::cout << "dimension un_compatible" << std::endl
                   << "data dim:" << dimension << std::endl
-                  << "sample dim:" << sampleDimension << std::endl;
+                  << "query dim:" << queryDimension << std::endl;
         assert(false);
     }
-
-    statistic(data, sampleData, dimension);
 
 
     string e2m("e2m");
@@ -277,19 +250,19 @@ int main(int argc, char** argv) {
         string operation(argv[i]);
 
         if (e2m==operation) {
-            dimension = euclidToMIP(data, sampleData, dimension);
+            dimension = euclidToMIP(data, queryData, dimension);
         } else if (m2a==operation) {
-            dimension = mipToAngular(data, sampleData, dimension);
+            dimension = mipToAngular(data, queryData, dimension);
         } else {
             std::cout << "invalid operation " << operation << std::endl;
         }
     }
 
     dumpData(outputFile, data, dimension);
-    dumpData(outputSampleFile, sampleData, dimension);
+    dumpData(outputSampleFile, queryData, dimension);
 
     freeVectors(data);
-    freeVectors(sampleData);
+    freeVectors(queryData);
 
     return 0;
 }
