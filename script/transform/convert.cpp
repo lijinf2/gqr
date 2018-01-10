@@ -42,6 +42,8 @@ float calMaxNormSquare(vector<float* >& data, int dimension) {
 
 int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
+    std::cout << "[euclidToMIP] transforming data" << std::endl;
+
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
         float norm_square = calNormSquare(buffer, dimension);
@@ -56,10 +58,15 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
         buffer[dimension] = -0.5f;
     }
 
+    std::cout << "[euclidToMIP] transforming data, done" << std::endl;
+
     return dimension+2;
 }
 
 int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+
+    std::cout << "[mipToAngular] transforming data" << std::endl;
+
     float max_norm_square = MAX( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
 
     for (int i = 0; i < data.size(); ++i) {
@@ -78,6 +85,8 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
         buffer[dimension+1] = sqrt(max_norm_square - norm_square);
     }
 
+    std::cout << "[mipToAngular] transforming data, done" << std::endl;
+
     return dimension+2;
 }
 
@@ -89,7 +98,7 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
-    std::cout << "reading data from file:" << file << std::endl;
+    std::cout << "[loadData] reading data from file:" << file << std::endl;
 
     int originDim;
     while (fin.read((char*)(&originDim), sizeof(int))) {
@@ -99,7 +108,7 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         data.push_back(buffer);
     }
 
-    std::cout << "read data, done" << std::endl;
+    std::cout << "[loadData] read data, done" << std::endl;
 
     fin.close();
     return originDim;
@@ -112,14 +121,14 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
-    std::cout << "writing data to file:" << file << std::endl;
+    std::cout << "[dumpData] writing data to file:" << file << std::endl;
 
     for (int i = 0; i < data.size(); ++i)
     {
         fout.write((char*)&dimension, sizeof(int));
         fout.write((char*)data[i], dimension * sizeof(float));
     }
-    std::cout << "wrote data, done" << std::endl;
+    std::cout << "[dumpData] wrote data, done" << std::endl;
 
     fout.close();
     return dimension;
