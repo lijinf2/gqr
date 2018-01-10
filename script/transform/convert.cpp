@@ -333,7 +333,7 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
-     statistic(data, sampleData, dimension);
+//     statistic(data, sampleData, dimension);
 
     if (PRE_MEAN) {
         preMean(data, sampleData, dimension);
