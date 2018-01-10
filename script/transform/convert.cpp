@@ -278,10 +278,12 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     std::cout << "----[statistic] mean" << std::endl;
     // calculate mean
     for (int i = 0; i < dimension; ++i) {
-        mean[i] = (float)sum[i] / data.size();
+        mean[i] = (float)(sum[i]/data.size()) ;
     }
 
-    vector<float * > statistics ;
+    std::cout << "----[statistic] calculated" << std::endl;
+    vector<float*> statistics ;
+
     statistics.push_back(mean);
     statistics.push_back(max);
     statistics.push_back(min);
@@ -290,6 +292,7 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
     dumpText("data.statistic.log", statistics, dimension);
 
     delete[] sum;
+    std::cout << "----[statistic] clear" << std::endl;
     freeVectors(statistics);
 }
 
