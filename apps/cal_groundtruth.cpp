@@ -240,6 +240,7 @@ int main(int argc, char** argv) {
         lshboxFout << endl;
     }
     lshboxFout.close();
+    cout << "lshbox groundtruth are written into " << lshboxBenchFileName << endl;
 
     // ivecs file
     ofstream fout(ivecsBenchFileName, ios::binary);
@@ -254,5 +255,6 @@ int main(int argc, char** argv) {
         }
     }
     fout.close();
+    cout << "ivecs groundtruth are written into " << ivecsBenchFileName << endl;
     return 0;
 }
