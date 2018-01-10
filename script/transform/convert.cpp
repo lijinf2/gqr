@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
     string e2m("e2m");
     string m2a("m2a");
 
-    for (int i = 5; i <= argc; ++i) {
+    for (int i = 5; i < argc; ++i) {
 
         string operation(argv[i]);
 
