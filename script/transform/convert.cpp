@@ -293,7 +293,7 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
 
     std::cout << "----[statistic] write log" << std::endl;
     dumpText("data.statistic.log", statistics, dimension);
-
+    std::cout << "----[statistic] clear sum" << std::endl;
     delete[] sum_;
     std::cout << "----[statistic] clear" << std::endl;
     freeVectors(statistics);
