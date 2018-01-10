@@ -276,9 +276,9 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
             sum_[dim] += (double)(data[i])[dim];
 
             if((data[i][dim]) > max_[i])
-                max_[i] = (data[i][dim]);
+                max_[dim] = (data[i][dim]);
             if ((data[i][dim]) < min_[i])
-                min_[i] = (data[i][dim]);
+                min_[dim] = (data[i][dim]);
         }
     }
     std::cout << "----[statistic] mean" << std::endl;
@@ -289,11 +289,8 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
 
     std::cout << "----[statistic] calculated" << std::endl;
     vector<float*> statistics ;
-    std::cout << "----[statistic] mean" << std::endl;
     statistics.push_back(mean_);
-    std::cout << "----[statistic] max" << std::endl;
     statistics.push_back(max_);
-    std::cout << "----[statistic] min" << std::endl;
     statistics.push_back(min_);
 
     std::cout << "----[statistic] write log" << std::endl;
@@ -333,7 +330,7 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
-//     statistic(data, sampleData, dimension);
+     statistic(data, sampleData, dimension);
 
     if (PRE_MEAN) {
         preMean(data, sampleData, dimension);
