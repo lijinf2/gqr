@@ -121,7 +121,7 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
 }
 
 
-int execute(int argc, char** argv) {
+int main(int argc, char** argv) {
 
     if (argc <= 5) {
         cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} ${outputSampleFile} ${mipToAngular|euclidToMIP}" << endl;
@@ -166,4 +166,7 @@ int execute(int argc, char** argv) {
     dumpData(outputFile, data, dimension);
     dumpData(outputSampleFile, data, dimension);
 
+    return 0;
 }
+
+
