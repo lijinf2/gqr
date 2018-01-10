@@ -284,9 +284,11 @@ void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension
 
     std::cout << "----[statistic] calculated" << std::endl;
     vector<float*> statistics ;
-
+    std::cout << "----[statistic] mean" << std::endl;
     statistics.push_back(mean);
+    std::cout << "----[statistic] max" << std::endl;
     statistics.push_back(max);
+    std::cout << "----[statistic] min" << std::endl;
     statistics.push_back(min);
 
     std::cout << "----[statistic] write log" << std::endl;
