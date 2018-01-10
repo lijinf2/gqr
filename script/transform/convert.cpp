@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
     int sampleDimension;
 
     dimension = loadData(inputFile, data, 4);
-    sampleDimension = loadData(inputSampleFile, data, 4);
+    sampleDimension = loadData(inputSampleFile, sampleData, 4);
 
     if(dimension<0 || sampleDimension<0 || dimension!=sampleDimension) {
         std::cout << "dimension un_compatible" << std::endl
