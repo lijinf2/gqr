@@ -24,6 +24,7 @@ float inline calNormSquare(float* data, int dimension) {
     return norm_square;
 }
 
+
 float calMaxNormSquare(vector<float* >& data, int dimension) {
 
     float max_norm_square = 0.0f;
@@ -62,6 +63,7 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
 
     return dimension+2;
 }
+
 
 int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
@@ -179,7 +181,7 @@ int main(int argc, char** argv) {
     }
 
     dumpData(outputFile, data, dimension);
-    dumpData(outputSampleFile, data, dimension);
+    dumpData(outputSampleFile, sampleData, dimension);
 
     return 0;
 }
