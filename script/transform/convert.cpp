@@ -14,7 +14,8 @@
 #define SQUARE(X) ( (X)*(X) )
 #define ENABLE_SCALE (1)
 #define SCALE_TO     (1.0f)
-#define PRE_SCALE    (1.0f)
+#define PRE_MEAN    (1)
+#define PRE_SCALE    (0)
 
 using namespace std;
 
@@ -182,6 +183,39 @@ void preScale(vector<float* >& data, vector<float* >& sampleData, int dimension)
 
 }
 
+void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+
+    double* mean = new double[dimension];
+    for (int i = 0; i < dimension; ++i) {
+        mean[i] = 0.0;
+    }
+    // calculate sum
+    for (int i = 0; i < data.size(); ++i) {
+
+        for (int dim = 0; dim < dimension; ++dim) {
+            mean[dim] += (double)data[i][dim];
+        }
+    }
+    // calculate mean
+    for (int i = 0; i < dimension; ++i) {
+        mean[i] /= (double (data.size()));
+    }
+
+    // substrate mean
+    for (int i = 0; i < data.size(); ++i) {
+        for (int dim = 0; dim < dimension; ++dim) {
+            data[i][dim] -= mean[dim];
+        }
+    }
+
+    for (int i = 0; i < sampleData.size(); ++i) {
+        for (int dim = 0; dim < dimension; ++dim) {
+            sampleData[i][dim] -= mean[dim];
+        }
+    }
+
+}
+
 int main(int argc, char** argv) {
 
     int transform_arg = 5;
@@ -209,6 +243,10 @@ int main(int argc, char** argv) {
                   << "data dim:" << dimension << std::endl
                   << "sample dim:" << sampleDimension << std::endl;
         assert(false);
+    }
+
+    if (PRE_MEAN) {
+        preMean(data, sampleData, dimension);
     }
 
     if (PRE_SCALE) {
