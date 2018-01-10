@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 origin_dataset="audio"
 new_dataset="transformed_audio"
 operation="e2m m2a"
