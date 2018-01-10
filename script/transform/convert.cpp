@@ -53,7 +53,7 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
     }
 
     for (int j = 0; j < sampleData.size(); ++j) {
-        float * buffer = data[j];
+        float * buffer = sampleData[j];
         float norm_square = calNormSquare(buffer, dimension);
         buffer[dimension+1] = norm_square;
         buffer[dimension] = -0.5f;
@@ -80,7 +80,7 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
     }
 
     for (int j = 0; j < sampleData.size(); ++j) {
-        float * buffer = data[j];
+        float * buffer = sampleData[j];
         float norm_square = calNormSquare(buffer, dimension);
 
         buffer[dimension] = 0.0f;
