@@ -9,4 +9,4 @@ input_file="../../data/${origin_dataset}/${origin_dataset}_base.fvecs"
 output_file="${origin_dataset}.txt"
 
 
-./fvecs_to_txt.bin ${input_file} ${output_file}
+./binaryReader.bin ${input_file} ${output_file}
