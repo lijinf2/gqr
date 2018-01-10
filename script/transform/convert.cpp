@@ -13,7 +13,8 @@
 #define SQRT(X) ( (X)>0 ? sqrt(X) : 0.0f)
 #define SQUARE(X) ( (X)*(X) )
 #define ENABLE_SCALE (1)
-#define SCALE_TO (1.0f)
+#define SCALE_TO     (1.0f)
+#define PRE_SCALE    (1.0f)
 
 using namespace std;
 
@@ -44,7 +45,7 @@ float calMaxNormSquare(vector<float* >& data, int dimension) {
 
 int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
-    std::cout << "[euclidToMIP] transforming data" << std::endl;
+    std::cout << "----[euclidToMIP] transforming data" << std::endl;
 
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
@@ -61,7 +62,7 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
     }
 
 
-    std::cout << "[euclidToMIP] transforming data, done" << std::endl;
+    std::cout << "----[euclidToMIP] transforming data, done" << std::endl;
 
     return dimension+2;
 }
@@ -69,7 +70,7 @@ int euclidToMIP(vector<float* >& data, vector<float* >& sampleData, int dimensio
 
 int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
-    std::cout << "[mipToAngular] transforming data" << std::endl;
+    std::cout << "----[mipToAngular] transforming data" << std::endl;
 
     float max_norm_square = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
 
@@ -92,7 +93,7 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
     if (ENABLE_SCALE) {
 
         float scale = sqrt(max_norm_square) / SCALE_TO;
-        std::cout << "scale = " << sqrt(max_norm_square) << "/" <<  SCALE_TO << " = " << scale << std::endl;
+        std::cout << "----[mipToAngular] scale = " << sqrt(max_norm_square) << "/" <<  SCALE_TO << " = " << scale << std::endl;
         for (int line = 0; line < data.size(); ++line) {
             for (int dim = 0; dim < dimension+2; ++dim) {
                 data[line][dim] /= scale;
@@ -107,7 +108,7 @@ int mipToAngular(vector<float* >& data, vector<float* >& sampleData, int dimensi
         }
     }
 
-    std::cout << "[mipToAngular] transforming data, done" << std::endl;
+    std::cout << "----[mipToAngular] transforming data, done" << std::endl;
 
     return dimension+2;
 }
@@ -120,7 +121,7 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
-    std::cout << "[loadData] reading data from file:" << file << std::endl;
+    std::cout << "----[loadData] reading data from file:" << file << std::endl;
 
     int originDim;
     while (fin.read((char*)(&originDim), sizeof(int))) {
@@ -130,7 +131,7 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         data.push_back(buffer);
     }
 
-    std::cout << "[loadData] read data, done" << std::endl;
+    std::cout << "----[loadData] read data, done" << std::endl;
 
     fin.close();
     return originDim;
@@ -143,23 +144,49 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
-    std::cout << "[dumpData] writing data to file:" << file << std::endl;
+    std::cout << "----[dumpData] writing data to file:" << file << std::endl;
 
     for (int i = 0; i < data.size(); ++i)
     {
         fout.write((char*)&dimension, sizeof(int));
         fout.write((char*)data[i], dimension * sizeof(float));
     }
-    std::cout << "[dumpData] wrote data, done" << std::endl;
+    std::cout << "----[dumpData] wrote data, done" << std::endl;
 
     fout.close();
     return dimension;
 }
 
 
+void preScale(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+
+    std::cout << "----[preprocess] pre scale data" << std::endl;
+
+    float max_norm = std::max( calMaxNormSquare(data, dimension), calMaxNormSquare(sampleData, dimension) );
+    float scale = max_norm / PRE_SCALE;
+
+    for (int line = 0; line < data.size(); ++line) {
+        for (int dim = 0; dim < dimension; ++dim) {
+            data[line][dim] /= scale;
+        }
+    }
+
+    std::cout << "----[preprocess] pre scale query" << std::endl;
+
+    for (int line = 0; line < sampleData.size(); ++line) {
+        for (int dim = 0; dim < dimension; ++dim) {
+            data[line][dim] /= scale;
+        }
+    }
+    std::cout << "----[preprocess] pre scale, done" << std::endl;
+
+}
+
 int main(int argc, char** argv) {
 
-    if (argc <= 5) {
+    int transform_arg = 5;
+
+    if (argc <= transform_arg) {
         cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} ${outputSampleFile} ${mipToAngular|euclidToMIP}" << endl;
         return 0;
     }
@@ -184,10 +211,14 @@ int main(int argc, char** argv) {
         assert(false);
     }
 
+    if (PRE_SCALE) {
+        preScale(data, sampleData, dimension);
+    }
+
     string e2m("e2m");
     string m2a("m2a");
 
-    for (int i = 5; i < argc; ++i) {
+    for (int i = transform_arg; i < argc; ++i) {
 
         string operation(argv[i]);
 
