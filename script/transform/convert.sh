@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-origin_dataset="random"
-new_dataset="e2a_random"
+origin_dataset="audio"
+new_dataset="e2a_audio"
 operation="e2m m2a"
 
 mkdir ../../data/${new_dataset}
