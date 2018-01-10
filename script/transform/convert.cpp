@@ -109,12 +109,14 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
+    std::cout << "writing data to file:" << file << std::endl;
 
     for (int i = 0; i < data.size(); ++i)
     {
         fout.write((char*)&dimension, sizeof(int));
         fout.write((char*)data[i], dimension * sizeof(float));
     }
+    std::cout << "wrote data" << std::endl;
 
     fout.close();
     return dimension;
@@ -152,6 +154,7 @@ int main(int argc, char** argv) {
     string m2a("m2a");
 
     for (int i = 5; i <= argc; ++i) {
+
         string operation(argv[i]);
 
         if (e2m==operation) {
