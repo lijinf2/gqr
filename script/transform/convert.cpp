@@ -89,6 +89,7 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         std::cout << "cannot open file " << file << std::endl;
         assert(false);
     }
+    std::cout << "reading data from file:" << file << std::endl;
 
     int originDim;
     while (fin.read((char*)(&originDim), sizeof(int))) {
@@ -97,6 +98,8 @@ int loadData(const char* file, vector<float*>& data, int placeholder) {
         fin.read((char *)(buffer), sizeof(float) * originDim);
         data.push_back(buffer);
     }
+
+    std::cout << "read data, done" << std::endl;
 
     fin.close();
     return originDim;
@@ -116,7 +119,7 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
         fout.write((char*)&dimension, sizeof(int));
         fout.write((char*)data[i], dimension * sizeof(float));
     }
-    std::cout << "wrote data" << std::endl;
+    std::cout << "wrote data, done" << std::endl;
 
     fout.close();
     return dimension;
