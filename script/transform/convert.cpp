@@ -9,12 +9,13 @@
 #include <chrono>
 #include <vector>
 #include "lshbox/utils.h"
+#include <climits>
 
 #define SQRT(X) ( (X)>0 ? sqrt(X) : 0.0f)
 #define SQUARE(X) ( (X)*(X) )
 #define ENABLE_SCALE (1)
 #define SCALE_TO     (1.0f)
-#define PRE_MEAN    (1)
+#define PRE_MEAN    (0)
 #define PRE_SCALE    (0)
 
 using namespace std;
@@ -159,6 +160,27 @@ int dumpData(const char* file, vector<float*>& data, int dimension) {
 }
 
 
+int dumpText(const char* file, vector<float*>& data, int dimension) {
+
+    ofstream fout(file);
+    if (!fout) {
+        std::cout << "cannot open file " << file << std::endl;
+        assert(false);
+    }
+
+    for (int i = 0; i < data.size(); ++i) {
+        float * buffer = data[i];
+
+        for (int i = 0; i < dimension; ++i) {
+            fout << buffer[i] << "\t";
+        }
+        fout << endl;
+    }
+
+    fout.close();
+}
+
+
 void preScale(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
     std::cout << "----[preprocess] pre scale data" << std::endl;
@@ -182,6 +204,7 @@ void preScale(vector<float* >& data, vector<float* >& sampleData, int dimension)
     std::cout << "----[preprocess] pre scale, done" << std::endl;
 
 }
+
 
 void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) {
 
@@ -216,11 +239,48 @@ void preMean(vector<float* >& data, vector<float* >& sampleData, int dimension) 
 
 }
 
+
+void statistic(vector<float* >& data, vector<float* >& sampleData, int dimension) {
+    double* sum = new double[dimension];
+    float* mean = new float[dimension];
+    float* max = new float[dimension];
+    float* min = new float[dimension];
+
+    for (int i = 0; i < dimension; ++i) {
+        sum[i] = 0.0;
+        max[i] = std::numeric_limits<float >::max();
+        min[i] = std::numeric_limits<float >::min();
+    }
+
+    // calculate sum
+    for (int i = 0; i < data.size(); ++i) {
+        for (int dim = 0; dim < dimension; ++dim) {
+            sum[dim] += (double)data[i][dim];
+
+            if((data[i][dim]) > max[i])
+                max[i] = (data[i][dim]);
+            if ((data[i][dim]) < min[i])
+                min[i] = (data[i][dim]);
+        }
+    }
+    // calculate mean
+    for (int i = 0; i < dimension; ++i) {
+        mean[i] = (float)sum[i] / data.size();
+    }
+
+    vector<float * > statistics ;
+    statistics.push_back(mean);
+    statistics.push_back(max);
+    statistics.push_back(min);
+
+    dumpText("data.statistic.log", statistics, dimension);
+}
+
 int main(int argc, char** argv) {
 
     int transform_arg = 5;
 
-    if (argc <= transform_arg) {
+    if (argc < transform_arg) {
         cout << "Usage: transform.bin ${inputFile} ${outputFile} ${inputSampleFile} ${outputSampleFile} ${mipToAngular|euclidToMIP}" << endl;
         return 0;
     }
@@ -244,6 +304,8 @@ int main(int argc, char** argv) {
                   << "sample dim:" << sampleDimension << std::endl;
         assert(false);
     }
+
+    statistic(data, sampleData, dimension);
 
     if (PRE_MEAN) {
         preMean(data, sampleData, dimension);
