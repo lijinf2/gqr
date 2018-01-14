@@ -49,7 +49,7 @@ int Transform::euclidToMIP(vector<float* >& data, vector<float* >& queryData, in
     float dataMaxNormSquare = calMaxNormSquare(data, dimension);
     float queryMaxNormSquare = calMaxNormSquare(queryData, dimension);
     float max_norm_square = std::max(dataMaxNormSquare, queryMaxNormSquare);
-    float scalar = sqrt(max_norm_square);
+    float scalar = sqrt(max_norm_square) * dimension;
 
     scale(data, queryData, dimension, scalar);
 
@@ -92,9 +92,8 @@ int Transform::mipToAngular(vector<float* >& data, vector<float* >& queryData, i
         buffer[dimension+1] = sqrt(max_norm_square - norm_square);
     }
 
-    float scalar = sqrt(max_norm_square);
     int newDimension = dimension + 2;
-    scale(data, queryData, newDimension, scalar);
+
     return newDimension;
 }
 
