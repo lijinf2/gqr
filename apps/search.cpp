@@ -73,6 +73,8 @@ int main(int argc, const char **argv)
             TYPE_DIST = L2_DIST;
         } else if (type_dist_str=="L1") {
             TYPE_DIST = L1_DIST;
+        } else if (type_dist_str=="IP") {
+            TYPE_DIST = IP_DIST;
         }
     }
 
