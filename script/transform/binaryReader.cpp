@@ -8,16 +8,17 @@
 #include "lshbox/utils.h"
 using namespace std;
 
+#define RealT float
 
 int main (int argc, char** argv) {
     if (argc != 3) {
         cout << "Usage: transform.bin ${inputFile} ${outputFile} " << endl;
         return 0;
     }
-    
+
     const char* inputFile = argv[1];
     const char* outputFile = argv[2];
-    
+
 
     ofstream fout(outputFile);
     if (!fout) {
@@ -34,9 +35,9 @@ int main (int argc, char** argv) {
     int dimension;
 
     while (fin.read((char*)(&dimension), sizeof(int))) {
-        
-        float * buffer = new float[dimension];
-        fin.read((char *)(buffer), sizeof(float) * dimension);
+
+        RealT * buffer = new RealT[dimension];
+        fin.read((char *)(buffer), sizeof(RealT) * dimension);
 
         for (int i = 0; i < dimension; ++i)
         {
@@ -45,7 +46,7 @@ int main (int argc, char** argv) {
         fout << endl;
     }
 
-    
+
     fin.close();
     fout.close();
 
