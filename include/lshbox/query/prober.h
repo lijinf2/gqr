@@ -1,4 +1,5 @@
 #pragma once
+#include <cmath>
 template<typename ACCESSOR>
 class Prober {
 public:
@@ -28,6 +29,14 @@ public:
 
     unsigned int getNumItemsProbed() { // get number of items probed;
         return scanner_.cnt();
+    }
+
+    float calL2Norm(const DATATYPE* domin) {
+        float sum = 0;
+        for (int i = 0; i < hashBits_[0].size(); ++i) {
+            sum += domin[i] * domin[i];
+        }
+        return sqrt(sum);
     }
 
     void operator()(unsigned key){

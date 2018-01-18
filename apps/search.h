@@ -1,5 +1,6 @@
 #include <lshbox.h>
 #include <lshbox/query/treelookup.h>
+#include <lshbox/query/agqr/agqrlookup.h>
 #include <lshbox/query/losslookup.h>
 #include <lshbox/query/hashlookupPP.h>
 #include <string>
@@ -237,7 +238,31 @@ void search_mih(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_agqr(
+    const lshbox::Matrix<DATATYPE>& data,
+    const lshbox::Matrix<DATATYPE>& query,
+    LSHTYPE& mylsh,
+    const lshbox::Benchmark& bench,
+    SCANNER initScanner,
+    const unordered_map<string, string>& params) {
 
+    // initialized tree lookup
+    typedef AGQRLookup<typename lshbox::Matrix<DATATYPE>::Accessor> AGQRT;
+    Tree fvs(mylsh.getCodeLength());
+
+    void* raw_memory = operator new[]( 
+        sizeof(AGQRT) * bench.getQ());
+    AGQRT* probers = static_cast<AGQRT*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) AGQRT(
+            query[bench.getQuery(i)],
+            initScanner,
+            mylsh,
+            &fvs);// for non losslookup probers
+    }
+    annQuery(data, query, mylsh, bench, probers, params);
+}
 template<typename DATATYPE, typename LSHTYPE>
 void search(
     string method,
@@ -267,6 +292,8 @@ void search(
         search_qr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "MIH") {
         search_mih(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "AGQR") {
+        search_agqr(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);

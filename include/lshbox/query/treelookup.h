@@ -62,7 +62,7 @@ public:
         return std::make_pair(tb, newBucket);
     }
 
-private:
+protected:
     std::vector<TSTable> handlers_;
     std::vector<BIDTYPE> firstBK_;
 
