@@ -39,11 +39,15 @@ public:
         return sqrt(sum);
     }
 
-    void operator()(unsigned key){
+    virtual void operator()(unsigned key){
         scanner_(key);
     }
 
-    bool nextBucketExisted() {
+    pair<bool, float> evaluate(unsigned key) {
+        return this->scanner_.evaluate(key);
+    }
+
+    virtual bool nextBucketExisted() {
         if (getNumItemsProbed() < totalItems_)
             return true;
         else return false;
