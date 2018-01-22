@@ -8,8 +8,8 @@
 # operation="m2a"
 
 origin_dataset="audio"
-new_dataset="m2a_e2m_audio"
-operation="e2m m2a"
+new_dataset="m2a_audio"
+operation="m2a"
 
 mkdir ../../data/${new_dataset}
 

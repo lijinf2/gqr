@@ -1,0 +1,12 @@
+/home/xinyan/programs/gqr/script/CMakeFiles/edit_cache.dir
+/home/xinyan/programs/gqr/script/CMakeFiles/rebuild_cache.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/rebuild_cache.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/benchhasher.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/hasher.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/edit_cache.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/opq_evaluate.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/search.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/sample_queries.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/bin_to_fvecs.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/cal_groundtruth.dir
+/home/xinyan/programs/gqr/script/apps/CMakeFiles/doublebin_to_fvecs.dir

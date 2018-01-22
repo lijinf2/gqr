@@ -14,8 +14,8 @@ metric="euclidean"
 # metric="angular"
 
 iter=0
-# for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "audio"
+for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
+#for dataset in "audio"
 do
     iter=`expr $iter + 1`
 

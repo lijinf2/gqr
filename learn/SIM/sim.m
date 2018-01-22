@@ -1,8 +1,8 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'random_53387_192_0_10';
-codelength = 12;            
+dataset = 'audio';
+codelength = 54;            
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 
@@ -16,7 +16,8 @@ trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs'])
 testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
 trainset = trainset';
 meanTrainset = mean(trainset);
-% meanTrainset = meanTrainset-meanTrainset;
+meanTrainset = meanTrainset-meanTrainset;
+
 trainset = trainset - repmat(meanTrainset, size(trainset, 1), 1);
 testset = testset';
 testset = testset - repmat(meanTrainset, size(testset, 1), 1);

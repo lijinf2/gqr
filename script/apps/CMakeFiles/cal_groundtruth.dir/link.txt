@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/cal_groundtruth.dir/cal_groundtruth.cpp.o  -o ../bin/cal_groundtruth -rdynamic -lpthread 

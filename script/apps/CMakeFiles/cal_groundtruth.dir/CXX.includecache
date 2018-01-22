@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/xinyan/programs/gqr/apps/cal_groundtruth.cpp
+iostream
+-
+fstream
+-
+vector
+-
+queue
+-
+string
+-
+algorithm
+-
+functional
+-
+cmath
+-
+thread
+-
+math.h
+-
+assert.h
+-
+

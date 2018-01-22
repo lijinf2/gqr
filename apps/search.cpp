@@ -18,6 +18,7 @@
 #include <lshbox/lsh/sim.h>
 #include <lshbox/lsh/simpleLSH.h>
 #include <bits/unordered_map.h>
+#include <lshbox/lsh/lmip.h>
 
 #include "search.h"
 using std::unordered_map;
@@ -150,8 +151,11 @@ int main(int argc, const char **argv)
         lshbox::SimpleLSH<DATATYPE > mip;
         mip.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, mip, bench, params, TYPE_DIST, invalid_dim);
-    }
-    else {
+    } else if (hashMethod == "LMIP") {
+        lshbox::LMIP<DATATYPE> lmip;
+        lmip.loadModel(modelFile, baseBitsFile);
+        search(queryMethod, data, query, lmip, bench, params, TYPE_DIST, invalid_dim);
+    } else {
         cout << "parameters are not corrected, please double check and give correct parameters" << endl;
         return -1;
     }

@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/search.dir/search.cpp.o  -o ../bin/search -rdynamic -lpthread 

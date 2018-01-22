@@ -2,6 +2,8 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <assert.h>
+
 using namespace std;
 class Transform {
 public:

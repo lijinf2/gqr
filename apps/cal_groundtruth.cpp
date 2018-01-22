@@ -8,6 +8,8 @@
 #include <cmath>
 #include <thread>
 #include <math.h>
+#include <assert.h>
+
 using namespace std;
 class IdAndDstPair {
     public:
