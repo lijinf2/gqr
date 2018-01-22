@@ -141,12 +141,12 @@ int main(int argc, const char **argv)
         lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
-    } else if (hashMethod == "KNNGraphH") { // graph method
+    } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);
         search_graph(queryMethod, data, query, kgraphhasher, bench, params, TYPE_DIST);
     } else {
-        cout << "parameters are not corrected, please double check and give correct parameters" << endl;
+        cout << "do not support hashMethod: " << hashMethod << endl;
         return -1;
     }
 }
