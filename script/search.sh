@@ -11,7 +11,7 @@ fi
 
 ### search methods
 ## knngraph
-hash_method="KNNGraphH"
+hash_method="KNNGraph"
 query_method="KGS"
 codelength=""
 num_tables="20k"
