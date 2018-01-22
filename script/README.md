@@ -28,11 +28,16 @@ cal_groundtruth.sh
 
 ### hash_method
     - PCAH - PCA hashing
+    - PCARR - PCA hashing with random rotation
     - ITQ - Iterative Quantization
+    - SH - Spectral Hashing
+    - SpH - Spherical Hashing
+    - IsoH - Isotropic Hashing
+    - KMH - Kmeans Hashing
 
 ### query_method
     - GQR - Generate-to-probe Quantization Ranking
-    - GHR or HL - Generate-to-probe Hamming Ranking
+    - GHR or HL - Generate-to-probe Hamming Ranking, or Hash Lookup
     - QR - Quantization Ranking
     - HR - Hamming Ranking
     - MIH - Multi-index Hashing
@@ -41,7 +46,7 @@ cal_groundtruth.sh
     - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally verify that the above settings is almost optimal.
 
 ### base_format
-    - For now, fvecs is the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
+    - Fvecs is currently the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
 
 ### num_queries
     - For each dataset and querying method, we usually randomly sample 1000 items as queries.

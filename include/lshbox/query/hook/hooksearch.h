@@ -3,9 +3,8 @@
 #include <queue>
 #include <set>
 #include <utility>
-#include <lshbox/query/prober.h>
+#include <util/heap_element.h>
 #include "hooker.h"
-#include "heap_element.h"
 using std::vector;
 using std::priority_queue;
 using std::pair;

@@ -1,3 +1,4 @@
+#pragma once
 #include <lshbox.h>
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/agqr/agqrlookup.h>

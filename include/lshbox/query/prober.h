@@ -43,6 +43,10 @@ public:
         scanner_(key);
     }
 
+    /*
+     * return (unvisited, distance)
+     * if unvisited = false, variable distance has no meaning
+     * */
     pair<bool, float> evaluate(unsigned key) {
         return this->scanner_.evaluate(key);
     }

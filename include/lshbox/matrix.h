@@ -206,7 +206,7 @@ public:
             flags_[key] = true;
             return true;
         }
-        const T *operator () (unsigned key)
+        const T *operator () (unsigned key) const
         {
             return matrix_[key];
         }

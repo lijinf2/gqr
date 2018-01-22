@@ -386,6 +386,9 @@ public:
         return std::make_pair(nonVisited, dist);
     }
 
+    float calDist(unsigned key) const {
+        return metric_.dist(query_, accessor_(key));
+    }
 
     // const vector<pair<float, unsigned>>& getOpqResult() {
     //     std::sort(this->opqResult.begin(), this->opqResult.end()

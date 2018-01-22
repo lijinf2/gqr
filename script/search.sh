@@ -9,12 +9,23 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-hash_method="PCAH"
-query_method="GQR"
-num_tables=1
-codelength=12
+### search methods
+## knngraph
+hash_method="KNNGraphH"
+query_method="KGS"
+codelength=""
+num_tables="20k"
 
-#audio
+## binary hashing
+# hash_method="PCAH"
+# query_method="GQR"
+# codelength="12b"
+# num_tables="1tb"
+
+
+
+### datasets
+# audio
 dataset="audio"
 base_format="fvecs"
 cardinality=53387
@@ -127,9 +138,9 @@ topk=20
 # num_queries=1000
 # topk=20
 
-model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}b_${num_tables}tb.txt"
+model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}_${num_tables}.txt"
 base_file="../data/${dataset}/${dataset}_base.fvecs"
-base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}b_${num_tables}tb.txt"
+base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}_${num_tables}.txt"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
@@ -141,7 +152,6 @@ benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
     --dimension=$dimension \
     --num_queries=$num_queries \
     --topk=$topk \
-    --num_tables=$num_tables \
     --model_file=$model_file\
     --base_file=$base_file \
     --base_bits_file=$base_bits_file \
