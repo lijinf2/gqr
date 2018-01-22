@@ -8,7 +8,21 @@
 
 
 
-
+/**
+ * a total bits array represents a unsigned long long:
+ * eg:
+ *       total bits num     : 10
+ *       paramN             : 7 (7 hash value bit )
+ *       length bit num     : 3 (cause 2^3 >= 7, 3 is big enough),
+ *       queryVal           : 1 0 1 1 0 1 0 [append with] 1 1 0 (6+1=7 valid bits)
+ *       bucketVal          : 0 0 1 1 1 1 0 [append with] 0 1 1 (3+1=4 valid bits)
+ *       xor                : 1 0 0 0 1 0 0 ------------  1 0 1
+ *
+ *       bucketLengthMask   : 0 0 0 0 0 0 0 ------------  1 1 1 (extract 011=>3=>4 valid bits)
+ *       bucketValidBitMask : 0 0 0 1 1 1 1 ------------  0 0 0 (extract 4 bits)
+ *       valid xor          : 0 0 0 0 1 0 0 ------------  0 0 0 (1 '1')
+ *       distance           : numberOfOne(1) + paramN(7) - validBitsNumber(4) = 4
+ */
 class LengthMarkedTable {
 private:
     typedef unsigned long long BIDTYPE;
@@ -61,7 +75,13 @@ private:
 
         return lengthMask;
     }
-    
+
+    /**
+     *
+     * @param validLength
+     * @param lengthBitNum  how many bits used to represented valid bits
+     * @return bitMask used to extract valid bits
+     */
     inline BIDTYPE getValidBitsMask(unsigned validLength, unsigned lengthBitNum) {
         BIDTYPE bitsMask = 0;
     
@@ -83,6 +103,15 @@ private:
         return hamDist;
     }
 
+    /**
+     *
+     * @param queryVal
+     * @param bucketVal
+     * @param lengthBitNum how many bits used to represented valid bits
+     * @param validLengthMask mask used to extract valid length(@validLength) of whole bits array
+     * @param paramN totally bit number
+     * @return
+     */
     inline unsigned calculateDist(
         const BIDTYPE& queryVal, 
         const BIDTYPE& bucketVal, 
@@ -90,7 +119,8 @@ private:
         const BIDTYPE& validLengthMask,
         const unsigned paramN) {
 
-        BIDTYPE validLength  = bucketVal & validLengthMask;
+        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
+        assert(validLength <= paramN);
         BIDTYPE validBitsMask = getValidBitsMask(validLength, lengthBitNum);
 
         BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
@@ -209,3 +239,5 @@ private:
     unsigned dist_ = 0; // current probing hamming distance
     // std::vector<BIDTYPE>* currentTable_ = NULL;
 };
+
+
