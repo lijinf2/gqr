@@ -134,23 +134,23 @@ typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::getHashVal(unsigned k, cons
 template<typename DATATYPE>
 typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::bitsToBucket(const vector<bool>& hashbits) {
     BIDTYPE hashVal = 0;
-    // for (unsigned i = 0; i != hashbits.size(); ++i)
-    // {
-    //     hashVal <<= 1; // hashVal *= 2
-    //     if (hashbits[i])
-    //     {
-    //         hashVal += 1;
-    //     }
-    // }
+     for (unsigned i = 0; i != hashbits.size(); ++i)
+     {
+         hashVal <<= 1; // hashVal *= 2
+         if (hashbits[i])
+         {
+             hashVal += 1;
+         }
+     }
 
-    for (unsigned i = hashbits.size()-1; i != -1; --i)
-    {
-        hashVal <<= 1; // hashVal *= 2
-        if (hashbits[i])
-        {
-            hashVal += 1;
-        }
-    }
+//    for (unsigned i = hashbits.size()-1; i != -1; --i)
+//    {
+//        hashVal <<= 1; // hashVal *= 2
+//        if (hashbits[i])
+//        {
+//            hashVal += 1;
+//        }
+//    }
     return hashVal;
 }
 
