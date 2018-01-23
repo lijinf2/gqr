@@ -11,17 +11,16 @@ fi
 
 ### search methods
 ## knngraph
-hash_method="KNNGraph"
-query_method="KGS"
-codelength=""
-num_tables="20k"
+# hash_method="KNNGraph"
+# query_method="KGS"
+# codelength=""
+# num_tables="20k"
 
 ## binary hashing
-# hash_method="PCAH"
-# query_method="GQR"
-# codelength="12b"
-# num_tables="1tb"
-
+hash_method="PCAH"
+query_method="GQR"
+codelength="12b"
+num_tables="1tb"
 
 
 ### datasets
@@ -89,7 +88,7 @@ topk=20
 # num_queries=1000
 # topk=20
 
-# # # gist
+# # gist
 # dataset="gist"
 # base_format="fvecs"
 # cardinality=1000000
@@ -109,7 +108,7 @@ topk=20
 # #tiny5m
 # dataset="tiny5m"
 # base_format="fvecs"
-# cardinality=50000000
+# cardinality=5000000
 # dimension=384
 # num_queries=1000
 # topk=20
