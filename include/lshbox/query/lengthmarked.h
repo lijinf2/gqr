@@ -103,6 +103,42 @@ private:
         return hamDist;
     }
 
+
+    inline unsigned calculateDistByWeight(
+        const BIDTYPE& queryVal, 
+        const BIDTYPE& bucketVal, 
+        const unsigned lengthBitNum, 
+        const BIDTYPE& validLengthMask,
+        const unsigned paramN) 
+    {
+
+        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
+        assert(validLength <= paramN);
+        BIDTYPE validBitsMask = getValidBitsMask(validLength, lengthBitNum);
+
+        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
+        unsigned hammingDist = countOnes(xorVal);
+        hammingDist += paramN - validLength;
+        
+        return hammingDist;
+    }
+
+    inline unsigned calculateDistByLength( const BIDTYPE& queryVal, 
+        const BIDTYPE& bucketVal, 
+        const unsigned lengthBitNum, 
+        const BIDTYPE& validLengthMask,
+        const unsigned paramN) 
+    {
+
+        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
+        assert(validLength <= paramN);
+
+        BIDTYPE xorVal = (queryVal ^ bucketVal);
+        unsigned diffBitNum = countOnes(xorVal);
+        unsigned hammingDist = diffBitNum + paramN - validLength;
+
+        return hammingDist;
+    }
     /**
      *
      * @param queryVal
@@ -119,30 +155,12 @@ private:
         const BIDTYPE& validLengthMask,
         const unsigned paramN) {
 
-        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
-        assert(validLength <= paramN);
-        BIDTYPE validBitsMask = getValidBitsMask(validLength, lengthBitNum);
-
-        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
-        unsigned hamDist = countOnes(xorVal);
-        // std::cout 
-        //     << "----------------------" << std::endl
-        //     << "queryVal  : " << std::bitset<32>(queryVal)          << std::endl
-        //     << "bucketVal : " << std::bitset<32>(bucketVal)      << std::endl
-        //     << "bitsMask  : " << std::bitset<32>(validBitsMask)  << std::endl
-        //     << "xorVal    : " << std::bitset<32>(xorVal)         << std::endl
-        //     << "validLen  : " << validLength                     << std::endl
-        //     << "hamDist   : " << hamDist                         << std::endl
-        //     << "hamDist   : " << hamDist + paramN - validLength  << std::endl;
-
-        hamDist += paramN - validLength;
-        
-        return hamDist;
+        return calculateDistByWeight(queryVal, bucketVal, lengthBitNum, validLengthMask, paramN);
     }
 
-public:
-    
-    LengthMarkedTable(
+
+
+    void lengthMarkedRanking(
             BIDTYPE hashVal, // hash value of query q
             unsigned paramN, // number of bits per binary code
             const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
@@ -152,7 +170,7 @@ public:
         const unsigned lengthBitNum = this->getLengthBit(paramN);
         const BIDTYPE  validLengthMask = this->getValidLengthMask(lengthBitNum);
 
-        dstToBks_.resize(paramN + 1); // maximum hamming dist is paramN
+        dstToBks_.resize(paramN + paramN); // maximum hamming dist is paramN*2
 
         for ( std::unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it = table.begin(); it != table.end(); ++it) {
 
@@ -163,8 +181,15 @@ public:
             dstToBks_[hamDist].push_back(bucketVal);
 
         }
-
-        // setNextRowCol_();
+    }
+public:
+    
+    LengthMarkedTable(
+            BIDTYPE hashVal, // hash value of query q
+            unsigned paramN, // number of bits per binary code
+            const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
+           ){
+        lengthMarkedRanking(hashVal, paramN, table);
     }
 
     int getNumBuckets(int hamDist) {

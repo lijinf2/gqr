@@ -37,8 +37,8 @@ private:
     /**
      *    find the index of the first item bigger than item's norm
      *    if no bigger item find, then item = normPrctile.size()
-     *    so item length = 1,2,normPrctile.size()-1=normIntevalCount, 
-     *    then shift length to 0,1,2,normPrctile.size()-2=normIntevalCount-1
+     *    so item length = 1,2,normPrctile.size()-1=normIntervalCount, 
+     *    then shift length to 0,1,2,normPrctile.size()-2=normIntervalCount-1
      *    start with index=1, cause normPrctile[0] is the minist norm of train data
      */
     inline unsigned findPrctile(const DATATYPE *domin) {
@@ -49,10 +49,10 @@ private:
                 break;
             }
         }
-        // shift length to 0,1,2,normPrctile.size()-2=normIntevalCount-1
+        // shift length to 0,1,2,normPrctile.size()-2=normIntervalCount-1
         normPrctileIndex--;
 
-        assert(normPrctile.size()-2==normIntevalCount-1);
+        assert(normPrctile.size()-2==normIntervalCount-1);
         assert(normPrctileIndex<=normIntervalCount-1 && normPrctileIndex>=0);
         
         return normPrctileIndex;
@@ -83,7 +83,7 @@ private:
 template<typename DATATYPE>
 vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
 
-    vector<float> domin_pc(mean.size() + lengthBitsCount);
+    vector<float> domin_pc(tableCodelen + lengthBitsCount, 0);
 
     // zero-centered first
     for (unsigned i = 0; i != pcsAll[k].size(); ++i) {
@@ -91,27 +91,16 @@ vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
             domin_pc[i] += (domin[j] - mean[j] )* pcsAll[k][i][j];
         }
     }
-
     // determine the prctile 
-    unsigned normPrctileIndex = findPrctile(domin);
+    // unsigned normPrctileIndex = findPrctile(domin);
     // shift length to 0,1,2,..tableCodelen-1>=normIntervalCount-1
-    int currentLength = normPrctileIndex + tableCodelen - normIntervalCount;
+    // int currentLength = normPrctileIndex + tableCodelen - normIntervalCount;
 
-    assert(currentLength<=tableCodelen-1 && currentLength>=tableCodelen-normIntervalCount);
+    // assert(currentLength<=tableCodelen-1 && currentLength>=tableCodelen-normIntervalCount);
 
-    for (int i = 0; i < lengthBitsCount; ++i) {
-        domin_pc[ mean.size() - i -1 ] = ( currentLength & (1<<i) ) ? 1 : 0;
-    }
-
-//     std::cout << "-------------------------" << std::endl;
-//     float normDomin = calculateNorm(domin);
-//     std::cout << "  -- norm : " << normDomin << std::endl;
-//     std::cout << "  -- indx : " << normPrctileIndex << std::endl;
-//     std::cout << "  -- leng : " ;
-//     for (int i = lengthBitsCount-1; i != -1; --i) {
-//         std::cout << " " << domin_pc[ mean.size() - i -1 ];
-//     }
-//     std::cout << std::endl << "-------------------------" << std::endl;
+    // for (int i = 0; i < lengthBitsCount; ++i) {
+        // domin_pc[ domin_pc.size() - i -1 ] = ( currentLength & (1<<i) ) ? 1 : -1;
+    // }
 
     return domin_pc;
 }
@@ -178,5 +167,5 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
     assert(tableCodelen >= normIntervalCount );
 
     // initialized numTotalItems and tables
-    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen);
+    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen+lengthBitsCount);
 }

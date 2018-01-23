@@ -3,3 +3,4 @@ build/*
 *.cmake
 log.txt
 Makefile/
+hashingCodeTXT/

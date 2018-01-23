@@ -12,7 +12,7 @@ fi
 hash_method="LMIP"
 query_method="LM"
 num_tables=1
-codelength=54
+codelength=48
 TYPE_DIST="IP"
 
 dataset="audio"
@@ -45,6 +45,7 @@ base_file="../data/${dataset}/${dataset}_base.fvecs"
 base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}b_${num_tables}tb.txt"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 benchmark_file="../data/${dataset}/${dataset}_product_groundtruth.lshbox"
+# benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
 # gdb --args \
  ../build/bin/search\

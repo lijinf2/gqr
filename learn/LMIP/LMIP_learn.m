@@ -46,8 +46,8 @@ for k=1:Nitems
     end
 
 end
-
-B = [B, lens];
+% lens = lens - lens;
+B = [B lens];
 
 model.U = U;
 model.prct = prct;

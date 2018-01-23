@@ -45,6 +45,7 @@ for k=1:Nitems
     end
 end
 
+% lens = lens - lens;
 B = [B lens];
 
 elapse = toc(tmp_T);
