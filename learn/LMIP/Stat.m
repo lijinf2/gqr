@@ -7,9 +7,11 @@ dataset = 'audio';
 trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
 trainset = trainset';
 
-size(trainset)
+testset = fvecs_read (['../../data/',dataset,'/',dataset,'_query.fvecs']);
+testset = testset' ;
 
 norms = sum(trainset.^2, 2);
+testNorms = sum(testset.^2, 2);
 histogram(norms);
-bits = 12;
+bits = 16;
 prc = prctile(norms, linspace(0, 100, bits+1));
