@@ -29,7 +29,7 @@ int main(int argc, const char **argv)
     typedef float DATATYPE;
 
     unordered_map<string, string> params = lshbox::parseParams(argc, argv);
-    if (params.size() < 11)
+    if (params.size() < 10)
     {
         std::cerr << "Usage: "
             << "./search   "
@@ -57,7 +57,6 @@ int main(int argc, const char **argv)
     string queryMethod = params["query_method"];
     int cardinality = atoi(params["cardinality"].c_str());
     int dimension = atoi(params["dimension"].c_str());
-    int topK = atoi(params["topk"].c_str());
     string modelFile = params["model_file"];
     string dataFile = params["base_file"];
     string baseBitsFile = params["base_bits_file"];
