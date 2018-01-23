@@ -19,10 +19,6 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     Bencher opqBencher(benchFile.c_str());
 
     int numQueries = bench.getQ();
-    auto it =  params.find("num_queries");
-    if (it != params.end()) {
-        numQueries = atoi((it->second).c_str());
-    }
 
     std::cout << "probed items, " << "overall query time, " 
         << "avg recall, " << "avg precision, " << "avg error ratio" <<"\n";
@@ -76,8 +72,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     }
 
     // release memory of prober;
-    std::cout << "bench.getQ: " << bench.getQ() << std::endl;
-    for (unsigned i = bench.getQ() - 1; i !=0; --i) {
+    std::cout << "numQueries " << numQueries << std::endl;
+    for (unsigned i = numQueries - 1; i !=0; --i) {
         probers[i].~PROBERTYPE();
     }
 

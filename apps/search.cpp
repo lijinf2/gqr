@@ -29,7 +29,7 @@ int main(int argc, const char **argv)
     typedef float DATATYPE;
 
     unordered_map<string, string> params = lshbox::parseParams(argc, argv);
-    if (params.size() < 12)
+    if (params.size() < 11)
     {
         std::cerr << "Usage: "
             << "./search   "
@@ -38,7 +38,6 @@ int main(int argc, const char **argv)
             << "--base_format=xxx "
             << "--cardinality=xxx "
             << "--dimension=xxx "
-            << "--num_queries=xxx "
             << "--topk=xxx " 
             << "--modle_file=xxx " 
             << "--base_file=xxx "
@@ -58,7 +57,6 @@ int main(int argc, const char **argv)
     string queryMethod = params["query_method"];
     int cardinality = atoi(params["cardinality"].c_str());
     int dimension = atoi(params["dimension"].c_str());
-    int numQueries = atoi(params["num_queries"].c_str());
     int topK = atoi(params["topk"].c_str());
     string modelFile = params["model_file"];
     string dataFile = params["base_file"];
@@ -86,18 +84,9 @@ int main(int argc, const char **argv)
     std::cout << std::endl;
     lshbox::timer timer;
 
-    // load lshbox type data and query
-    std::cout << "load data and query..." << std::endl;
-    lshbox::Matrix<DATATYPE> data;
-    lshbox::Matrix<DATATYPE> query;
-    if (baseFormat == "fvecs") {
-        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
-        lshbox::loadFvecs(query, queryFile, dimension, numQueries);
-    }
 
     // load bench
     // transform ivecs bench to lshbox bench 
-    
     lshbox::Benchmark bench;
     // std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
     // bench.load(lshboxBenchFile);
@@ -106,6 +95,15 @@ int main(int argc, const char **argv)
         assert(false);
     } else {
         bench.load(benchFile.c_str());
+    }
+
+    // load lshbox type data and query
+    std::cout << "load data and query..." << std::endl;
+    lshbox::Matrix<DATATYPE> data;
+    lshbox::Matrix<DATATYPE> query;
+    if (baseFormat == "fvecs") {
+        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
+        lshbox::loadFvecs(query, queryFile, dimension, bench.getQ());
     }
     
     // load model

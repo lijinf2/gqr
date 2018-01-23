@@ -29,7 +29,6 @@ dataset="audio"
 base_format="fvecs"
 cardinality=53387
 dimension=192
-num_queries=200
 topk=20
 
 #msong 
@@ -37,7 +36,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=994185
 # dimension=420
-# num_queries=1000
 # topk=20
 
 #glove1.2m
@@ -45,7 +43,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=1193514
 # dimension=200
-# num_queries=1000
 # topk=20
 
 # #imagenet
@@ -53,7 +50,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=2340373
 # dimension=150
-# num_queries=200
 # topk=20
 
 #nuswide
@@ -61,7 +57,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=268643
 # dimension=500
-# num_queries=200
 # topk=20
 
 #ukbench
@@ -69,7 +64,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=1097907
 # dimension=128
-# num_queries=200
 # topk=20
 
 #enron
@@ -77,7 +71,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=94987
 # dimension=1369
-# num_queries=200
 # topk=20
 
 #cifar60k
@@ -85,7 +78,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=60000
 # dimension=512
-# num_queries=1000
 # topk=20
 
 # # gist
@@ -93,7 +85,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=1000000
 # dimension=960
-# num_queries=1000
 # topk=20
 
 #sift1m
@@ -101,7 +92,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=1000000
 # dimension=128
-# num_queries=1000
 # topk=20
 
 
@@ -110,7 +100,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=5000000
 # dimension=384
-# num_queries=1000
 # topk=20
 
 #sift10m
@@ -118,7 +107,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=10000000
 # dimension=128
-# num_queries=1000
 # topk=20
 
 # #glove2.2m
@@ -126,7 +114,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=2196017
 # dimension=300
-# num_queries=1000
 # topk=20
 #
 # deep1m
@@ -134,7 +121,6 @@ topk=20
 # base_format="fvecs"
 # cardinality=1000000
 # dimension=256
-# num_queries=1000
 # topk=20
 
 model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}_${num_tables}.txt"
@@ -149,7 +135,6 @@ benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
     --base_format=$base_format \
     --cardinality=$cardinality \
     --dimension=$dimension \
-    --num_queries=$num_queries \
     --topk=$topk \
     --model_file=$model_file\
     --base_file=$base_file \
