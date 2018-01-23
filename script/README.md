@@ -48,12 +48,6 @@ cal_groundtruth.sh
 ### base_format
     - Fvecs is currently the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
 
-### num_queries
-    - For each dataset and querying method, we usually randomly sample 1000 items as queries.
-
-### topk
-    - By default, we do 20-nearest neighbors search.
-
 ### model_file & base_bits_file
     - model learned from dataset using hash_method mentioned above.
     
