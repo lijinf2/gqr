@@ -63,3 +63,7 @@ GQR only takes fvecs as input formats. We can generate random datasets or transf
 ### K-Means hashing
 
 K-Means Hashing requires other scirpts to run, please refer to folder `../learn/KMH` for details.
+
+## Limitations
+
+### Data scale: current implementation supports at most 2^27 (i.e. about 100,000,000) data items, to process larger datasets please refer to distributed computing frameworks LoSHa (https://dl.acm.org/citation.cfm?id=3080800). 
