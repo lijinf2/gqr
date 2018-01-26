@@ -168,4 +168,6 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
 
     // initialized numTotalItems and tables
     this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen+lengthBitsCount);
+    // should be avoid
+    this->codelength = tableCodelen;
 }

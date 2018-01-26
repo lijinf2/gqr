@@ -104,7 +104,7 @@ private:
     }
 
 
-    inline unsigned calculateDistByWeight(
+    inline unsigned calculateDistByLength(
         const BIDTYPE& queryVal, 
         const BIDTYPE& bucketVal, 
         const unsigned lengthBitNum, 
@@ -123,14 +123,15 @@ private:
         return hammingDist;
     }
 
-    inline unsigned calculateDistByLength( const BIDTYPE& queryVal, 
+    inline unsigned calculateDistByWeight( const BIDTYPE& queryVal, 
         const BIDTYPE& bucketVal, 
         const unsigned lengthBitNum, 
         const BIDTYPE& validLengthMask,
         const unsigned paramN) 
     {
 
-        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
+        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1ULL;
+
         assert(validLength <= paramN);
 
         BIDTYPE xorVal = (queryVal ^ bucketVal);
@@ -155,7 +156,13 @@ private:
         const BIDTYPE& validLengthMask,
         const unsigned paramN) {
 
-        return calculateDistByWeight(queryVal, bucketVal, lengthBitNum, validLengthMask, paramN);
+        return calculateDistByLength(
+            queryVal, 
+            bucketVal, 
+            lengthBitNum, 
+            validLengthMask, 
+            paramN
+        );
     }
 
 
@@ -188,7 +195,8 @@ public:
             BIDTYPE hashVal, // hash value of query q
             unsigned paramN, // number of bits per binary code
             const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
-           ){
+           ) {
+
         lengthMarkedRanking(hashVal, paramN, table);
     }
 
