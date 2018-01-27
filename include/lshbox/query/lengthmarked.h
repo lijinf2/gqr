@@ -5,6 +5,7 @@
 #include <iostream>
 #include <limits>
 #include <bitset>
+#include <lshbox.h>
 
 
 
@@ -112,7 +113,7 @@ private:
         const unsigned paramN) 
     {
 
-        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1;
+        unsigned validLength  = (unsigned)(bucketVal & validLengthMask) + 1;
         assert(validLength <= paramN);
         BIDTYPE validBitsMask = getValidBitsMask(validLength, lengthBitNum);
 
@@ -123,30 +124,53 @@ private:
         return hammingDist;
     }
 
-    inline unsigned calculateDistByWeight( const BIDTYPE& queryVal, 
+    inline unsigned calculateDistByNormBias( const BIDTYPE& queryVal,
         const BIDTYPE& bucketVal, 
         const unsigned lengthBitNum, 
         const BIDTYPE& validLengthMask,
         const unsigned paramN) 
     {
 
-        BIDTYPE validLength  = (bucketVal & validLengthMask) + 1ULL;
-
+        unsigned validLength  = (unsigned)(bucketVal & validLengthMask) + 1;
         assert(validLength <= paramN);
 
-        BIDTYPE xorVal = (queryVal ^ bucketVal);
+        BIDTYPE validBitsMask = getValidBitsMask(paramN, lengthBitNum);
+        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
+
         unsigned diffBitNum = countOnes(xorVal);
         unsigned hammingDist = diffBitNum + paramN - validLength;
 
         return hammingDist;
     }
+
+    inline unsigned calculateDistByWeight( const BIDTYPE& queryVal,
+        const BIDTYPE& bucketVal,
+        const unsigned lengthBitNum,
+        const BIDTYPE& validLengthMask,
+        const unsigned paramN)
+    {
+
+        unsigned validLength = (unsigned)(bucketVal & validLengthMask) + 1;
+
+        BIDTYPE validBitsMask = getValidBitsMask(paramN, lengthBitNum);
+        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
+
+        unsigned diffBitNum = countOnes(xorVal);
+        unsigned sameBitNum = paramN - diffBitNum;
+        unsigned hammingDist = paramN * ((unsigned)validLengthMask+1) - sameBitNum * validLength;
+
+
+        return hammingDist;
+
+    }
     /**
      *
+     * cost only o(1) time to call
      * @param queryVal
      * @param bucketVal
-     * @param lengthBitNum how many bits used to represented valid bits
-     * @param validLengthMask mask used to extract valid length(@validLength) of whole bits array
-     * @param paramN totally bit number
+     * @param lengthBitNum how many bits used to represented valid bits                           EG: 5
+     * @param validLengthMask mask used to extract valid length(@validLength) of whole bits array EG: 0...0 11111 = 63
+     * @param paramN totally bit number                                                           EG: 27
      * @return
      */
     inline unsigned calculateDist(
@@ -154,11 +178,12 @@ private:
         const BIDTYPE& bucketVal, 
         const unsigned lengthBitNum, 
         const BIDTYPE& validLengthMask,
-        const unsigned paramN) {
+        const unsigned paramN)
+    {
 
         return calculateDistByLength(
             queryVal, 
-            bucketVal, 
+            bucketVal,
             lengthBitNum, 
             validLengthMask, 
             paramN
@@ -171,15 +196,16 @@ private:
             BIDTYPE hashVal, // hash value of query q
             unsigned paramN, // number of bits per binary code
             const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
-           ){
+           )
+    {
 
         // ranking by linear sorting with weight(valid length is represented by last lengthBitNum bit)
         const unsigned lengthBitNum = this->getLengthBit(paramN);
         const BIDTYPE  validLengthMask = this->getValidLengthMask(lengthBitNum);
 
-        dstToBks_.resize(paramN + paramN); // maximum hamming dist is paramN*2
+        dstToBks_.resize(1 + paramN * (1 + (unsigned)validLengthMask)); // maximum hamming dist is paramN*2
 
-        for ( std::unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it = table.begin(); it != table.end(); ++it) {
+        for ( auto it = table.begin(); it != table.end(); ++it) {
 
             const BIDTYPE& bucketVal = it->first;
             unsigned hamDist = calculateDist(hashVal, bucketVal, lengthBitNum, validLengthMask, paramN);
@@ -189,6 +215,7 @@ private:
 
         }
     }
+
 public:
     
     LengthMarkedTable(
