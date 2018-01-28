@@ -2,6 +2,7 @@ PROJECT(APPS)
 
 SET(APPS
     sample_queries
+    sample_remove_queries
     cal_groundtruth
     bin_to_fvecs
     doublebin_to_fvecs
