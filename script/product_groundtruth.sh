@@ -8,7 +8,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-topk=20
+topk=50
 numThreads=8;
 metric="product"
 # metric="euclidean"
@@ -16,7 +16,7 @@ metric="product"
 
 iter=0
 # for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "m2a_audio"
+for dataset in "netflix"
 do
     iter=`expr $iter + 1`
 

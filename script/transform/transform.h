@@ -75,15 +75,17 @@ int Transform::euclidToMIP(vector<float* >& data, vector<float* >& queryData, in
 int Transform::mipToAngular(vector<float* >& data, vector<float* >& queryData, int dimension) {
 
     float dataMaxNormSquare = calMaxNormSquare(data, dimension);
-    float queryMaxNormSquare = calMaxNormSquare(queryData, dimension);
-    float max_norm_square = std::max(dataMaxNormSquare, queryMaxNormSquare);
 
     for (int i = 0; i < data.size(); ++i) {
         float * buffer = data[i];
         float norm_square = calNormSquare(buffer, dimension);
 
-        buffer[dimension] = sqrt(max_norm_square - norm_square);
+        buffer[dimension] = sqrt(dataMaxNormSquare - norm_square);
         buffer[dimension+1] = 0.0f;
+
+        for (int j = 0; j < dimension+2; ++j) {
+            buffer[j] /= dataMaxNormSquare;
+        }
     }
 
     for (int j = 0; j < queryData.size(); ++j) {
@@ -91,7 +93,11 @@ int Transform::mipToAngular(vector<float* >& data, vector<float* >& queryData, i
         float norm_square = calNormSquare(buffer, dimension);
 
         buffer[dimension] = 0.0f;
-        buffer[dimension+1] = sqrt(max_norm_square - norm_square);
+        buffer[dimension+1] = 0.0f;
+
+        for (int j = 0; j < dimension+2; ++j) {
+            buffer[j] /= norm_square;
+        }
     }
 
     int newDimension = dimension + 2;

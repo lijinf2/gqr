@@ -12,31 +12,23 @@ fi
 hash_method="LMIP"
 query_method="LM"
 num_tables=1
-codelength=48
+codelength=16
 TYPE_DIST="IP"
 
-dataset="audio"
 base_format="fvecs"
-cardinality=53387
-dimension=192
-num_queries=200
+
+dataset="netflix"
+cardinality=17770
+dimension=300
+num_queries=60000
+
+# dataset="movielens"
+# cardinality=69878
+# dimension=100
+# num_queries=10677
+# num_queries=200
+
 topk=20
-
-#msong 
-# dataset="msong"
-# base_format="fvecs"
-# cardinality=994185
-# dimension=420
-# num_queries=1000
-# topk=20
-
-# sift1m
-# dataset="sift1m"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=128
-# num_queries=1000
-# topk=20
 
 
 

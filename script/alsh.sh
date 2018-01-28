@@ -12,129 +12,21 @@ fi
 hash_method="SIM"
 query_method="HR"
 num_tables=1
-codelength=54
+codelength=64
 TYPE_DIST="AG"
-
-dataset="m2a_audio"
 base_format="fvecs"
-cardinality=53387
-dimension=194
-num_queries=200
+
+# dataset="m2a_movielens"
+# cardinality=69876
+# dimension=102
+# num_queries=10677
+
+dataset="m2a_netflix"
+cardinality=17770
+dimension=302
+num_queries=60000
+
 topk=20
-
-
-# audio
-# dataset="audio"
-# base_format="fvecs"
-# cardinality=53387
-# dimension=192
-# num_queries=200
-# topk=20
-
-#msong 
-# dataset="m2a_msong"
-# base_format="fvecs"
-# cardinality=994185
-# dimension=421
-# num_queries=1000
-# topk=20
- 
-#glove1.2m
-# dataset="glove1.2m"
-# base_format="fvecs"
-# cardinality=1193514
-# dimension=200
-# num_queries=1000
-# topk=20
-
-# #imagenet
-# dataset="imagenet"
-# base_format="fvecs"
-# cardinality=2340373
-# dimension=150
-# num_queries=200
-# topk=20
-
-#nuswide
-# dataset="nuswide"
-# base_format="fvecs"
-# cardinality=268643
-# dimension=500
-# num_queries=200
-# topk=20
-
-#ukbench
-# dataset="ukbench"
-# base_format="fvecs"
-# cardinality=1097907
-# dimension=128
-# num_queries=200
-# topk=20
-
-#enron
-# dataset="enron"
-# base_format="fvecs"
-# cardinality=94987
-# dimension=1369
-# num_queries=200
-# topk=20
-
-#cifar60k
-# dataset="cifar60k"
-# base_format="fvecs"
-# cardinality=60000
-# dimension=512
-# num_queries=1000
-# topk=20
-
-# # # gist
-# dataset="gist"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=960
-# num_queries=1000
-# topk=20
-
-#sift1m
-# dataset="sift1m"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=128
-# num_queries=1000
-# topk=20
-
-
-# #tiny5m
-# dataset="tiny5m"
-# base_format="fvecs"
-# cardinality=50000000
-# dimension=384
-# num_queries=1000
-# topk=20
-
-#sift10m
-# dataset="sift10m"
-# base_format="fvecs"
-# cardinality=10000000
-# dimension=128
-# num_queries=1000
-# topk=20
-
-# #glove2.2m
-# dataset="glove2.2m"
-# base_format="fvecs"
-# cardinality=2196017
-# dimension=300
-# num_queries=1000
-# topk=20
-#
-# deep1m
-# dataset="deep1M"
-# base_format="fvecs"
-# cardinality=1000000
-# dimension=256
-# num_queries=1000
-# topk=20
 
 model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}b_${num_tables}tb.txt"
 base_file="../data/${dataset}/${dataset}_base.fvecs"

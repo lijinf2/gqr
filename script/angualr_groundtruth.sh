@@ -1,4 +1,5 @@
-cd ../build 
+#!/usr/bin/env bash
+cd ../build
 # cmake ../ -DCMAKE_BUILD_TYPE=Debug
 cmake ../ -DCMAKE_BUILD_TYPE=Release
 make cal_groundtruth 2>&1 | tee ../script/log.txt
@@ -8,7 +9,7 @@ if [ "$log" != "" ]; then
     exit
 fi
 
-topk=20
+topk=50
 numThreads=8;
 # metric="product"
 # metric="euclidean"
@@ -16,7 +17,7 @@ metric="angular"
 
 iter=0
 # for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "m2a_audio"
+for dataset in "m2a_netflix"
 do
     iter=`expr $iter + 1`
 
