@@ -20,9 +20,11 @@ for dataset in "movielens"
 do
     iter=`expr $iter + 1`
 
+    # input data files
     base_file="../data/${dataset}/${dataset}_base.fvecs"
     query_file="../data/${dataset}/${dataset}_query.fvecs"
 
+    # output groundtruth files, support both ivecs and lshbox formats 
     ivecs_bench_file="../data/${dataset}/${dataset}_groundtruth.ivecs"
     lshbox_bench_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
     if [ $metric != "euclidean" ]

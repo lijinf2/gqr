@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -90,4 +91,14 @@ float cal_avg_precision(const Bencher& bench, const vector<vector<pair<unsigned,
     assert(formatted == true);
     Bencher res(results, formatted);
     return bench.avg_precision(res, numItemProbed);
+}
+
+float cal_avg(const vector<unsigned>& vec) {
+    if (vec.size() == 0) return 0;
+    unsigned long long sum = 0;
+    for (const unsigned& v : vec) {
+        sum += v;
+    }
+    double result = (double) sum / vec.size();
+    return ((float)result);
 }

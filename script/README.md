@@ -28,11 +28,16 @@ cal_groundtruth.sh
 
 ### hash_method
     - PCAH - PCA hashing
+    - PCARR - PCA hashing with random rotation
     - ITQ - Iterative Quantization
+    - SH - Spectral Hashing
+    - SpH - Spherical Hashing
+    - IsoH - Isotropic Hashing
+    - KMH - Kmeans Hashing
 
 ### query_method
     - GQR - Generate-to-probe Quantization Ranking
-    - GHR or HL - Generate-to-probe Hamming Ranking
+    - GHR or HL - Generate-to-probe Hamming Ranking, or Hash Lookup
     - QR - Quantization Ranking
     - HR - Hamming Ranking
     - MIH - Multi-index Hashing
@@ -41,13 +46,7 @@ cal_groundtruth.sh
     - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally verify that the above settings is almost optimal.
 
 ### base_format
-    - For now, fvecs is the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
-
-### num_queries
-    - For each dataset and querying method, we usually randomly sample 1000 items as queries.
-
-### topk
-    - By default, we do 20-nearest neighbors search.
+    - Fvecs is currently the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.
 
 ### model_file & base_bits_file
     - model learned from dataset using hash_method mentioned above.
@@ -64,3 +63,7 @@ GQR only takes fvecs as input formats. We can generate random datasets or transf
 ### K-Means hashing
 
 K-Means Hashing requires other scirpts to run, please refer to folder `../learn/KMH` for details.
+
+## Limitations
+
+### Data scale: current implementation supports at most 2^27 (i.e. about 100,000,000) data items, to process larger datasets please refer to distributed computing frameworks LoSHa (https://dl.acm.org/citation.cfm?id=3080800). 

@@ -16,11 +16,16 @@
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
+
 #include <lshbox/lsh/simpleLSH.h>
+
+#include <lshbox/graph/knngraphh.h>
+
 #include <bits/unordered_map.h>
 #include <lshbox/lsh/lmip.h>
 
 #include "search.h"
+#include "search_graph.h"
 using std::unordered_map;
 using std::string;
 int main(int argc, const char **argv)
@@ -29,20 +34,21 @@ int main(int argc, const char **argv)
     typedef float DATATYPE;
 
     unordered_map<string, string> params = lshbox::parseParams(argc, argv);
-    if (params.size() < 11)
+    if (params.size() < 10)
     {
         std::cerr << "Usage: "
-            << "./search"
-            << "base_format "
-            << "base_file "
-            << "cardinality "
-            << "dimension "
-            << "base_bits_file "
-            << "query_file "
-            << "num_query"
-            << "query_bits_file "
-            << "benchmark_ivecs_file" 
-            << "topk" 
+            << "./search   "
+            << "--hash_method=xxx "
+            << "--query_method=xxx "
+            << "--base_format=xxx "
+            << "--cardinality=xxx "
+            << "--dimension=xxx "
+            << "--topk=xxx " 
+            << "--modle_file=xxx " 
+            << "--base_file=xxx "
+            << "--base_bits_file=xxx "
+            << "--query_file=xxx "
+            << "--benchmark_file=xxx" 
             << std::endl;
         return -1;
     }
@@ -56,9 +62,6 @@ int main(int argc, const char **argv)
     string queryMethod = params["query_method"];
     int cardinality = atoi(params["cardinality"].c_str());
     int dimension = atoi(params["dimension"].c_str());
-    int numQueries = atoi(params["num_queries"].c_str());
-    int topK = atoi(params["topk"].c_str());
-    int numTables = atoi(params["num_tables"].c_str());
     string modelFile = params["model_file"];
     string dataFile = params["base_file"];
     string baseBitsFile = params["base_bits_file"];
@@ -66,6 +69,7 @@ int main(int argc, const char **argv)
     string benchFile = params["benchmark_file"];
 
     unsigned TYPE_DIST = L2_DIST;
+
     if (params.find("TYPE_DIST")!=params.end()) {
         string type_dist_str = params["TYPE_DIST"];
         if(type_dist_str=="AG") {
@@ -92,18 +96,9 @@ int main(int argc, const char **argv)
     std::cout << std::endl;
     lshbox::timer timer;
 
-    // load lshbox type data and query
-    std::cout << "load data and query..." << std::endl;
-    lshbox::Matrix<DATATYPE> data;
-    lshbox::Matrix<DATATYPE> query;
-    if (baseFormat == "fvecs") {
-        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
-        lshbox::loadFvecs(query, queryFile, dimension, numQueries);
-    }
 
     // load bench
     // transform ivecs bench to lshbox bench 
-    
     lshbox::Benchmark bench;
     // std::string lshboxBenchFile =  lshbox::genBenchFromIvecs(benchFile.c_str(), numQueries, topK);
     // bench.load(lshboxBenchFile);
@@ -112,6 +107,15 @@ int main(int argc, const char **argv)
         assert(false);
     } else {
         bench.load(benchFile.c_str());
+    }
+
+    // load lshbox type data and query
+    std::cout << "load data and query..." << std::endl;
+    lshbox::Matrix<DATATYPE> data;
+    lshbox::Matrix<DATATYPE> query;
+    if (baseFormat == "fvecs") {
+        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
+        lshbox::loadFvecs(query, queryFile, dimension, bench.getQ());
     }
     
     // load model
@@ -144,7 +148,7 @@ int main(int argc, const char **argv)
         spectralHashing.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SIM") {
-        lshbox::SIMH<DATATYPE > sim;
+        lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "SimpleLSH") {
@@ -155,8 +159,13 @@ int main(int argc, const char **argv)
         lshbox::LMIP<DATATYPE> lmip;
         lmip.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, lmip, bench, params, TYPE_DIST, invalid_dim);
+    } else if (hashMethod == "KNNGraph") { // graph method
+        lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
+        kgraphhasher.loadModel(modelFile);
+        search_graph(queryMethod, data, query, kgraphhasher, bench, params, TYPE_DIST);
+
     } else {
-        cout << "parameters are not corrected, please double check and give correct parameters" << endl;
+        cout << "do not support hashMethod: " << hashMethod << endl;
         return -1;
     }
 }

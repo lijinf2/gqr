@@ -370,6 +370,26 @@ public:
         }
     }
 
+    /*
+     * same function with operator(), but with return values (nonvisited, distance); distance has meaning only when visited is false*/
+    pair<bool, float> evaluate (unsigned key)
+    {
+        bool nonVisited = accessor_.mark(key);
+        float dist = -1;
+        if (nonVisited)
+        {
+            ++cnt_;
+            dist = metric_.dist(query_, accessor_(key));
+
+            topk_.push(key, dist);
+        }
+        return std::make_pair(nonVisited, dist);
+    }
+
+    float calDist(unsigned key) const {
+        return metric_.dist(query_, accessor_(key));
+    }
+
     // const vector<pair<float, unsigned>>& getOpqResult() {
     //     std::sort(this->opqResult.begin(), this->opqResult.end()
     //         , [](const pair<float, unsigned>& a, const pair<float, unsigned>&b) {

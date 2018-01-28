@@ -1,8 +1,11 @@
+#pragma once
 #include <lshbox.h>
 #include <lshbox/query/treelookup.h>
+#include <lshbox/query/agqr/agqrlookup.h>
 #include <lshbox/query/losslookup.h>
 #include <lshbox/query/lengthmarked.h>
 #include <lshbox/query/hashlookupPP.h>
+#include <lshbox/query/hook/hooksearch.h>
 #include <string>
 #include <unordered_map>
 #include "apps/opq_evaluate.cpp"
@@ -17,24 +20,20 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     Bencher opqBencher(benchFile.c_str());
 
     int numQueries = bench.getQ();
-    auto it =  params.find("num_queries");
-    if (it != params.end()) {
-        numQueries = atoi((it->second).c_str());
-    }
 
     std::cout << "probed items, " << "overall query time, " 
-        << "avg recall, " << "avg precision, " << "avg error ratio" <<"\n";
+        << "avg recall, " << "avg precision, " << "avg error ratio" << "avg probed items" << "\n";
 
     double runtime = 0;
     lshbox::timer timer;
     int numAllItems = data.getSize();
+
+    // unsigned step = data.getSize() * 0.001;
+    // for (unsigned numItems = 1; true ; numItems += step) { //  # step wise probing
+
     for (unsigned numItems = 1; true ; numItems *= 2) { //  # of probed items must be the power of two
         if (numItems > numAllItems) 
             numItems = numAllItems;
-
-        // numItems = 65536;
-        // // numItems = 16;
-        // numAllItems = numItems;
 
         // for (unsigned i = 0; i != numQueries; ++i) {
         //     probers[i].getScanner().opqReserve(numItems); 
@@ -66,7 +65,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
         std::cout << numItems << ", " << runtime <<", "
             << cal_avg_recall(opqBencher, benchResult, true) << ", "
             << cal_avg_precision(opqBencher, benchResult, numItemProbed, true) << ", " 
-            << cal_avg_error(opqBencher, benchResult, true) << "\n";
+            << cal_avg_error(opqBencher, benchResult, true) << ", " 
+            << cal_avg(numItemProbed) <<"\n";
 
 
         if (numItems == numAllItems)
@@ -74,8 +74,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     }
 
     // release memory of prober;
-    std::cout << "bench.getQ: " << bench.getQ() << std::endl;
-    for (unsigned i = bench.getQ() - 1; i !=0; --i) {
+    std::cout << "numQueries " << numQueries << std::endl;
+    for (unsigned i = numQueries - 1; i !=0; --i) {
         probers[i].~PROBERTYPE();
     }
 
@@ -238,6 +238,64 @@ void search_mih(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_agqr(
+        const lshbox::Matrix<DATATYPE>& data,
+        const lshbox::Matrix<DATATYPE>& query,
+        LSHTYPE& mylsh,
+        const lshbox::Benchmark& bench,
+        SCANNER initScanner,
+        const unordered_map<string, string>& params) {
+
+    // initialized tree lookup
+    typedef AGQRLookup<typename lshbox::Matrix<DATATYPE>::Accessor> AGQRT;
+    Tree fvs(mylsh.getCodeLength());
+
+    void* raw_memory = operator new[]( 
+            sizeof(AGQRT) * bench.getQ());
+    AGQRT* probers = static_cast<AGQRT*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) AGQRT(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh,
+                &fvs);// for non losslookup probers
+    }
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_hook(
+        const lshbox::Matrix<DATATYPE>& data,
+        const lshbox::Matrix<DATATYPE>& query,
+        LSHTYPE& mylsh,
+        const lshbox::Benchmark& bench,
+        SCANNER initScanner,
+        const unordered_map<string, string>& params) {
+
+    int hookDegree = 8;
+    auto it =  params.find("hook_degree");
+    if (it != params.end()) {
+        hookDegree = atoi((it->second).c_str());
+    }
+
+    // initialized hook search
+    Hooker hooker(hookDegree, data, initScanner, mylsh);
+    typedef HookSearch<typename lshbox::Matrix<DATATYPE>::Accessor> HOOKSEARCHT;
+
+    void* raw_memory = operator new[]( 
+            sizeof(HOOKSEARCHT) * bench.getQ());
+    HOOKSEARCHT* probers = static_cast<HOOKSEARCHT*>(raw_memory);
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) HOOKSEARCHT(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh,
+                &hooker);// for non losslookup probers
+    }
+    annQuery(data, query, mylsh, bench, probers, params);
+    delete[] probers;
+}
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
@@ -301,6 +359,10 @@ void search(
         search_mih(data, query, mylsh, bench, initScanner, params);
     } else if (method == "LM") {
         search_lm(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "AGQR") {
+        search_agqr(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "HOOK") {
+        search_hook(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);
