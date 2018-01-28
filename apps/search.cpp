@@ -20,12 +20,12 @@
 #include <lshbox/lsh/simpleLSH.h>
 
 #include <lshbox/graph/knngraphh.h>
-
 #include <bits/unordered_map.h>
 #include <lshbox/lsh/lmip.h>
 
 #include "search.h"
 #include "search_graph.h"
+
 using std::unordered_map;
 using std::string;
 int main(int argc, const char **argv)

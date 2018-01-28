@@ -297,6 +297,7 @@ void search_hook(
     delete[] probers;
 }
 
+
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
     const lshbox::Matrix<DATATYPE>& data,
