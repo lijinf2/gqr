@@ -39,16 +39,19 @@ You may refer to folder `./script` for detailed explanations and more instructio
 - PCARR: PCA hashing with random rotation
 - SH: Spectral Hashing
 - SpH: Spherical Hashing
-- KMH: Kmeans Hashing
-- IsoH: isotropic Hashing
-- SIM: random project
-- LMIP: length Marked (variant length) inner product (work with LM)
+- KMH: KMeans Hashing
+- IsoH: Isotropic Hashing
+- SIM: Random Projecting Hashing.
+- LMIP: Length Marked (variant length) Inner Product
+    - only work with query method LM
+    - based on SIM which generate random projecting bits, and extra bits is generated for representing NORM(Length)
 
 ## Query Algorithms
 - HR: Hamming Ranking
 - HL: Hash Lookup
 - GQR: Generate-to-probe quantization ranking
 - LM: Length Marked ranking(work the LMIP)
+    - use both random projecting bits and extra bis generated in LMIP to rank
 
 # Acknowledgement
 GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 
