@@ -1,5 +1,5 @@
 #include "search.h"
-#include <lshbox/query/lengthmarked.h>
+#include <lshbox/mip/query/lengthmarked.h>
 
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>

@@ -20,7 +20,7 @@
 
 #include <lshbox/graph/knngraphh.h>
 #include <bits/unordered_map.h>
-#include <lshbox/lsh/lmip.h>
+#include <lshbox/mip/lmip.h>
 
 #include "search.h"
 #include "search_graph.h"

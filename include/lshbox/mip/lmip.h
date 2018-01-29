@@ -10,7 +10,7 @@
 #include <lshbox/matrix.h>
 #include <lshbox/eval.h>
 #include <lshbox/utils.h>
-#include "hasher.h"
+#include "lshbox/lsh/hasher.h"
 
 using std::vector;
 using std::string;
