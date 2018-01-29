@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/bin_to_fvecs.dir/bin_to_fvecs.cpp.o  -o ../bin/bin_to_fvecs -rdynamic -lpthread 

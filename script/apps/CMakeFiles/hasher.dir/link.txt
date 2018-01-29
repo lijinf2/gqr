@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/hasher.dir/hasher.cpp.o  -o ../bin/hasher -rdynamic -lpthread 

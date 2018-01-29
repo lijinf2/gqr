@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/opq_evaluate.dir/opq_evaluate.cpp.o  -o ../bin/opq_evaluate -rdynamic -lpthread 

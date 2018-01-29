@@ -1,1 +1,0 @@
-/usr/bin/c++    -std=c++11 -O3 -DNDEBUG   CMakeFiles/benchhasher.dir/benchhasher.cpp.o  -o ../bin/benchhasher -rdynamic -lpthread 
