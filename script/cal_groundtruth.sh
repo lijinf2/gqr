@@ -16,7 +16,7 @@ metric="product"
 
 iter=0
 # for dataset in "audio" "gist" "sift1m" "glove2.2m" "tiny5m" "deep1M" "sift10m"
-for dataset in "movielens"
+for dataset in "audio"
 do
     iter=`expr $iter + 1`
 
