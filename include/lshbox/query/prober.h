@@ -18,8 +18,7 @@ public:
         for (unsigned tb = 0; tb < hashBits_.size(); ++tb) {
             hashBits_[tb] = mylsh.getHashBits(tb, domin);
         }
-        // R_ = hashBits_[0].size();
-        R_ = mylsh.getCodeLength();
+        R_ = hashBits_[0].size();
 
         totalItems_ = mylsh.getBaseSize();
     }

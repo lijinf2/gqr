@@ -252,6 +252,7 @@ public:
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
+        this->R_ = mylsh.getCodeLength();
         allTables_.reserve(mylsh.tables.size());
         for (int i = 0; i < mylsh.tables.size(); ++i) {
             BIDTYPE hashValue = mylsh.getHashVal(i, domin);
