@@ -3,7 +3,7 @@
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/agqr/agqrlookup.h>
 #include <lshbox/query/losslookup.h>
-#include <lshbox/query/lengthmarked.h>
+
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/query/hook/hooksearch.h>
 #include <string>
@@ -298,36 +298,6 @@ void search_hook(
 }
 
 
-template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
-void search_lm(
-    const lshbox::Matrix<DATATYPE>& data,
-    const lshbox::Matrix<DATATYPE>& query,
-    LSHTYPE& mylsh,
-    const lshbox::Benchmark& bench,
-    SCANNER initScanner,
-    const unordered_map<string, string>& params) {
-
-    typedef LengthMarked<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
-
-    void* raw_memory = operator new[]( 
-        sizeof(LMR) * bench.getQ());
-    LMR* probers = static_cast<LMR*>(raw_memory);
-
-    double construct_time = 0;
-    lshbox::timer timer;
-    timer.restart();
-    for (int i = 0; i < bench.getQ(); ++i) {
-        new(&probers[i]) LMR(
-            query[bench.getQuery(i)],
-            initScanner,
-            mylsh);// for non losslookup probers
-    }
-    construct_time= timer.elapsed();
-    std::cout << "LM constructing time : " << construct_time << "." << std::endl;
-    annQuery(data, query, mylsh, bench, probers, params);
-}
-
-
 template<typename DATATYPE, typename LSHTYPE>
 void search(
     string method,
@@ -336,12 +306,11 @@ void search(
     LSHTYPE& mylsh,
     const lshbox::Benchmark& bench,
     const unordered_map<string, string>& params,
-    const unsigned TYPE_DIST,
-    const int invalid_dim=0) {
+    const unsigned TYPE_DIST) {
 
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
-    lshbox::Metric<DATATYPE> metric(data.getDim()-invalid_dim, TYPE_DIST);
+    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
     lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
         accessor,
         metric,
@@ -358,8 +327,6 @@ void search(
         search_qr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "MIH") {
         search_mih(data, query, mylsh, bench, initScanner, params);
-    } else if (method == "LM") {
-        search_lm(data, query, mylsh, bench, initScanner, params);
     } else if (method == "AGQR") {
         search_agqr(data, query, mylsh, bench, initScanner, params);
     } else if (method == "HOOK") {

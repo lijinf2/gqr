@@ -24,6 +24,7 @@
 
 #include "search.h"
 #include "search_graph.h"
+#include "search_mip.cpp"
 
 using std::unordered_map;
 using std::string;
@@ -82,10 +83,7 @@ int main(int argc, const char **argv)
         }
     }
 
-    int invalid_dim = 0;
-    if (params.find("invalid_dim")!=params.end()) {
-        invalid_dim = atoi(params["invalid_dim"].c_str());
-    }
+
 
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
@@ -121,39 +119,39 @@ int main(int argc, const char **argv)
     if (hashMethod == "PCAH") {
         lshbox::PCAH<DATATYPE> pcah;
         pcah.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST);
     } else if (hashMethod == "ITQ") {
         lshbox::ITQ<DATATYPE> itq;
         itq.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, itq, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, itq, bench, params, TYPE_DIST);
     } else if (hashMethod == "PCARR") {
         lshbox::PCARR<DATATYPE> pcarr;
         pcarr.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST);
     } else if (hashMethod == "SpH") {
         lshbox::SpH<DATATYPE> sph;
         sph.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sph, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, sph, bench, params, TYPE_DIST);
     } else if (hashMethod == "IsoH") {
         lshbox::IsoH<DATATYPE> isoh;
         isoh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST);
     } else if (hashMethod == "KMH") {
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST);
     } else if (hashMethod == "SH") {
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST);
     } else if (hashMethod == "SIM") {
         lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sim, bench, params, TYPE_DIST, invalid_dim);
+        search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
     } else if (hashMethod == "LMIP") {
         lshbox::LMIP<DATATYPE> lmip;
         lmip.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, lmip, bench, params, TYPE_DIST, invalid_dim);
+        search_mip(queryMethod, data, query, lmip, bench, params, TYPE_DIST);
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);

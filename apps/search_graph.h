@@ -11,7 +11,7 @@ void search_kgraph(
 
     typedef KGraphSearch<typename lshbox::Matrix<DATATYPE>::Accessor> KGS;
 
-    void* raw_memory = operator new[]( 
+    void* raw_memory = operator new[](
         sizeof(KGS) * bench.getQ());
     KGS* probers = static_cast<KGS*>(raw_memory);
 
