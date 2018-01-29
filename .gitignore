@@ -3,9 +3,11 @@ build/
 *.cmake
 Makefile/
 hashingCodeTXT/
-plot/*
 .idea/
 cmake-build-debug/
 script/CMakeFiles/CMakeTmp/
 *.bin
 script/log.txt
+script/*_ingore*
+
+
