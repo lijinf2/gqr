@@ -16,11 +16,16 @@
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
+
+
 #include <lshbox/graph/knngraphh.h>
 #include <bits/unordered_map.h>
+#include <lshbox/mip/lmip.h>
 
 #include "search.h"
 #include "search_graph.h"
+#include "search_mip.cpp"
+
 using std::unordered_map;
 using std::string;
 int main(int argc, const char **argv)
@@ -64,7 +69,8 @@ int main(int argc, const char **argv)
     string benchFile = params["benchmark_file"];
 
     unsigned TYPE_DIST = L2_DIST;
-    if(params.find("TYPE_DIST")!=params.end()) {
+
+    if (params.find("TYPE_DIST")!=params.end()) {
         string type_dist_str = params["TYPE_DIST"];
         if(type_dist_str=="AG") {
             TYPE_DIST = AG_DIST;
@@ -72,8 +78,12 @@ int main(int argc, const char **argv)
             TYPE_DIST = L2_DIST;
         } else if (type_dist_str=="L1") {
             TYPE_DIST = L1_DIST;
+        } else if (type_dist_str=="IP") {
+            TYPE_DIST = IP_DIST;
         }
     }
+
+
 
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
@@ -138,10 +148,15 @@ int main(int argc, const char **argv)
         lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
+    } else if (hashMethod == "LMIP") {
+        lshbox::LMIP<DATATYPE> lmip;
+        lmip.loadModel(modelFile, baseBitsFile);
+        search_mip(queryMethod, data, query, lmip, bench, params, TYPE_DIST);
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);
         search_graph(queryMethod, data, query, kgraphhasher, bench, params, TYPE_DIST);
+
     } else {
         cout << "do not support hashMethod: " << hashMethod << endl;
         return -1;

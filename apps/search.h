@@ -3,6 +3,7 @@
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/agqr/agqrlookup.h>
 #include <lshbox/query/losslookup.h>
+
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/query/hook/hooksearch.h>
 #include <string>
@@ -295,6 +296,7 @@ void search_hook(
     annQuery(data, query, mylsh, bench, probers, params);
     delete[] probers;
 }
+
 
 template<typename DATATYPE, typename LSHTYPE>
 void search(

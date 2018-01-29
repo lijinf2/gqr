@@ -8,6 +8,8 @@
 #include <cmath>
 #include <thread>
 #include <math.h>
+#include <assert.h>
+
 using namespace std;
 class IdAndDstPair {
     public:
@@ -94,6 +96,15 @@ static float calAngularDist(const vector<float>& query, const vector<float>& ite
     } 
     cosDst /= (qNorm * iNorm); 
     return acos(cosDst);
+}
+
+static float calInnerProductDist(const vector<float >& query, const vector<float >& item) {
+    float ipDist = 0;
+    assert(query.size() == item.size());
+    for (int i = 0; i < query.size(); ++i) {
+        ipDist -= (query[i] * item[i]);
+    }
+    return ipDist;
 }
 
 class Query {
@@ -193,6 +204,8 @@ int main(int argc, char** argv) {
             queryObjs.push_back(Query(queryVecs[i], K, calEuclideanDist));
         } else if (metric == "angular") {
             queryObjs.push_back(Query(queryVecs[i], K, calAngularDist));
+        } else if (metric == "product") {
+            queryObjs.push_back(Query(queryVecs[i], K, calInnerProductDist));
         } else {
             assert(false);
         }
