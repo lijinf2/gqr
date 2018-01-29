@@ -41,11 +41,14 @@ You may refer to folder `./script` for detailed explanations and more instructio
 - SpH: Spherical Hashing
 - KMH: Kmeans Hashing
 - IsoH: isotropic Hashing
+- SIM: random project
+- LMIP: length Marked (variant length) inner product (work with LM)
 
 ## Query Algorithms
 - HR: Hamming Ranking
 - HL: Hash Lookup
 - GQR: Generate-to-probe quantization ranking
+- LM: Length Marked ranking(work the LMIP)
 
 # Acknowledgement
 GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 
