@@ -17,7 +17,6 @@
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
 
-#include <lshbox/lsh/simpleLSH.h>
 
 #include <lshbox/graph/knngraphh.h>
 #include <bits/unordered_map.h>
@@ -151,10 +150,6 @@ int main(int argc, const char **argv)
         lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST, invalid_dim);
-    } else if (hashMethod == "SimpleLSH") {
-        lshbox::SimpleLSH<DATATYPE > mip;
-        mip.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mip, bench, params, TYPE_DIST, invalid_dim);
     } else if (hashMethod == "LMIP") {
         lshbox::LMIP<DATATYPE> lmip;
         lmip.loadModel(modelFile, baseBitsFile);
