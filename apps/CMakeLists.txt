@@ -6,7 +6,6 @@ SET(APPS
     cal_groundtruth
     bin_to_fvecs
     doublebin_to_fvecs
-    hasher
     benchhasher
     search
     opq_evaluate
