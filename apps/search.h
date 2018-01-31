@@ -23,8 +23,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
     std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
 
-    std::cout << "probed items, " << "overall query time, " 
-        << "avg recall, " << "avg precision, " << "avg error ratio" << "avg probed items" << "\n";
+    std::cout << "expected avg items, " << "overall query time, " 
+        << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual probed items" << "\n";
 
     double runtime = 0;
     lshbox::timer timer;
