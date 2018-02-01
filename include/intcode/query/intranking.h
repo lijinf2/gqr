@@ -68,18 +68,21 @@ public:
 
             auto distor = [&hashFloats](const BIDTYPE& bucket) {
                 float distance = 0;
+                float tmp;
                 for (int i = 0; i < bucket.size(); ++i) {
                     if (bucket[i] > hashFloats[i]) {
-                        distance += bucket[i] - hashFloats[i];
+                        tmp = bucket[i] - hashFloats[i];
+                        distance += tmp * tmp;
                     } else {
-                        float tmp = hashFloats[i] - bucket[i];
-                        if (tmp > 1)
-                            distance += tmp - 1;
+                        tmp = hashFloats[i] - bucket[i];
+                        if (tmp > 1) {
+                            tmp -= 1;
+                            distance += tmp * tmp;
+                        }
                     }
                 }
                 return distance;
             };
-
             LTable_.emplace_back(
                 BucketList<BIDTYPE>(mylsh.tables[tb], distor));
         }
