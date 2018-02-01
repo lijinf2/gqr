@@ -3,6 +3,7 @@
 #include <lshbox/query/treelookup.h>
 #include <lshbox/query/agqr/agqrlookup.h>
 #include <lshbox/query/losslookup.h>
+
 #include <lshbox/query/hashlookupPP.h>
 #include <lshbox/query/hook/hooksearch.h>
 #include <string>
@@ -24,7 +25,7 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
 
     std::cout << "expected avg items, " << "overall query time, " 
-        << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual probed items" << "\n";
+        << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual avg items" << "\n";
 
     double runtime = 0;
     lshbox::timer timer;
@@ -296,6 +297,7 @@ void search_hook(
     annQuery(data, query, mylsh, bench, probers, params);
     delete[] probers;
 }
+
 
 template<typename DATATYPE, typename LSHTYPE>
 void search(

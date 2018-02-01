@@ -34,6 +34,11 @@ cal_groundtruth.sh
     - SpH - Spherical Hashing
     - IsoH - Isotropic Hashing
     - KMH - Kmeans Hashing
+    - SIM - Random Projecting Hashing.
+    - LMIP - length Marked (variant length) Inner Product
+        - only work with query method LM
+        - based on SIM which generate random projecting bits, and extra bits is generated for representing NORM(Length)
+    - E2LSH - Locality Sensitive Hashing for Euclidean Distance
 
 ### query_method
     - GQR - Generate-to-probe Quantization Ranking
@@ -41,9 +46,13 @@ cal_groundtruth.sh
     - QR - Quantization Ranking
     - HR - Hamming Ranking
     - MIH - Multi-index Hashing
+    - LM - Length Marked ranking(work the LMIP)
+        - use both random projecting bits and extra bis generated in LMIP to rank
+    - IntRank - ranking to probe for E2LSH
     
 ### codelength
     - Default code length is 12, 16, 18 and 20 for CIFAR60K, GIST1M, TINY5M and SIFT10M, respectively. We experimentally verify that the above settings is almost optimal.
+    - For LMIP, a extra parameter normInteval is needed. Default value equals codeLength.
 
 ### base_format
     - Fvecs is currently the only format we supported. See TEXMEX(http://corpus-texmex.irisa.fr/) for details.

@@ -10,18 +10,24 @@ if [ "$log" != "" ]; then
 fi
 
 ### search methods
+
 ## knngraph
 # hash_method="KNNGraph"
 # query_method="KGS"
 # codelength=""
 # num_tables="20k"
 
-## binary hashing
-hash_method="PCAH"
-query_method="GQR"
+## e2lsh
+hash_method="E2LSH"
+query_method="IntRank"
 codelength="12b"
 num_tables="1tb"
 
+## binary hashing
+# hash_method="PCAH"
+# query_method="GQR"
+# codelength="12b"
+# num_tables="1tb"
 
 ### datasets
 # audio

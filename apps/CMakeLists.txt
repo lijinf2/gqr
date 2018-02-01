@@ -9,6 +9,7 @@ SET(APPS
     benchhasher
     search
     opq_evaluate
+    test
 )
 
 FOREACH(APP ${APPS})

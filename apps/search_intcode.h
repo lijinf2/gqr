@@ -1,7 +1,9 @@
+#pragma once
 #include "search.h"
-#include "lshbox/graph/query/kgraphsearch.h"
+#include "intcode/query/intranking.h"
+
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
-void search_kgraph(
+void search_intrank(
     const lshbox::Matrix<DATATYPE>& data,
     const lshbox::Matrix<DATATYPE>& query,
     LSHTYPE& mylsh,
@@ -9,28 +11,28 @@ void search_kgraph(
     SCANNER initScanner,
     const unordered_map<string, string>& params) {
 
-    typedef KGraphSearch<typename lshbox::Matrix<DATATYPE>::Accessor> KGS;
+    typedef IntRanking<typename lshbox::Matrix<DATATYPE>::Accessor> IR;
 
     void* raw_memory = operator new[](
-        sizeof(KGS) * bench.getQ());
-    KGS* probers = static_cast<KGS*>(raw_memory);
+        sizeof(IR) * bench.getQ());
+    IR* probers = static_cast<IR*>(raw_memory);
 
     double construct_time = 0;
     lshbox::timer timer;
     timer.restart();
     for (int i = 0; i < bench.getQ(); ++i) {
-        new(&probers[i]) KGS(
+        new(&probers[i]) IR(
             query[bench.getQuery(i)],
             initScanner,
             mylsh);// for non losslookup probers
     }
     construct_time= timer.elapsed();
-    std::cout << "HR constructing time : " << construct_time << "." << std::endl;
+    std::cout << "IntRank constructing time : " << construct_time << "." << std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
 template<typename DATATYPE, typename LSHTYPE>
-void search_graph(
+void search_intcode(
     string method,
     const lshbox::Matrix<DATATYPE>& data,
     const lshbox::Matrix<DATATYPE>& query,
@@ -48,9 +50,9 @@ void search_graph(
         bench.getK()
     );
 
-    if (method == "KGS") {
-        search_kgraph(data, query, mylsh, bench, initScanner, params);
-    } else if (method == "HR") {
+    if (method == "IntRank") {
+        search_intrank(data, query, mylsh, bench, initScanner, params);
+    } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);
     }

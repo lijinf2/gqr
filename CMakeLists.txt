@@ -18,9 +18,11 @@ IF(WIN32)
     ENDIF()
 ELSEIF(LINUX)
     SET(SAVE_CLASS linux)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    link_libraries(-lpthread)
 ELSE()
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -lpthread")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    link_libraries(-lpthread)
 ENDIF()
 
 INCLUDE_DIRECTORIES(

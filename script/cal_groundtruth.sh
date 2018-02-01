@@ -10,7 +10,8 @@ fi
 
 topk=20
 numThreads=8;
-metric="euclidean"
+metric="product"
+# metric="euclidean"
 # metric="angular"
 
 iter=0
