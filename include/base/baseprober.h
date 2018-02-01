@@ -1,13 +1,13 @@
 #pragma once
 #include <cmath>
 #include "lshbox/utils.h"
-template<typename ACCESSOR>
-class Prober {
+template<typename ACCESSOR, typename BIDTYPE>
+class BaseProber {
 public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
-    typedef unsigned long long BIDTYPE;
+
     template<typename LSHTYPE>
-    Prober(
+    BaseProber(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : scanner_(scanner) {
@@ -15,11 +15,11 @@ public:
         // initialize scanner_, this->hashBits_, and this->R_
         scanner_.reset(domin);
 
-        hashBits_.resize(mylsh.tables.size());
-        for (unsigned tb = 0; tb < hashBits_.size(); ++tb) {
-            hashBits_[tb] = mylsh.getHashBits(tb, domin);
+        buckets_.resize(mylsh.tables.size());
+        for (unsigned tb = 0; tb < buckets_.size(); ++tb) {
+            buckets_[tb] = mylsh.getBuckets(tb, domin);
         }
-        R_ = hashBits_[0].size();
+        R_ = buckets_[0].size();
 
         totalItems_ = mylsh.getBaseSize();
     }
@@ -30,14 +30,6 @@ public:
 
     unsigned int getNumItemsProbed() { // get number of items probed;
         return scanner_.cnt();
-    }
-
-    float calL2Norm(const DATATYPE* domin) {
-        float sum = 0;
-        for (int i = 0; i < hashBits_[0].size(); ++i) {
-            sum += domin[i] * domin[i];
-        }
-        return sqrt(sum);
     }
 
     virtual void operator()(unsigned key){
@@ -68,13 +60,10 @@ public:
             = thisScan.topk().getTopk();
     }
 
-    ~Prober(){
-        // delete[] visited;
-    }
 protected:
     unsigned int numBucketsProbed_ = 0;
     unsigned R_;
-    std::vector<std::vector<bool>> hashBits_; // L hash tables
+    std::vector<BIDTYPE> buckets_; // L hash tables
 
 private:
     lshbox::Scanner<ACCESSOR> scanner_;

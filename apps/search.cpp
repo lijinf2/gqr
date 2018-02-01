@@ -16,6 +16,7 @@
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
+#include <intcode/hash/e2lsh.h>
 
 
 #include <lshbox/graph/knngraphh.h>
@@ -24,6 +25,7 @@
 
 #include "search.h"
 #include "search_graph.h"
+#include "search_intcode.h"
 #include "search_mip.cpp"
 
 using std::unordered_map;
@@ -157,7 +159,12 @@ int main(int argc, const char **argv)
         kgraphhasher.loadModel(modelFile);
         search_graph(queryMethod, data, query, kgraphhasher, bench, params, TYPE_DIST);
 
+    } else if (hashMethod == "E2LSH") {
+        lshbox::E2LSH<DATATYPE> e2lsh; 
+        e2lsh.loadModel(modelFile, baseBitsFile);
+        search_intcode(queryMethod, data, query, e2lsh, bench, params, TYPE_DIST);
     } else {
+
         cout << "do not support hashMethod: " << hashMethod << endl;
         return -1;
     }
