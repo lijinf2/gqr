@@ -52,6 +52,14 @@ public:
 
     virtual std::pair<unsigned, BIDTYPE> getNextBID() = 0; 
 
+    float calL2Norm(const DATATYPE* domin) {
+        float sum = 0;
+        for (int i = 0; i < R_; ++i) {
+            sum += domin[i] * domin[i];
+        }
+        return sqrt(sum);
+    }
+    
     void reportCDD(){
         // report probed items
         lshbox::Scanner<ACCESSOR> thisScan = scanner_;
@@ -62,7 +70,7 @@ public:
 
 protected:
     unsigned int numBucketsProbed_ = 0;
-    unsigned R_;
+    unsigned R_; // code length
     std::vector<BIDTYPE> buckets_; // L hash tables
 
 private:
