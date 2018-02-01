@@ -23,6 +23,10 @@ public:
 
     void loadModel(const string& modelFile); 
 
+    void loadModel(const string& modelFile, const string& baseBitsFile) override {
+        loadModel(modelFile);
+    }
+
 private:
     vector<bool> bucketToBits_(BIDTYPE bid);
 };

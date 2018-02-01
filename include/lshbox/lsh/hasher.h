@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
+#include "base/basehasher.h"
 using std::vector;
 using std::unordered_map;
 using std::string;
@@ -14,28 +15,15 @@ using std::istringstream;
 namespace lshbox {
 
 template<typename DATATYPE = float>
-class Hasher {
+class Hasher : public BaseHasher<DATATYPE, unsigned long long>{
 public:
     typedef unsigned long long BIDTYPE;
-    // struct Parameter
-    // {
-    //     /// Number of hash tables
-    //     unsigned L = 0;
-    //     /// Dimension of the vector
-    //     unsigned D = 0;
-    //     /// Binary code bytes
-    //     unsigned N = 0;
-    //     /// Size of vectors in train
-    //     unsigned S = 0;
-    // };
 
-    int numTotalItems;
-    int codelength;
-    vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
+    Hasher() : BaseHasher<DATATYPE, BIDTYPE>() {}
 
-    Hasher() {}
-
-
+    BIDTYPE getBuckets(unsigned tb, const DATATYPE *data) override {
+        return getHashVal(tb, data);
+    }
     virtual vector<float>  getHashFloats(unsigned k, const DATATYPE* domin) {
         std::cout << "invoke getHashFloats but not override" << std::endl;
         assert(false);
@@ -56,23 +44,8 @@ public:
 
     BIDTYPE bitsToBucket(const vector<bool>& hashbits); 
 
-    template<typename PROBER>
-    int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
-
-    template<typename PROBER>
-    void KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems);
-
     vector<bool> quantizeByZero(const vector<float>& hashFloats);
 
-    int getTableSize();
-
-    int getMaxBucketSize();
-
-    int getBaseSize();
-
-    int getCodeLength();
-
-    int getNumTables();
 };
 
 //--------------------- Implementations ------------------
@@ -146,32 +119,6 @@ typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::bitsToBucket(const vector<b
 }
 
 template<typename DATATYPE>
-template<typename PROBER>
-int Hasher<DATATYPE>::probe(unsigned t, BIDTYPE bucketId, PROBER& prober) {
-    int numProbed = 0;
-    if (this->tables[t].find(bucketId) != this->tables[t].end())
-    {
-        numProbed = this->tables[t][bucketId].size();
-        for (std::vector<unsigned>::iterator iter = this->tables[t][bucketId].begin(); iter != this->tables[t][bucketId].end(); ++iter)
-        {
-            prober(*iter);
-        }
-    }
-    return numProbed;
-}
-
-template<typename DATATYPE>
-template<typename PROBER>
-void Hasher<DATATYPE>::KItemByProber(const DATATYPE *domin, PROBER &prober, int numItems) {
-
-    while(prober.getNumItemsProbed() < numItems && prober.nextBucketExisted()) {
-        // <table, bucketId>
-        const std::pair<unsigned, BIDTYPE>& probePair = prober.getNextBID();
-        probe(probePair.first, probePair.second, prober); 
-    }
-}
-
-template<typename DATATYPE>
 vector<bool> Hasher<DATATYPE>::quantizeByZero(const vector<float>& hashFloats)
 {
     vector<bool> hashBits;
@@ -184,37 +131,5 @@ vector<bool> Hasher<DATATYPE>::quantizeByZero(const vector<float>& hashFloats)
         }
     }
     return  hashBits;
-}
-
-template<typename DATATYPE>
-int Hasher<DATATYPE>::getTableSize() {
-    return tables[0].size();
-}
-
-template<typename DATATYPE>
-int Hasher<DATATYPE>::getMaxBucketSize() {
-    int max = 0;
-    std::unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it;
-    for (it = tables[0].begin(); it != tables[0].end(); ++it) {
-        if (it->second.size() > max) {
-            max = it->second.size();
-        }
-    }
-    return max;
-}
-
-template<typename DATATYPE>
-int Hasher<DATATYPE>::getBaseSize() {
-    return this->numTotalItems;
-}
-
-template<typename DATATYPE>
-int Hasher<DATATYPE>::getCodeLength() {
-    return this->codelength;
-}
-
-template<typename DATATYPE>
-int Hasher<DATATYPE>::getNumTables() {
-    return this->tables.size();
 }
 };

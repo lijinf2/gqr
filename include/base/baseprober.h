@@ -19,7 +19,7 @@ public:
         for (unsigned tb = 0; tb < buckets_.size(); ++tb) {
             buckets_[tb] = mylsh.getBuckets(tb, domin);
         }
-        R_ = buckets_[0].size();
+        R_ = mylsh.getCodeLength();
 
         totalItems_ = mylsh.getBaseSize();
     }
