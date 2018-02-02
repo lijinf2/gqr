@@ -20,24 +20,23 @@ function [model, B, elapse] = LMIP_learn(A, maxbits, normInteval, norms, prct, l
 tmp_T = tic;
 
 [Nitems, Nfeatures] = size(A);
-k = maxbits;
 
 
-U = normrnd(0, 1, Nfeatures, k);
+U = normrnd(0, 1, Nfeatures, maxbits);
 Z = A * U;
 
 B = (Z > 0);
 
 lens = zeros(Nitems, lengthBits);
 
+U_median = median(norms);
+
+
 % put vector norm(length) in lens matrix in binary form
 for k=1:Nitems
 	% vector whose norms is not greater than prct[2] belongs to the 0 group
-	currentLength = find(prct>norms(k), 1) - 2; 
-	if(currentLength<0)
-		currentLength = 0;
-	end
-	currentLength = currentLength + maxbits - normInteval;
+	% currentLength = find(prct>norms(k), 1) - 2; 
+	currentLength = cal_weight(prct, norms, k, U_median, lengthBits, normInteval,  maxbits);
 
 	mask = 1;
 	for bitIndex=1:lengthBits
