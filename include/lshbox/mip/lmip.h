@@ -24,40 +24,6 @@ template<typename DATATYPE = float>
 class LMIP: public Hasher<DATATYPE>
 {
 
-private:
-
-    inline float calculateNorm(const DATATYPE *domin) {
-        float normSquare = 0.0;
-        for (int i = 0; i < mean.size(); ++i) {
-            normSquare += domin[i] * domin[i];
-        }
-        return normSquare;
-    }
-
-    /**
-     *    find the index of the first item bigger than item's norm
-     *    if no bigger item find, then item = normPrctile.size()
-     *    so item length = 1,2,normPrctile.size()-1=normIntervalCount, 
-     *    then shift length to 0,1,2,normPrctile.size()-2=normIntervalCount-1
-     *    start with index=1, cause normPrctile[0] is the minist norm of train data
-     */
-    inline unsigned findPrctile(const DATATYPE *domin) {
-        float norm = calculateNorm(domin);
-        int normPrctileIndex;
-        for (normPrctileIndex = 1; normPrctileIndex < normPrctile.size()-1; ++normPrctileIndex) {
-            if (normPrctile[normPrctileIndex] >= norm) {
-                break;
-            }
-        }
-        // shift length to 0,1,2,normPrctile.size()-2=normIntervalCount-1
-        normPrctileIndex--;
-
-        assert(normPrctile.size()-2==normIntervalCount-1);
-        assert(normPrctileIndex<=normIntervalCount-1 && normPrctileIndex>=0);
-        
-        return normPrctileIndex;
-    }
-
 public:
 
     typedef typename Hasher<DATATYPE>::BIDTYPE BIDTYPE;
@@ -68,7 +34,7 @@ public:
 
     vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
 
-    void loadModel(const string& modelFile, const string& baseBitsFile); 
+    void loadModel(const string& modelFile, const string& baseBitsFile);
 
 private:
     vector<vector<vector<float> > > pcsAll;
@@ -91,16 +57,6 @@ vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
             domin_pc[i] += (domin[j] - mean[j] )* pcsAll[k][i][j];
         }
     }
-    // determine the prctile 
-    // unsigned normPrctileIndex = findPrctile(domin);
-    // shift length to 0,1,2,..tableCodelen-1>=normIntervalCount-1
-    // int currentLength = normPrctileIndex + tableCodelen - normIntervalCount;
-
-    // assert(currentLength<=tableCodelen-1 && currentLength>=tableCodelen-normIntervalCount);
-
-    // for (int i = 0; i < lengthBitsCount; ++i) {
-        // domin_pc[ domin_pc.size() - i -1 ] = ( currentLength & (1<<i) ) ? 1 : -1;
-    // }
 
     return domin_pc;
 }
