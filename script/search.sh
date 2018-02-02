@@ -1,5 +1,5 @@
 #!/bin/bash
-cd ../build 
+mkdir ../build && cd ../build 
 # cmake ../ -DCMAKE_BUILD_TYPE=Debug
 cmake ../ -DCMAKE_BUILD_TYPE=Release
 make search 2>&1 | tee ../script/log.txt
@@ -18,16 +18,16 @@ fi
 # num_tables="20k"
 
 ## e2lsh
-hash_method="E2LSH"
-query_method="IntRank"
-codelength="12b"
-num_tables="1tb"
-
-## binary hashing
-# hash_method="PCAH"
-# query_method="GQR"
+# hash_method="E2LSH"
+# query_method="IntRank"
 # codelength="12b"
 # num_tables="1tb"
+
+## binary hashing
+hash_method="PCAH"
+query_method="GQR"
+codelength="12b"
+num_tables="1tb"
 
 ### datasets
 # audio
