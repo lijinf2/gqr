@@ -1,10 +1,11 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'audio';
+dataset ='movielens'; 
 
-codelength = 48;
+codelength = 12;
 normInteval = codelength;
+
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 
@@ -44,9 +45,8 @@ disp('==============================');
 numQueries = size(testset, 1)
 
 norms = sum(trainset.^2,  2);
-prct = prctile(norms, linspace(0, 100, normInteval+1));
-prct(end) = realmax;
 lengthBits = ceil(log2(codelength));
+prct = split(norms, normInteval, lengthBits);
 
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries
