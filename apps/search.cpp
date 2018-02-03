@@ -147,6 +147,7 @@ int main(int argc, const char **argv)
         search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
     } else if (hashMethod == "LMIP") {
         lshbox::LMIP<DATATYPE> lmip;
+        TYPE_DIST = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, TYPE_DIST);
     } else if (hashMethod == "KNNGraph") { // graph method
