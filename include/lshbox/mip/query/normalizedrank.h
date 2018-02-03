@@ -13,7 +13,7 @@
 #include <lshbox.h>
 #include "lshbox/mip/lmip.h"
 
-long count_fjdslfjdkfjdklj = 0;
+
 
 class NRTable {
 private:
@@ -72,7 +72,7 @@ private:
         if (validLength+1>=normIntervals.size()) {
             assert(false);
         }
-        float hammingDist = (paramN / 12.0f - sameBitNum) * normIntervals[validLength+1] ;
+        float hammingDist = (paramN / 32.0f - sameBitNum) * normIntervals[validLength+1] ;
 
         return hammingDist;
     }
@@ -111,7 +111,6 @@ public:
         }
         assert(dstToBks_.size() == table.size());
 
-        std::cout << "start ranking :" << dstToBks_.size() << " count: " << count_fjdslfjdkfjdklj++ << std::endl;
 
         std::sort(dstToBks_.begin(),
                   dstToBks_.end(),

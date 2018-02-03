@@ -1,12 +1,12 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'movielens';
+dataset = 'netflix';
 
 codelength = 16;
 normInteval = codelength;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
-lengthBits = ceil(normInteval);
+lengthBits = ceil(sqrt(normInteval));
 
 method = 'NLMIP';
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
