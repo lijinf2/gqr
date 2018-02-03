@@ -6,7 +6,7 @@
 #include <limits>
 #include <bitset>
 #include <lshbox.h>
-
+#include "lshbox/mip/lmip.h"
 
 
 /**
@@ -194,15 +194,14 @@ private:
 
     void lengthMarkedRanking(
             BIDTYPE hashVal, // hash value of query q
-            unsigned paramN, // number of bits per binary code
+            const unsigned paramN, // number of bits per binary code
+            const unsigned lengthBitNum,
             const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
            )
     {
 
         // ranking by linear sorting with weight(valid length is represented by last lengthBitNum bit)
-        const unsigned lengthBitNum = this->getLengthBit(paramN);
         const BIDTYPE  validLengthMask = this->getValidLengthMask(lengthBitNum);
-
         dstToBks_.resize(1 + paramN * (1 + (unsigned)validLengthMask)); // maximum hamming dist is paramN*2
 
         for ( auto it = table.begin(); it != table.end(); ++it) {
@@ -220,11 +219,12 @@ public:
     
     LengthMarkedTable(
             BIDTYPE hashVal, // hash value of query q
-            unsigned paramN, // number of bits per binary code
+            const unsigned paramN, // number of bits per binary code
+            const unsigned lengthBitNum,
             const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
            ) {
 
-        lengthMarkedRanking(hashVal, paramN, table);
+        lengthMarkedRanking(hashVal, paramN, lengthBitNum, table);
     }
 
     int getNumBuckets(int hamDist) {
@@ -246,17 +246,18 @@ public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
 
-    template<typename LSHTYPE>
+    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
     LengthMarked(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
-        this->R_ = mylsh.getCodeLength();
+        this->R_ = mylsh.getHashBitsLen();
         allTables_.reserve(mylsh.tables.size());
+
         for (int i = 0; i < mylsh.tables.size(); ++i) {
             BIDTYPE hashValue = mylsh.getHashVal(i, domin);
-            allTables_.emplace_back(LengthMarkedTable(hashValue, this->R_, mylsh.tables[i]));
+            allTables_.emplace_back(LengthMarkedTable(hashValue, mylsh.getHashBitsLen(), mylsh.getLengthBitsCount(), mylsh.tables[i]));
         }
         table_ = 0;
         iterator_ = 0;

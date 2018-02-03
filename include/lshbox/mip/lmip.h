@@ -70,20 +70,26 @@ public:
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
+    vector<float > getNormIntervals() { return normPrctile; }
+
+    unsigned getHashBitsLen() { return hashBitsLen; }
+
+    unsigned getLengthBitsCount() { return lengthBitsCount; }
+
 private:
     vector<vector<vector<float> > > pcsAll;
     vector<float> mean;
     vector<float> normPrctile;
     unsigned lengthBitsCount;
     unsigned normIntervalCount;
-    unsigned tableCodelen;
+    unsigned hashBitsLen;
 };
 }
 
 template<typename DATATYPE>
 vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
 
-    vector<float> domin_pc(tableCodelen + lengthBitsCount, 0);
+    vector<float> domin_pc(hashBitsLen + lengthBitsCount, 0);
 
     // zero-centered first
     for (unsigned i = 0; i != pcsAll[k].size(); ++i) {
@@ -93,10 +99,10 @@ vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
     }
     // determine the prctile 
     // unsigned normPrctileIndex = findPrctile(domin);
-    // shift length to 0,1,2,..tableCodelen-1>=normIntervalCount-1
-    // int currentLength = normPrctileIndex + tableCodelen - normIntervalCount;
+    // shift length to 0,1,2,..hashBitsLen-1>=normIntervalCount-1
+    // int currentLength = normPrctileIndex + hashBitsLen - normIntervalCount;
 
-    // assert(currentLength<=tableCodelen-1 && currentLength>=tableCodelen-normIntervalCount);
+    // assert(currentLength<=hashBitsLen-1 && currentLength>=hashBitsLen-normIntervalCount);
 
     // for (int i = 0; i < lengthBitsCount; ++i) {
         // domin_pc[ domin_pc.size() - i -1 ] = ( currentLength & (1<<i) ) ? 1 : -1;
@@ -125,7 +131,7 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
     getline(modelFin, line);
     istringstream statIss(line);
     int numTables, tableDim, tableNumItems, tableNumQueries;
-    statIss >> numTables >> tableDim >> tableCodelen >> tableNumItems >> tableNumQueries;
+    statIss >> numTables >> tableDim >> hashBitsLen >> tableNumItems >> tableNumQueries;
 
     getline(modelFin, line);
     istringstream paramIss(line);
@@ -149,14 +155,14 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
 
     this->pcsAll.resize(numTables);
     for (auto& curPcs : pcsAll) {
-        curPcs.resize(tableCodelen);
+        curPcs.resize(hashBitsLen);
         for (auto& v : curPcs) {
             v.resize(tableDim);
         }
         for (int row = 0; row < tableDim; ++row) {
             getline(modelFin, line);
             istringstream iss(line);
-            for (int cIdx = 0; cIdx < tableCodelen; ++cIdx) {
+            for (int cIdx = 0; cIdx < hashBitsLen; ++cIdx) {
                 iss >> curPcs[cIdx][row];
             }
         }
@@ -164,10 +170,9 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
     modelFin.close();
 
     assert(normPrctile.size()-1 == normIntervalCount);
-    assert(tableCodelen >= normIntervalCount );
+    assert(hashBitsLen >= normIntervalCount );
 
     // initialized numTotalItems and tables
-    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, tableCodelen+lengthBitsCount);
-    // should be avoid
-    this->codelength = tableCodelen;
+    this->initBaseHasher(baseBitsFile, numTables, tableNumItems, hashBitsLen+lengthBitsCount);
+
 }
