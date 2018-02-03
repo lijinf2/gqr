@@ -36,16 +36,13 @@ int main(int argc, const char **argv)
     typedef float DATATYPE;
 
     unordered_map<string, string> params = lshbox::parseParams(argc, argv);
-    if (params.size() < 10)
+    if (params.size() < 8)
     {
         std::cerr << "Usage: "
             << "./search   "
             << "--hash_method=xxx "
             << "--query_method=xxx "
             << "--base_format=xxx "
-            << "--cardinality=xxx "
-            << "--dimension=xxx "
-            << "--topk=xxx " 
             << "--modle_file=xxx " 
             << "--base_file=xxx "
             << "--base_bits_file=xxx "
@@ -62,8 +59,6 @@ int main(int argc, const char **argv)
     }
     string hashMethod = params["hash_method"];
     string queryMethod = params["query_method"];
-    int cardinality = atoi(params["cardinality"].c_str());
-    int dimension = atoi(params["dimension"].c_str());
     string modelFile = params["model_file"];
     string dataFile = params["base_file"];
     string baseBitsFile = params["base_bits_file"];
@@ -113,8 +108,8 @@ int main(int argc, const char **argv)
     lshbox::Matrix<DATATYPE> data;
     lshbox::Matrix<DATATYPE> query;
     if (baseFormat == "fvecs") {
-        lshbox::loadFvecs(data, dataFile, dimension, cardinality);
-        lshbox::loadFvecs(query, queryFile, dimension, bench.getQ());
+        lshbox::loadFvecs(data, dataFile);
+        lshbox::loadFvecs(query, queryFile);
     }
     
     // load model
