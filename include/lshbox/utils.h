@@ -109,15 +109,27 @@ vector<bool> to_bits (unsigned long long num)
 }
 
 template<typename DATATYPE>
-void loadFvecs(Matrix<DATATYPE>& data, const string& dataFile, int dimension, int cardinality) {
-    data.reset(dimension, cardinality);
-    std::ifstream fin(dataFile.c_str(), std::ios::binary);
+void loadFvecs(Matrix<DATATYPE>& data, const string& dataFile) {
+    std::ifstream fin(dataFile.c_str(), std::ios::binary | std::ios::ate);
     if (!fin) {
         std::cout << "cannot open file " << dataFile.c_str() << std::endl;
         assert(false);
     }
+    unsigned fileSize = fin.tellg();
+    fin.seekg(0, fin.beg);
+    assert(fileSize != 0);
+
+    int dimension;
+    fin.read((char*)&dimension, sizeof(int));
+    unsigned bytesPerRecord = dimension * sizeof(DATATYPE) + 4;
+    assert(fileSize % bytesPerRecord == 0);
+    int cardinality = fileSize / bytesPerRecord;
+
+    data.reset(dimension, cardinality);
+    fin.read((char *)(data.getData()), sizeof(float) * dimension);
+
     int dim;
-    for (int i = 0; i < cardinality; ++i) {
+    for (int i = 1; i < cardinality; ++i) {
         fin.read((char*)&dim, sizeof(int));
         assert(dim == dimension);
         fin.read((char *)(data.getData() + i * dimension), sizeof(float) * dimension);
