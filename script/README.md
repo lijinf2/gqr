@@ -75,4 +75,49 @@ K-Means Hashing requires other scirpts to run, please refer to folder `../learn/
 
 ## Limitations
 
-### Data scale: current implementation supports at most 2^27 (i.e. about 100,000,000) data items, to process larger datasets please refer to distributed computing frameworks LoSHa (https://dl.acm.org/citation.cfm?id=3080800). 
+### Data scale: current implementation supports at most 2^27 (i.e. about 100,000,000) data items, to process larger datasets please refer to distributed computing frameworks LoSHa (https://dl.acm.org/citation.cfm?id=3080800).
+
+## Calculate Recall for losha/gqr
+
+### Prepare directory
+
+Assume our dataset is cifar60k
+
+    $ cd ../
+    $ mkdir data/cifar60k
+    $ cd ./script
+    $ mkdir ./output
+    $ mkdir ./output/cifar60k
+
+### Calculate groundtruth. 
+    
+The input files are in .fvecs, each item has no id.
+
+Modify cal_groundtruth.sh
+
+    topk=21
+    ...
+    metric="euclidean"
+
+Copy the input files .fevs (with no id) from /data/jinfeng/... to gqr/data/cifar60k/
+
+Then run cal_groundtruth.sh
+
+    $ sh cal_groundtruth.sh
+
+### Prepare input files for losha/gqr
+    
+Change assign_id input path and output path
+
+    $ sh assign_id.sh
+
+The above output files are the input for losha/gqr
+
+### Calculate Recall
+
+After running losha/gqr, we got the app output and we can compare the result with the ground truth.
+
+    $ cd output/cifar60k
+    $ hdfs dfs -get /losha/gqr/cifar60k/output/path/*
+    $ cd ../
+    $ sh cal_recall.sh

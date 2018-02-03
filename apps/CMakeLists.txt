@@ -10,6 +10,8 @@ SET(APPS
     search
     opq_evaluate
     test
+    assign_id
+    cal_recall
 )
 
 FOREACH(APP ${APPS})
