@@ -1,5 +1,6 @@
 #!/bin/bash
-mkdir ../build && cd ../build 
+mkdir ../build 
+cd ../build 
 # cmake ../ -DCMAKE_BUILD_TYPE=Debug
 cmake ../ -DCMAKE_BUILD_TYPE=Release
 make search 2>&1 | tee ../script/log.txt
@@ -125,8 +126,6 @@ benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
     --hash_method=$hash_method \
     --query_method=$query_method \
     --base_format=$base_format \
-    --cardinality=$cardinality \
-    --dimension=$dimension \
     --model_file=$model_file\
     --base_file=$base_file \
     --base_bits_file=$base_bits_file \

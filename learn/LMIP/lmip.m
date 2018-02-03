@@ -3,10 +3,12 @@ addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
 dataset ='movielens'; 
 
-codelength = 12;
+codelength = 27;
+lengthBits = ceil(log2(codelength));
 normInteval = codelength;
 
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
+
 
 
 method = 'LMIP'
@@ -45,8 +47,7 @@ disp('==============================');
 numQueries = size(testset, 1)
 
 norms = sum(trainset.^2,  2);
-lengthBits = ceil(log2(codelength));
-prct = split(norms, normInteval, lengthBits);
+prct = split(norms, normInteval);
 
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries

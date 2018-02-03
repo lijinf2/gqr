@@ -32,12 +32,8 @@ lens = zeros(Nitems, lengthBits);
 
 for k=1:Nitems
 	% vector whose norms is not greater than prct[2] belongs to the 0 group
-	currentLength = find(prct>norms(k), 1) - 2; 
-	if(currentLength<0)
-		currentLength = 0;
-	end
-	currentLength = currentLength + model.maxbits - model.normInteval;
-
+	currentLength = cal_weight(model.prct, norms, k, model.normInteval,  model.maxbits);
+	
 	mask = 1;
 	for bitIndex=1:lengthBits
 		lens(k, lengthBits+1-bitIndex) = bitand(currentLength, mask)>0;
