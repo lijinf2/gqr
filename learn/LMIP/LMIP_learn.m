@@ -29,20 +29,16 @@ B = (Z > 0);
 
 lens = zeros(Nitems, lengthBits);
 
-U_median = median(norms);
-
-
 % put vector norm(length) in lens matrix in binary form
 for k=1:Nitems
 	% vector whose norms is not greater than prct[2] belongs to the 0 group
-	% currentLength = find(prct>norms(k), 1) - 2; 
-	currentLength = cal_weight(prct, norms, k, U_median, lengthBits, normInteval,  maxbits);
+	currentLength = cal_weight(prct, norms, k, normInteval,  maxbits);
 
 	mask = 1;
 	for bitIndex=1:lengthBits
 		lens(k, lengthBits+1-bitIndex) = bitand(currentLength, mask)>0;
 		mask = 2 * mask;
-    end
+    	end
 
 end
 % lens = lens - lens;
