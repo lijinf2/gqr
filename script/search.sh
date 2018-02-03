@@ -1,5 +1,6 @@
 #!/bin/bash
-mkdir ../build && cd ../build 
+mkdir ../build 
+cd ../build 
 # cmake ../ -DCMAKE_BUILD_TYPE=Debug
 cmake ../ -DCMAKE_BUILD_TYPE=Release
 make search 2>&1 | tee ../script/log.txt
