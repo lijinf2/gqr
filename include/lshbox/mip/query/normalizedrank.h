@@ -11,6 +11,7 @@
 #include <limits>
 #include <bitset>
 #include <lshbox.h>
+#include "lshbox/mip/lmip.h"
 
 long count_fjdslfjdkfjdklj = 0;
 
@@ -18,11 +19,6 @@ class NRTable {
 private:
     typedef unsigned long long BIDTYPE;
 
-
-    inline unsigned getLengthBit(unsigned paramN) {
-        if (paramN<=1) { assert(false); }
-        return paramN / 2;
-    }
 
     inline BIDTYPE getValidLengthMask(unsigned lengthBitNum) {
 
@@ -63,7 +59,8 @@ private:
             const BIDTYPE& bucketVal,
             const unsigned lengthBitNum,
             const BIDTYPE& validLengthMask,
-            const unsigned paramN) {
+            const unsigned paramN,
+            const vector<float > normIntervals) {
 
         BIDTYPE validLength  = (bucketVal & validLengthMask) ;
 
@@ -72,8 +69,10 @@ private:
 
         unsigned diffBitNum = countOnes(xorVal);
         unsigned sameBitNum = paramN - diffBitNum;
-        float hammingDist = (paramN / 32.0f - sameBitNum) * (float)validLength ;
-//        float hammingDist = ( - sameBitNum) * (float)validLength ;
+        if (validLength+1>=normIntervals.size()) {
+            assert(false);
+        }
+        float hammingDist = (paramN / 12.0f - sameBitNum) * normIntervals[validLength+1] ;
 
         return hammingDist;
     }
@@ -81,12 +80,21 @@ private:
 public:
     typedef std::unordered_map<BIDTYPE, std::vector<unsigned> > TableT;
 
+    /**
+     *
+     * @param hashVal
+     * @param paramN
+     * @param lengthBitNum
+     * @param table
+     * @param normIntervals
+     */
     NRTable(
             BIDTYPE hashVal,
             unsigned paramN,
-            const TableT& table){
+            const unsigned lengthBitNum,
+            const TableT& table,
+            const vector<float > normIntervals){
 
-        const unsigned lengthBitNum = this->getLengthBit(paramN);
         const BIDTYPE  validLengthMask = this->getValidLengthMask(lengthBitNum);
 
         dstToBks_.reserve(table.size());
@@ -97,7 +105,7 @@ public:
             // should be improved by xor operations
 
             const BIDTYPE& bucketVal = it->first;
-            dst  = calculateDist(hashVal, bucketVal, lengthBitNum, validLengthMask, paramN);
+            dst  = calculateDist(hashVal, bucketVal, lengthBitNum, validLengthMask, paramN, normIntervals);
 
             dstToBks_.emplace_back(std::pair<float, BIDTYPE>(dst, it->first));
         }
@@ -146,19 +154,20 @@ public:
     // typedef std::pair<float, unsigned > PairT; // <score, tableIdx>
     typedef ScoreIdxPair PairT;
 
-    template<typename LSHTYPE>
+    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
     NormalizedRank(
             const DATATYPE* domin,
             lshbox::Scanner<ACCESSOR>& scanner,
             LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {
 
+        this->R_ = mylsh.getHashBitsLen();
         allTables_.reserve(mylsh.tables.size());
 
         for (int i = 0; i < mylsh.tables.size(); ++i) {
 
             BIDTYPE hashValue = mylsh.getHashVal(i, domin);
             allTables_.emplace_back(
-                    NRTable(hashValue, mylsh.getCodeLength(), mylsh.tables[i]));
+                    NRTable(hashValue, mylsh.getHashBitsLen(), mylsh.getLengthBitsCount(), mylsh.tables[i], mylsh.getNormIntervals() ));
         }
 
         for (unsigned i = 0; i != allTables_.size(); ++i) {

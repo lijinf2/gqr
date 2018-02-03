@@ -29,33 +29,32 @@ scale = 2^lengthBits / max_norm;
 for k=1:Nitems
 	% vector whose norms is not greater than prct[2] belongs to the 0 group
 	currentLength = find(prct>=norms(k), 1) - 2; 
-    if isempty(currentLength)
-        currentLength = size(prct, 2) - 2;
-    end
+  	if isempty(currentLength)
+       		currentLength = size(prct, 2) - 2;
+    	end
 	if(currentLength<0)
 		currentLength = 0;
-    end
-    
+    	end
 	currentLength = currentLength + maxbits - normInteval;
 	
-	currentLength = scale * norms(k);
-	currentLength = floor(currentLength);
+	% currentLength = scale * norms(k);
+	% currentLength = floor(currentLength);
 	
 	mask = 1;
     
 	for bitIndex=1:lengthBits
         lens(k, lengthBits+1-bitIndex) = bitand(currentLength, mask)>0;
 		mask = 2 * mask;
-    end
+    	end
     
 end
 
 normTerm = zeros(Nitems, 1);
 for k=1:Nitems
 	normIntervalIndex = find(prct>norms(k), 1);
-    if isempty(normIntervalIndex)
-        normIntervalIndex = size(prct, 2);
-    end
+    	if isempty(normIntervalIndex)
+        	normIntervalIndex = size(prct, 2);
+    	end
     
 	normIntervalItem = prct(normIntervalIndex);
 	normTerm(k, 1) = sqrt(normIntervalItem - norms(k));
