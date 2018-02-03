@@ -95,7 +95,9 @@ The input files are in .fvecs, each item has no id.
 
 Modify cal_groundtruth.sh
 
-    topk=21
+    dataset="cifar60k"
+    ...
+    topk=20
     ...
     metric="euclidean"
 

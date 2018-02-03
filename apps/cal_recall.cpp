@@ -8,15 +8,6 @@
 
 using namespace std;
 
-/* 
- * We assume the input files have 21 nearest neighbors for each of the query.
- * We will read in the input files, and remove the query itself from its neighbor.
- * Then we will do some sorting and may remove one more neighbor for each query.
- * At last, each query will have 20 neighbors not including itself.
- * And we will compare the result between losha/gqr and cal_groundtruth.
- */
-
-
 int topK;
 
 void sortContainer( map<int, vector< pair<int, float> > > &container )
@@ -122,20 +113,6 @@ int main(int argc, char** argv)
     //}
     //return 0;
     
-    // Find largest
-    //float largest_distance = 0; 
-    //for (const auto &query : groundTruth)
-    //{
-    //    for (const auto &item : query.second)
-    //    {
-    //        if ( largest_distance < item.second )
-    //        {
-    //            largest_distance = item.second;
-    //        }
-    //    }
-    //}
-    //cout << "Largest distance: " << largest_distance << "\n";
-
     // Read in app result
     for ( int partIter = 0; partIter < numOfThreads; ++partIter)
     {
@@ -196,19 +173,6 @@ int main(int argc, char** argv)
 
     // Each query should have $topK elements in vector<int, float> on both appResult and goundtruth, not containing itself.
 
-    // DEBUG ONLY
-    //for (const auto &query : appResult)
-    //{
-    //    cout << "queryId: " << query.first << "\t size(): " << query.second.size() << "\n";
-    //    for (const auto &item : query.second)
-    //    {
-    //        cout << item.first << "\t";
-    //        cout << item.second << "\t";
-    //    }
-    //    cout << "\n\n"; 
-    //}
-    //cout << "appResult.size(): " << appResult.size() << "\n";
-
     // Calculate Error Ratio
     int numberOfQuery = 0;
     float recallSum = 0;
@@ -221,7 +185,7 @@ int main(int argc, char** argv)
         // Check app result size() is right
         if ( query.second.size() > topK )
         {
-            cout << "Wow! item.second.size() is more than " + to_string(topK) + "! Erase part may have problems.\n";
+            cout << "Wow! item.second.size() is more than " + to_string(topK) + "!\n";
             return 0;
         }
         int queryId = query.first;
@@ -247,29 +211,14 @@ int main(int argc, char** argv)
         vector<int> newRowGT;
         vector<int> newRowAR;
         
-        //string gtString = "";
-        //string arString = "";
-
         for ( int i = 0; i < oldRowGT.size(); ++i ) 
         {
             newRowGT.push_back( oldRowGT[i].first );
-            //gtString += to_string( oldRowGT[i].first );
-            //gtString += " ";
-            //gtString += to_string( oldRowGT[i].second );
-            //gtString += " ";
         }
-        //cout << "GT string:\n";
-        //cout << queryId << " " << gtString << "\n";
         for ( int i = 0; i < oldRowAR.size(); ++i )
         {
             newRowAR.push_back( oldRowAR[i].first );
-            //arString += to_string( oldRowAR[i].first );
-            //arString += " ";
-            //arString += to_string( oldRowAR[i].second );
-            //arString += " ";
         }
-        //cout << "AR string:\n";
-        //cout << queryId << " " << arString << "\n";
 
         // DEBUG ONLY
         if ( newRowAR.size() > topK ){
@@ -287,7 +236,7 @@ int main(int argc, char** argv)
             {
                 if ( newRowAR[x] == newRowAR[y] )
                 {
-                    cout << "Redundancy found! queryId: " << queryId << "\n";
+                    cout << "Redundancy found! One neighbor was found twice for one query. queryId: " << queryId << "\n";
                     return 0;
                 }
             } 
@@ -329,9 +278,6 @@ int main(int argc, char** argv)
     //    return 0;
     //}
     //outputFile.close();
-
-    // Problem:
-    // Current gqr implementation did not find enough nearest neighbors. Some query may not find enough topK return items.
 
     return 0;
 }
