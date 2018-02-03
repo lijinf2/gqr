@@ -6,7 +6,7 @@ dataset = 'movielens';
 codelength = 16;
 normInteval = codelength;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
-lengthBits = 8;
+lengthBits = ceil(normInteval);
 
 method = 'NLMIP';
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
