@@ -1,6 +1,7 @@
 #include "search.h"
 #include <lshbox/mip/query/lengthmarked.h>
 #include <lshbox/mip/query/normalizedrank.h>
+#include <mips/query/normrank.h>
 #include <lshbox/mip/query/lmprober.h>
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
