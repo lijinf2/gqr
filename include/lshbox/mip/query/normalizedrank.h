@@ -12,88 +12,19 @@
 #include <bitset>
 #include <lshbox.h>
 #include "lshbox/mip/lmip.h"
-
-
+#include "base/bucketlist.h"
 
 class NRTable {
-private:
-    typedef unsigned long long BIDTYPE;
-
-
-    inline BIDTYPE getValidLengthMask(unsigned lengthBitNum) {
-
-        BIDTYPE lengthMask = 0;
-        for (unsigned i = 0; i < lengthBitNum; ++i) {
-            // assign the i'th bit 1
-            lengthMask |= (1ULL << i);
-        }
-
-        return lengthMask;
-    }
-
-
-    inline BIDTYPE getValidBitsMask(unsigned validLength, unsigned lengthBitNum) {
-        BIDTYPE bitsMask = 0;
-
-        for (unsigned i = 0; i < validLength; ++i)
-        {
-            // assign the (lengthBitNum + i)'th bit 1
-            bitsMask |= (1ULL << (lengthBitNum + i));
-        }
-        return bitsMask;
-    }
-
-
-    inline unsigned countOnes(BIDTYPE xorVal) {
-        unsigned hamDist = 0;
-        while(xorVal != 0){
-            hamDist++;
-            xorVal &= xorVal - 1;
-        }
-        return hamDist;
-    }
-
-
-    inline float calculateDist(
-            const BIDTYPE& queryVal,
-            const BIDTYPE& bucketVal,
-            const unsigned lengthBitNum,
-            const BIDTYPE& validLengthMask,
-            const unsigned paramN,
-            const vector<float > normIntervals) {
-
-        BIDTYPE validLength  = (bucketVal & validLengthMask) ;
-
-        BIDTYPE validBitsMask = getValidBitsMask(paramN, lengthBitNum);
-        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
-
-        unsigned diffBitNum = countOnes(xorVal);
-        unsigned sameBitNum = paramN - diffBitNum;
-        if (validLength+1>=normIntervals.size()) {
-            assert(false);
-        }
-        float hammingDist = (paramN / 32.0f - sameBitNum) * normIntervals[validLength+1] ;
-
-        return hammingDist;
-    }
-
 public:
+    typedef unsigned long long BIDTYPE;
     typedef std::unordered_map<BIDTYPE, std::vector<unsigned> > TableT;
 
-    /**
-     *
-     * @param hashVal
-     * @param paramN
-     * @param lengthBitNum
-     * @param table
-     * @param normIntervals
-     */
     NRTable(
             BIDTYPE hashVal,
             unsigned paramN,
             const unsigned lengthBitNum,
             const TableT& table,
-            const vector<float > normIntervals){
+            const vector<float >& normIntervals){
 
         const BIDTYPE  validLengthMask = this->getValidLengthMask(lengthBitNum);
 
@@ -111,17 +42,12 @@ public:
         }
         assert(dstToBks_.size() == table.size());
 
-
         std::sort(dstToBks_.begin(),
                   dstToBks_.end(),
                   [] (const std::pair<float, BIDTYPE>& a, const std::pair<float, BIDTYPE>& b ) {
                       return a.first < b.first;
                   });
 
-        iterator = 0;
-    }
-
-    bool reset() {
         iterator = 0;
     }
 
@@ -142,6 +68,60 @@ public:
 private:
     std::vector<std::pair<float, BIDTYPE> > dstToBks_;
     unsigned iterator = 0;
+
+    BIDTYPE getValidLengthMask(unsigned lengthBitNum) {
+
+        BIDTYPE lengthMask = 0;
+        for (unsigned i = 0; i < lengthBitNum; ++i) {
+            // assign the i'th bit 1
+            lengthMask |= (1ULL << i);
+        }
+
+        return lengthMask;
+    }
+
+    BIDTYPE getValidBitsMask(unsigned validLength, unsigned lengthBitNum) {
+        BIDTYPE bitsMask = 0;
+
+        for (unsigned i = 0; i < validLength; ++i)
+        {
+            // assign the (lengthBitNum + i)'th bit 1
+            bitsMask |= (1ULL << (lengthBitNum + i));
+        }
+        return bitsMask;
+    }
+
+    unsigned countOnes(BIDTYPE xorVal) {
+        unsigned hamDist = 0;
+        while(xorVal != 0){
+            hamDist++;
+            xorVal &= xorVal - 1;
+        }
+        return hamDist;
+    }
+
+    float calculateDist(
+            const BIDTYPE& queryVal,
+            const BIDTYPE& bucketVal,
+            const unsigned lengthBitNum,
+            const BIDTYPE& validLengthMask,
+            const unsigned paramN,
+            const vector<float >& normIntervals) {
+
+        BIDTYPE validLength  = (bucketVal & validLengthMask) ;
+
+        BIDTYPE validBitsMask = getValidBitsMask(paramN, lengthBitNum);
+        BIDTYPE xorVal = (queryVal ^ bucketVal) &  validBitsMask;
+
+        unsigned diffBitNum = countOnes(xorVal);
+        unsigned sameBitNum = paramN - diffBitNum;
+        if (validLength+1>=normIntervals.size()) {
+            assert(false);
+        }
+        float hammingDist = (paramN / 32.0f - sameBitNum) * normIntervals[validLength+1] ;
+
+        return hammingDist;
+    }
 };
 
 template<typename ACCESSOR>
