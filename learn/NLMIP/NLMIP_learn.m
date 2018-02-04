@@ -35,7 +35,7 @@ for k=1:Nitems
 	if(currentLength<0)
 		currentLength = 0;
     	end
-	currentLength = currentLength + maxbits - normInteval;
+%	currentLength = currentLength + maxbits - normInteval;
 	
 	% currentLength = scale * norms(k);
 	% currentLength = floor(currentLength);
