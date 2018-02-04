@@ -98,16 +98,6 @@ unordered_map<string, string> parseParams(int argc, const char** argv) {
     return params;
 }
 
-vector<bool> to_bits (unsigned long long num)
-{
-    vector<bool> bits;
-    while(num > 0 ){
-        bits.push_back(num % 2);
-        num /= 2;
-    }
-    return bits;
-}
-
 template<typename DATATYPE>
 void loadFvecs(Matrix<DATATYPE>& data, const string& dataFile) {
     std::ifstream fin(dataFile.c_str(), std::ios::binary | std::ios::ate);
@@ -178,6 +168,25 @@ string genBenchFromIvecs(const char* ivecBenchFile, int numQueries, int topK) {
     }
     fout.close();
     return lshBenchFile;
+}
+
+vector<bool> to_bits (unsigned long long num)
+{
+    vector<bool> bits;
+    while(num > 0 ){
+        bits.push_back(num % 2);
+        num /= 2;
+    }
+    return bits;
+}
+
+unsigned countOnes(unsigned long long xorVal) {
+    unsigned hamDist = 0;
+    while(xorVal != 0){
+        hamDist++;
+        xorVal &= xorVal - 1;
+    }
+    return hamDist;
 }
 };
 

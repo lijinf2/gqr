@@ -70,7 +70,7 @@ public:
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
-    vector<float > getNormIntervals() { return normPrctile; }
+    const vector<float>& getNormIntervals() const { return normPrctile; }
 
     unsigned getHashBitsLen() { return hashBitsLen; }
 
