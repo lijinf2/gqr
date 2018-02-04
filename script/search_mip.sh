@@ -12,14 +12,35 @@ fi
 
 ### search methods
 ## mips
-hash_method="SIM"
-query_method="HR"
-codelength="16b"
+# nlmip
+hash_method="NLMIP"
+query_method="NR"
+codelength="12b" # 12b 27b 58b
 num_tables="1tb"
-metric="angular"
+metric="product"
+
+# lmip
+#hash_method="LMIP"
+#query_method="LM"
+#codelength="12b" # 12b 27b 58b
+#num_tables="1tb"
+#metric="product"
+
+# simpleLSH
+#query_method="HR"
+#codelength="16b" # 16b 32b 64b
+#num_tables="1tb"
+#metric="angular"
 
 # movielens
-dataset="movielens_m2a"
+dataset="movielens"
+#dataset="movielens_m2a"
+# netflix
+#dataset="netflix"
+#dataset="netflix_m2a"
+#
+
+
 base_format="fvecs"
 
 model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}_${num_tables}.txt"

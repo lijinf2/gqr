@@ -150,6 +150,11 @@ int main(int argc, const char **argv)
         metric = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, metric);
+    } else if (hashMethod == "NLMIP") {
+        lshbox::LMIP<DATATYPE> lmip;
+        metric = IP_DIST;
+        lmip.loadModel(modelFile, baseBitsFile);
+        search_mip(queryMethod, data, query, lmip, bench, params, metric);
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);
