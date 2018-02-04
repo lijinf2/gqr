@@ -42,7 +42,7 @@ void search_nr(
         SCANNER initScanner,
         const unordered_map<string, string>& params) {
 
-    typedef NormalizedRank<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
+    typedef NormRank<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
 
     void* raw_memory = operator new[](
             sizeof(LMR) * bench.getQ());
