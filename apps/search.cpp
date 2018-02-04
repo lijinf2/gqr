@@ -65,18 +65,18 @@ int main(int argc, const char **argv)
     string queryFile = params["query_file"];
     string benchFile = params["benchmark_file"];
 
-    unsigned TYPE_DIST = L2_DIST;
+    unsigned metric = L2_DIST;
 
-    if (params.find("TYPE_DIST")!=params.end()) {
-        string type_dist_str = params["TYPE_DIST"];
-        if(type_dist_str=="AG") {
-            TYPE_DIST = AG_DIST;
-        } else if (type_dist_str=="L2") {
-            TYPE_DIST = L2_DIST;
+    if (params.find("metric")!=params.end()) {
+        string type_dist_str = params["metric"];
+        if(type_dist_str=="angular") {
+            metric = AG_DIST;
+        } else if (type_dist_str=="euclidean") {
+            metric = L2_DIST;
         } else if (type_dist_str=="L1") {
-            TYPE_DIST = L1_DIST;
-        } else if (type_dist_str=="IP") {
-            TYPE_DIST = IP_DIST;
+            metric = L1_DIST;
+        } else if (type_dist_str=="product") {
+            metric = IP_DIST;
         }
     }
 
@@ -85,7 +85,7 @@ int main(int argc, const char **argv)
     for (int i = 0; i < argc; ++i) {
         std::cout << argv[i] << " ";
     }
-    std::cout<<"dist type "<<TYPE_DIST;
+    std::cout<<"dist type "<<metric;
     std::cout << std::endl;
     std::cout << std::endl;
     lshbox::timer timer;
@@ -116,51 +116,50 @@ int main(int argc, const char **argv)
     if (hashMethod == "PCAH") {
         lshbox::PCAH<DATATYPE> pcah;
         pcah.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcah, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, pcah, bench, params, metric);
     } else if (hashMethod == "ITQ") {
         lshbox::ITQ<DATATYPE> itq;
         itq.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, itq, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, itq, bench, params, metric);
     } else if (hashMethod == "PCARR") {
         lshbox::PCARR<DATATYPE> pcarr;
         pcarr.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, pcarr, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, pcarr, bench, params, metric);
     } else if (hashMethod == "SpH") {
         lshbox::SpH<DATATYPE> sph;
         sph.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sph, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, sph, bench, params, metric);
     } else if (hashMethod == "IsoH") {
         lshbox::IsoH<DATATYPE> isoh;
         isoh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, isoh, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, isoh, bench, params, metric);
     } else if (hashMethod == "KMH") {
         lshbox::KMH<DATATYPE> mylsh;
         mylsh.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, mylsh, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, mylsh, bench, params, metric);
     } else if (hashMethod == "SH") {
         lshbox::spectral<DATATYPE > spectralHashing;
         spectralHashing.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, spectralHashing, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, spectralHashing, bench, params, metric);
     } else if (hashMethod == "SIM") {
         lshbox::SIMH<DATATYPE> sim;
         sim.loadModel(modelFile, baseBitsFile);
-        search(queryMethod, data, query, sim, bench, params, TYPE_DIST);
+        search(queryMethod, data, query, sim, bench, params, metric);
     } else if (hashMethod == "LMIP") {
         lshbox::LMIP<DATATYPE> lmip;
-        TYPE_DIST = IP_DIST;
+        metric = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
-        search_mip(queryMethod, data, query, lmip, bench, params, TYPE_DIST);
+        search_mip(queryMethod, data, query, lmip, bench, params, metric);
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);
-        search_graph(queryMethod, data, query, kgraphhasher, bench, params, TYPE_DIST);
+        search_graph(queryMethod, data, query, kgraphhasher, bench, params, metric);
 
     } else if (hashMethod == "E2LSH") {
         lshbox::E2LSH<DATATYPE> e2lsh; 
         e2lsh.loadModel(modelFile, baseBitsFile);
-        search_intcode(queryMethod, data, query, e2lsh, bench, params, TYPE_DIST);
+        search_intcode(queryMethod, data, query, e2lsh, bench, params, metric);
     } else {
-
         cout << "do not support hashMethod: " << hashMethod << endl;
         return -1;
     }
