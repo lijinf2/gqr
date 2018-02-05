@@ -9,10 +9,7 @@ protected:
     DataT data_;
 
 public: 
-    DistData(float dist, const DataT& data) {
-        dist_ = dist;
-        data_ = data;
-    }
+    DistData(float dist, const DataT& data): dist_(dist), data_(data) {}
 
     DistData(const pair<float, DataT>& p) {
         dist_ = p.first;
@@ -20,6 +17,10 @@ public:
     }
 
     float getDist() const {
+        return dist_;
+    }
+
+    float dist() const {
         return dist_;
     }
 
