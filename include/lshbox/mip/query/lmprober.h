@@ -36,14 +36,24 @@ public:
             Prober<ACCESSOR>(domin, scanner, mylsh),
             fvs_(fvs),
             imiProber(
-                    mylsh.tables.size(),               // table size
-                    mylsh.getNormIntervals().size()-1, // x equals intervals count, first element is the minimum.
+                    (unsigned)mylsh.tables.size(),               // table size
+                    (unsigned)mylsh.getNormIntervals().size()-1, // x equals intervals count, first element is the minimum.
                     mylsh.getHashBitsLen()+1,          // y equals number of bit different. 0 1 2 ... bitsLen
+
                     [&](InvertedMultiIndex& nearestBucket) { // how to determine distance
+
+                        float CONSTANT = 32.0f;
                         unsigned L = mylsh.getHashBitsLen();
-                        int sameBitNum = L/2 - (L - nearestBucket.x_);
-                        int normIndex = mylsh.getLengthBitsCount() - nearestBucket.y_ - 1;
-                        return (L / 32.0f - sameBitNum) * mylsh.getNormIntervals()[normIndex+1];
+
+                        // belongs to interval  [L, L-1, ... 1, 0]
+                        unsigned sameBitNum = L - nearestBucket.y_;
+                        assert(sameBitNum>=0 && sameBitNum<=L);
+                        // when y = 0,  normIndex = U.size-1 where U(normIndex) is the maximum value
+                        int normIndex = (unsigned)mylsh.getNormIntervals().size()-1 - nearestBucket.x_;
+                        assert(normIndex>=1 && normIndex<=mylsh.getNormIntervals().size()-1);
+
+                        float u_max = mylsh.getNormIntervals()[normIndex];
+                        return (L / CONSTANT - sameBitNum) * u_max;
                     }) {
 
         table_ = 0;
@@ -51,25 +61,29 @@ public:
         idxToLayer_ = 0;
 
         this->R_ = mylsh.getHashBitsLen();
-
+        this->lengthBitCount = mylsh.getLengthBitsCount();
     }
 
 
     std::pair<unsigned, BIDTYPE> getNextBID(){
         this->numBucketsProbed_++;
+        static long  count = 0;
 
         while (!fvs_->existed(layer_, idxToLayer_)) {
 
             if (!imiProber.hashNext()) {
-                assert(false);
+                return std::make_pair(-1, -1);
             }
 
             // if current layer is visited, retrieve from heap
-            const InvertedMultiIndex& imi = imiProber.getNext();
+            const InvertedMultiIndex imi = imiProber.getNext();
 
             table_ = imi.tableIndex;
             layer_ = imi.y_;            // layer = imi.y_ 0,1,2, ..y_len
+            curent_interval_ = imiProber.getXlen() - imi.x_ ;
             idxToLayer_ = 0;
+
+//            std::cout << " pop: " << count++ << " imi probe: " << imiProber.size() << std::endl;
 
         }
 
@@ -82,6 +96,7 @@ public:
 
         const bool* fv = fvs_->getFlippingVector(layer_, idxToLayer_++);
 
+
         BIDTYPE newBucket = 0;
         for (unsigned i = 0; i < this->R_; ++i) {
             newBucket <<= 1;
@@ -92,7 +107,28 @@ public:
             }
         }
 
+        // last several bits will not used to flip
+        // for example: 0 1 0 1 .. 1 1 1 1 1 1
+        // flip vector: 1 1 1 1 .. 1 1 0 0 0 0 (hamming dist = R)
+        newBucket <<= lengthBitCount;
+        for (int i = 0; i < lengthBitCount; ++i) {
+            newBucket |= (curent_interval_& (1<<i)==0?0:1);
+        }
+
+
+//        for (int i = 0; i < this->R_; ++i) {
+//            std::cout << (fv[i]? 0 : 1) ;
+//        }
+//        std::cout  << "  " ;
+//        for (int i = 0; i < lengthBitCount; ++i) {
+//            std::cout << (curent_interval_& (1<<i));
+//        }
+//
+//        std::cout  << " layer_: " << layer_ << " idxToLayer_: " << idxToLayer_;
+//        std::cout  << std::endl;
+
         std::pair<unsigned, BIDTYPE> result = std::make_pair(table, newBucket);
+
         return result;
     };
 
@@ -101,6 +137,9 @@ private:
     unsigned table_;
     unsigned layer_;
     unsigned idxToLayer_;
+    unsigned lengthBitCount;
+
+    unsigned curent_interval_;
 
     IMIProber imiProber;
 };
