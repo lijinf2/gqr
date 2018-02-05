@@ -2,10 +2,12 @@
 #include <algorithm>
 #include <vector>
 #include <utility>
+#include <string>
 
 #include "base/onetableprober.h"
 using std::vector;
 using std::pair;
+using std::string;
 template<typename BIDTYPE>
 class BucketList : public OneTableProber<BIDTYPE> {
 public:
@@ -41,6 +43,16 @@ public:
         return sortedBucket_.size();
     }
 
+    string toString() {
+        string str = "dist, bucket\n";
+        
+        for (int i = 0; i < sortedBucket_.size(); ++i) {
+            str = str 
+                + std::to_string(sortedBucket_[i].first)
+                + ", " + std::to_string(sortedBucket_[i].second) + "\n";
+        }
+        return str;
+    }
 protected:
     vector<pair<float, BIDTYPE>> sortedBucket_;
     unsigned index = 0;

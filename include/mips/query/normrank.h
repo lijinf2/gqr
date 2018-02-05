@@ -46,7 +46,10 @@ public:
             auto distor = [&qHashValue, &numBitHash, &numBitLength, &lengthMask, &normIntervals](const BIDTYPE& bucket) {
                 unsigned numSameBit = numBitHash - lshbox::countOnes((qHashValue ^ bucket) & (~lengthMask));
                 unsigned intervalIdx = (bucket & lengthMask) + 1;
-                float dist = (numBitHash / 32.0 - numSameBit) * normIntervals[intervalIdx];
+                // float dist = (numBitHash / 32.0 - numSameBit) * normIntervals[intervalIdx];
+                float dist = 0;
+                if (numSameBit != 0 || normIntervals[intervalIdx] > 0.0000001)
+                    dist = 1 / (numSameBit * normIntervals[intervalIdx]);
                 return dist;
             };
 
@@ -59,6 +62,12 @@ public:
         for (int tb = 0; tb < this->LTable_.size(); ++tb) {
             this->tbNextEnheap(tb);
         }
+
+        // print
+        if (count == 0) {
+            count++;
+            std::cout << LTable_[0].toString();
+        }
     }
 
     OneTableProber<BIDTYPE>* getTableProber (unsigned tb) override {
@@ -66,4 +75,8 @@ public:
     }
 private:
     vector<BucketList<BIDTYPE>> LTable_;
+    static unsigned count;
 };
+
+template<typename ACCESSOR>
+unsigned NormRank<ACCESSOR>::count = 0;

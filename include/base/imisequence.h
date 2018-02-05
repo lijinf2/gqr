@@ -33,6 +33,14 @@ public:
         return !minHeap_.empty();
     }
 
+    unsigned getRowLength() {
+        return rowLen_;
+    }
+
+    unsigned getColLength() {
+        return colLen_;
+    }
+
     pair<float, Coord> next() {
         Coord p = minHeap_.top().data();
         float dist = minHeap_.top().dist();
@@ -74,50 +82,3 @@ private:
     }
 };
 
-// class InvertedMultiIndex {
-// public:
-//     struct Coord {
-//         Coord(unsigned x, unsigned y): x_(x), y_(y) {}
-//         unsigned x_;
-//         unsigned y_;
-//     }
-//
-//     InvertedMultiIndex(
-//         const vector<float>& leftVec,
-//         const vector<float>& rightVec,
-//         const function<float (float, float)>& func) {
-//
-//         left_.reserve(leftVec.size());
-//         for (unsigned i = 0; i < leftVec.size() ++i) {
-//             left_.emplace_back(DistDataSmaller(leftVec[i],i));
-//         }
-//         std::sort(left_.begin(), left_.end());
-//
-//         right_.reserve(rightVec.size());
-//         for (unsigned i = 0; i < rightVec.size(); ++i) {
-//             right_.emplace_back(DistDataSamller(rightVec[i], i));
-//         }
-//         std::sort(right_.begin(), right_.end());
-//
-//         distor_ = func;
-//     }
-//
-//     bool hasNext() const {
-//         return !minHeap_.empty()
-//     }
-//
-//     pair<unsigned, unsigned> next() {
-//     } 
-// private:
-//     // dist stores float value, data stores the index in the given leftVec or rightVec;
-//     vector<DistDataSmaller<unsigned>> left_;
-//     vector<DistDataSmaller<unsigned>> right_;
-//
-//     function<float (float, float)> distor_;
-//     priority_queue<DistDataMin<Coord>> minHeap_;
-//
-//     void enHeap(unsigned x, unsigned y) {
-//         float dist = distor_(left_[x].dist(), right_[y].dist());
-//         minHeap.emplace(DistDataMin(dist, Coord(x, y)));
-//     }
-// };

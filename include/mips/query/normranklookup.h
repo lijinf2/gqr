@@ -4,21 +4,20 @@
 #include "base/onetableprober.h"
 #include "base/imisequence.h"
 #include "lshbox/query/prober.h"
-#include "lshbox/query/mip/lmip.h"
 using std::pair;
 
 class LMLOneProber: public OneTableProber<unsigned long long> {
 public:
-    typedef lshbo::LMIP<DATATYPE> LSHTYPE;
+    typedef unsigned long long BIDTYPE;
     LMLOneProber(
         const vector<bool>& hashBits, 
         const FV* fvs, 
         unsigned codelen, 
         unsigned numInterval, 
         unsigned numBitLength,
-        std::function<float(unsigned, unsigned)> func)
-        : hashBits_(hashBits), fvs_(fvs), codelength_(codelen), distor(func),
-        sequencer_(codelen, numInterval, distor) {
+        const std::function<float(unsigned, unsigned)>& func)
+        : hashBits_(hashBits), fvs_(fvs), 
+        sequencer_(codelen, numInterval, func) {
         
         numBitLength_ = numBitLength;
         mask_ = 0;
@@ -28,7 +27,9 @@ public:
         }
     }
 
-    bool hasNext() override;
+    bool hasNext() override {
+        return (fvs_->existed(getCurNumBitDiff(), fvsIdx_) || sequencer_.hasNext());
+    };
 
     const pair<float, BIDTYPE>& next() override {
         if (!fvs_->existed(getCurNumBitDiff(), fvsIdx_)) {
@@ -40,19 +41,19 @@ public:
         fvsIdx_++;
 
         BIDTYPE bucket = genBucket(fv, getCurIntervalIdx());
-        return std::make_pair(getCurDist(), bucket);
+        next_ = std::make_pair(getCurDist(), bucket);
+        return next_;
     }
 
 private:
-    const vector<bool>& hashBits_;
+    vector<bool> hashBits_;
     unsigned numBitLength_;
-    unsinged mask_;
+    unsigned mask_;
 
     const FV* fvs_;
     unsigned fvsIdx_ = 0;
-    unsigned codeLength_;
-    std::function<float(unsigned, unsigned)> distor;
 
+    pair<float, BIDTYPE> next_;
     IMISequence sequencer_;
 
     // triplet (dist, numBitDiff, intervalIdx)
@@ -89,27 +90,35 @@ private:
 };
 
 template <typename ACCESSOR>
-class LengthMarkedLookup: public MTableProber<ACCESSOR, unsigned long long> {
+class NormRankLookup: public MTableProber<ACCESSOR, unsigned long long> {
 public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
-    LengthMarkedLookup(
+    NormRankLookup(
         const DATATYPE* query,
         lshbox::Scanner<ACCESSOR>& scanner,
-        lshbox::LMIP<DATATYPE>& mylsh) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
+        lshbox::LMIP<DATATYPE>& mylsh,
+        const FV* fvs) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
 
         this->LTable_.reserve(mylsh.tables.size());
         unsigned numBitHash = mylsh.getHashBitsLen();
-        unsigned numBitLength = mylsh.getLengthBigsCount();
-        const auto& normIntervals = mylsh.getNormIntervals();
+        unsigned numBitLength = mylsh.getLengthBitsCount();
+        // const auto& normIntervals = mylsh.getNormIntervals();
+        auto normIntervals = mylsh.getNormIntervals();
+        for (auto& e : normIntervals) {
+                e = 1 / e;
+        }
+
         for (int tb = 0; tb < mylsh.tables.size(); ++tb) {
-            auto distor = [&numBitHash, &numBitLength, &normIntervals](unsigned numBitDiff, unsigned intervalIdx) {
+            auto distor = [numBitHash, numBitLength, normIntervals](unsigned numBitDiff, unsigned intervalIdx) {
                 unsigned numBitSame = numBitHash - numBitDiff;
-                float dist = (numBitHash / 32.0 - numSameBit) * normIntervals[intervalIdx];
+                float dist = (1 / numBitSame) * normIntervals[intervalIdx + 1];
                 return dist;
             };
             this->LTable_.emplace_back(
-                BucketList<BIDTYPE>(mylsh.tables[tb], distor));
+                LMLOneProber(
+                    mylsh.getHashBits(tb, query) 
+                    , fvs, numBitHash, normIntervals.size() - 1, numBitLength, distor));
         }
 
         // initialize minHeap
@@ -123,5 +132,5 @@ public:
         return &LTable_[tb];
     }
 private:
-    vector<LMLOneProber<BIDTYPE>> LTable_;
+    vector<LMLOneProber> LTable_;
 };

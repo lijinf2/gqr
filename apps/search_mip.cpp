@@ -76,7 +76,8 @@ void search_imip(
         SCANNER initScanner,
         const unordered_map<string, string>& params) {
 
-    typedef LengthMarkedLookup<typename lshbox::Matrix<DATATYPE>::Accessor> IMIP;
+    // typedef LengthMarkedLookup<typename lshbox::Matrix<DATATYPE>::Accessor> IMIP;
+    typedef NormRankLookup<typename lshbox::Matrix<DATATYPE>::Accessor> IMIP;
 
     void* raw_memory = operator new[](
             sizeof(IMIP) * bench.getQ());
