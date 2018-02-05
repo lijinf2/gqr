@@ -2,6 +2,7 @@
 #include <lshbox/mip/query/lengthmarked.h>
 #include <lshbox/mip/query/normalizedrank.h>
 #include <mips/query/normrank.h>
+#include <lshbox/mip/query/lmprober.h>
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
@@ -55,7 +56,42 @@ void search_nr(
         new(&probers[i]) LMR(
                 query[bench.getQuery(i)],
                 initScanner,
-                mylsh);// for non losslookup probers
+                mylsh
+        );// for non losslookup probers
+    }
+    construct_time= timer.elapsed();
+    std::cout << "NR constructing time : " << construct_time << "." << std::endl;
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
+
+
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_imip(
+        const lshbox::Matrix<DATATYPE>& data,
+        const lshbox::Matrix<DATATYPE>& query,
+        LSHTYPE& mylsh,
+        const lshbox::Benchmark& bench,
+        SCANNER initScanner,
+        const unordered_map<string, string>& params) {
+
+    typedef LengthMarkedLookup<typename lshbox::Matrix<DATATYPE>::Accessor> IMIP;
+
+    void* raw_memory = operator new[](
+            sizeof(IMIP) * bench.getQ());
+    IMIP* probers = static_cast<IMIP*>(raw_memory);
+    FV fvs(mylsh.getHashBitsLen());
+
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) IMIP(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh,
+                &fvs);// for non losslookup probers
     }
     construct_time= timer.elapsed();
     std::cout << "NR constructing time : " << construct_time << "." << std::endl;
@@ -87,6 +123,8 @@ void search_mip(
     }
     else if (method == "NR") {
         search_nr(data, query, mylsh, bench, initScanner, params);
+    } else if (method == "IMIP") {
+        search_imip(data, query, mylsh, bench, initScanner, params);
     }
     else {
         std::cerr << "does not exist method " << method << std::endl;
