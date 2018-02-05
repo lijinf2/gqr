@@ -18,10 +18,6 @@ public:
     InvertedMultiIndex(unsigned t, unsigned x, unsigned y): tableIndex(t), x_(x), y_(y) {
     }
 
-    InvertedMultiIndex() {
-        // do not understand why default function is necessary.
-        // without this, failed to pass the compilation.
-    }
 
     unsigned tableIndex;
     unsigned x_;           // codeword U
@@ -61,7 +57,7 @@ public:
     IMIProber(unsigned table_size,
               unsigned x,
               unsigned y,
-              function<float(InvertedMultiIndex& ) > distance) : distance_(distance), x_len(x), y_len(y) {
+              function<float(InvertedMultiIndex& ) > distance) : distance_(std::move(distance)), x_len(x), y_len(y) {
 
         for (unsigned i = 0; i != table_size; ++i) {
             InvertedMultiIndex nearestBucket(i, 0, 0) ;
@@ -74,33 +70,47 @@ public:
         }
     }
 
+    virtual unsigned getXlen() {
+        return x_len;
+    }
+
+    virtual unsigned getYlen() {
+        return y_len;
+    }
+
     virtual bool hashNext() {
         return heap_.size()>0;
     }
 
-    virtual const InvertedMultiIndex& getNext() {
+    virtual unsigned long size() {
+        return heap_.size();
+    }
 
-        const InvertedMultiIndex& imi = heap_.top().data();
+    virtual const InvertedMultiIndex getNext() {
+
+        const InvertedMultiIndex imi = heap_.top().data();
         unsigned tb = imi.tableIndex;
 
         heap_.pop();
 
         visited_[imi.x_][imi.y_] = true;
 
-        if (imi.x_+1 < x_len) {
+        if (imi.x_+1 < x_len && !visited_[imi.x_+1][imi.y_]) {
             if (imi.y_==0 || visited_[imi.x_+1][imi.y_-1]) {
                 InvertedMultiIndex nearestBucket(tb, imi.x_+1, imi.y_) ;
                 float dist = distance_(nearestBucket);
                 heap_.push(PairT(dist, nearestBucket));
             }
+
         }
 
-        if (imi.y_+1 < y_len) {
+        if (imi.y_+1 < y_len && !visited_[imi.x_][imi.y_+1]) {
             if (imi.x_==0 ||visited_[imi.x_-1][imi.y_+1]) {
                 InvertedMultiIndex nearestBucket(tb, imi.x_, imi.y_+1) ;
                 float dist = distance_(nearestBucket);
                 heap_.push(PairT(dist, nearestBucket));
             }
+
         }
 
         return imi;
