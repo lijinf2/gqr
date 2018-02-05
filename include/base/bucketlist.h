@@ -2,10 +2,12 @@
 #include <algorithm>
 #include <vector>
 #include <utility>
+
+#include "base/onetableprober.h"
 using std::vector;
 using std::pair;
 template<typename BIDTYPE>
-class BucketList {
+class BucketList : public OneTableProber<BIDTYPE> {
 public:
     BucketList(
         const unordered_map<BIDTYPE, std::vector<unsigned> >& table,
@@ -27,11 +29,11 @@ public:
             });
     }
 
-    bool hasNext() const {
+    bool hasNext() override {
         return index < sortedBucket_.size();
     }
 
-    const pair<float, BIDTYPE>& next() {
+    const pair<float, BIDTYPE>& next() override {
         return sortedBucket_[index++];
     } 
 

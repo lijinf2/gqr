@@ -7,14 +7,14 @@
 #include <util/heap_element.h>
 #include <base/baseprober.h>
 #include <base/bucketlist.h>
-#include <base/ranking.h>
+#include <base/mtableprober.h>
 using std::priority_queue;
 using std::vector;
 using std::pair;
 using std::unordered_map;
 
 template<typename ACCESSOR>
-class IntRanking : public Ranking<ACCESSOR, vector<int>> {
+class IntRanking : public MTableProber<ACCESSOR, vector<int>> {
 public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef vector<int> BIDTYPE;
@@ -23,7 +23,7 @@ public:
     IntRanking(
         const DATATYPE* query,
         lshbox::Scanner<ACCESSOR>& scanner,
-        LSHTYPE& mylsh) : Ranking<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
+        LSHTYPE& mylsh) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
 
         this->LTable_.reserve(mylsh.tables.size());
         for (int tb = 0; tb < mylsh.tables.size(); ++tb) {
@@ -56,4 +56,10 @@ public:
             this->tbNextEnheap(tb);
         }
     }
+
+    OneTableProber<BIDTYPE>* getTableProber (unsigned tb) override {
+        return &LTable_[tb];
+    }
+private:
+    vector<BucketList<BIDTYPE>> LTable_;
 };

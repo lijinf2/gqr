@@ -10,10 +10,11 @@
 #include <lshbox.h>
 #include "lshbox/mip/lmip.h"
 #include "base/bucketlist.h"
+#include "base/mtableprober.h"
 #include "lshbox/utils.h"
 
 template<typename ACCESSOR>
-class NormRank : public Ranking<ACCESSOR, unsigned long long>{
+class NormRank : public MTableProber<ACCESSOR, unsigned long long>{
 public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
@@ -23,7 +24,7 @@ public:
     NormRank(
             const DATATYPE* domin,
             lshbox::Scanner<ACCESSOR>& scanner,
-            LSHTYPE& mylsh) : Ranking<ACCESSOR, BIDTYPE>(domin, scanner, mylsh) {
+            LSHTYPE& mylsh) : MTableProber<ACCESSOR, BIDTYPE>(domin, scanner, mylsh) {
 
         this->LTable_.reserve(mylsh.tables.size());
 
@@ -59,4 +60,10 @@ public:
             this->tbNextEnheap(tb);
         }
     }
+
+    OneTableProber<BIDTYPE>* getTableProber (unsigned tb) override {
+        return &LTable_[tb];
+    }
+private:
+    vector<BucketList<BIDTYPE>> LTable_;
 };
