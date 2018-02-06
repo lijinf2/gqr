@@ -10,11 +10,22 @@ function [model, V, elapse] = ALSH_learn(dataset, maxbits, w, m, U)
 %     model: Used for encoding a test sample point.
 %	      B: The binary code of the input data A. Each row is sample point
 %    elapse: The coding time (training time).
-%         m: 
-%         U: 
+%         m: add m extra term (see detail in ALSH.)
+%         U: scale train data's max norm equals U. 
 %
-%   Written xinyan Dai 
 %                                             
+%
+%   Reference:
+%       Anshumali Shrivastava, Ping Li
+%	Asymmetric LSH (ALSH) for Sublinear Time Maximum Inner Product Search (MIPS)
+%
+%
+%   version 1.0 --Feb/2018 
+%
+%   Written by xinyan Dai (xinyanshawn@gmail.com)
+
+
+
 
 tmp_T = tic;
 
@@ -22,9 +33,8 @@ tmp_T = tic;
 [Nitems, Nfeatures] = size(dataset);
 
 norms = sum(dataset.^2,  2);
-dataset = dataset ./ max(norms) .* U;
+dataset = dataset ./ sqrt(max(norms)) .* U;
 norms = sum(dataset.^2,  2);
-
 
 normTerm = zeros(Nitems, m);
 for k=1:Nitems

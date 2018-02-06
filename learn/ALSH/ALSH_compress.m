@@ -14,19 +14,13 @@ function [V,elapse] = ALSH_compress(dataset, model, w)
 %
 %
 %   Reference:
-%
-%   Moses S. Charikar: Similarity estimation techniques from rounding
-%   algorithms. Proceedings of the thiry-fourth annual ACM symposium on
-%   Theory of computing, 2002.  
+%       Anshumali Shrivastava, Ping Li
+%	Asymmetric LSH (ALSH) for Sublinear Time Maximum Inner Product Search (MIPS)
 %
 %
-%   version 2.0 --Nov/2016 
-%   version 1.0 --Jan/2011 
+%   version 1.0 --Feb/2018 
 %
-%   Written by  Yue Lin (linyue29@gmail.com)
-%               Deng Cai (dengcai AT gmail DOT com) 
-%   version 3.0 -- Jan/2018
-%   Modified by LI Jinfeng (lijinf8@gmail.com)
+%   Written by xinyan Dai (xinyanshawn@gmail.com)
 
 
 tmp_T = tic;
