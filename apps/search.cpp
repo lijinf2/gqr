@@ -17,7 +17,7 @@
 #include <lshbox/lsh/spectral.h>
 #include <lshbox/lsh/sim.h>
 #include <intcode/hash/e2lsh.h>
-
+#include <intcode/hash/alsh.h>
 
 #include <lshbox/graph/knngraphh.h>
 #include <bits/unordered_map.h>
@@ -155,6 +155,12 @@ int main(int argc, const char **argv)
         metric = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, metric);
+
+    } else if (hashMethod == "ALSH") {
+        lshbox::ALSH<DATATYPE > alsh;
+        alsh.loadModel(modelFile, baseBitsFile);
+        search_alsh(queryMethod, data, query, alsh, bench, params, IP_DIST);
+
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
         kgraphhasher.loadModel(modelFile);

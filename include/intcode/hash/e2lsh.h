@@ -17,7 +17,7 @@ namespace lshbox {
 
 template<typename DATATYPE = float>
 class E2LSH: public BaseHasher<DATATYPE, vector<int>>{
-private:
+protected:
     typedef vector<int> BIDTYPE;
     float W;
     vector<float> mean;
@@ -38,7 +38,7 @@ public:
         int cardinality,
         int codelength);
 
-    vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    virtual vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
 
     BIDTYPE getBuckets(unsigned k, const DATATYPE *domin);
     // BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
