@@ -64,10 +64,10 @@ public:
         }
 
         // print
-        if (count == 0) {
-            count++;
-            std::cout << LTable_[0].toString();
-        }
+        // if (count == 0) {
+        //     count++;
+        //     std::cout << LTable_[0].toString();
+        // }
     }
 
     OneTableProber<BIDTYPE>* getTableProber (unsigned tb) override {

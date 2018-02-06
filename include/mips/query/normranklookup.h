@@ -1,5 +1,6 @@
 #pragma once
 #include <utility>
+#include <iostream>
 #include "lshbox/query/fv.h"
 #include "base/onetableprober.h"
 #include "base/imisequence.h"
@@ -16,15 +17,16 @@ public:
         unsigned numInterval, 
         unsigned numBitLength,
         const std::function<float(unsigned, unsigned)>& func)
-        : hashBits_(hashBits), fvs_(fvs), 
+        : fvs_(fvs), 
+        inforInterval_(numBitLength, numInterval),
         sequencer_(codelen, numInterval, func) {
-        
-        numBitLength_ = numBitLength;
-        mask_ = 0;
-        for (unsigned i = 0; i < numBitLength; ++i) {
-            mask_ <<= 1;
-            mask_ &= 1;
-        }
+
+        hashBits_.resize(codelen);    
+        for (int i = 0; i < codelen; ++i) {
+            hashBits_[i] = hashBits[i];
+        } 
+
+        triplet_ = sequencer_.next();
     }
 
     bool hasNext() override {
@@ -47,8 +49,16 @@ public:
 
 private:
     vector<bool> hashBits_;
-    unsigned numBitLength_;
-    unsigned mask_;
+
+    struct InforInterval {
+        InforInterval(unsigned numBitLength, unsigned numInterval) {
+            numBitLength_ = numBitLength;
+            largestIdx_ = numInterval - 1;
+        }
+        unsigned numBitLength_;
+        unsigned largestIdx_;
+    } inforInterval_;
+
 
     const FV* fvs_;
     unsigned fvsIdx_ = 0;
@@ -68,7 +78,7 @@ private:
     }
 
     unsigned getCurIntervalIdx() {
-        return triplet_.second.second + 1;
+        return inforInterval_.largestIdx_ - triplet_.second.second;
     }
 
     unsigned long long genBucket(const bool* fv, unsigned intervalIdx) {
@@ -84,8 +94,9 @@ private:
 
         // append interval
         // last several bits will not used to flip
-        newBucket <<= numBitLength_;
+        newBucket <<= inforInterval_.numBitLength_;
         newBucket |= intervalIdx;
+        return newBucket;
     }
 };
 
@@ -103,18 +114,29 @@ public:
         this->LTable_.reserve(mylsh.tables.size());
         unsigned numBitHash = mylsh.getHashBitsLen();
         unsigned numBitLength = mylsh.getLengthBitsCount();
-        // const auto& normIntervals = mylsh.getNormIntervals();
-        auto normIntervals = mylsh.getNormIntervals();
-        for (auto& e : normIntervals) {
-                e = 1 / e;
+        const auto& normIntervals = mylsh.getNormIntervals();
+        vector<float> scoreLength(normIntervals.size() - 1);
+        for (unsigned i = 0; i < scoreLength.size(); ++i) {
+            scoreLength[i] = 1 / normIntervals[i + 1];
         }
+        std::sort(scoreLength.begin(), scoreLength.end());
+
+        vector<float> scoreBit(numBitHash + 1);
+        scoreBit[0] = 2.0;
+        for (unsigned i = 1; i < scoreBit.size(); ++i) {
+            scoreBit[i] = 1.0 / i;
+        }
+        std::sort(scoreBit.begin(), scoreBit.end());
 
         for (int tb = 0; tb < mylsh.tables.size(); ++tb) {
-            auto distor = [numBitHash, numBitLength, normIntervals](unsigned numBitDiff, unsigned intervalIdx) {
-                unsigned numBitSame = numBitHash - numBitDiff;
-                float dist = (1 / numBitSame) * normIntervals[intervalIdx + 1];
+            auto distor = [numBitHash, numBitLength, scoreBit, scoreLength](unsigned numBitDiff, unsigned intervalIdx) {
+                // unsigned numBitSame = numBitHash - numBitDiff;
+                // float dist = (1.0 / numBitSame) * normIntervals[normIntervals.size() - intervalIdx + 1];
+                float dist = scoreBit[numBitDiff] * scoreLength[intervalIdx];
                 return dist;
             };
+
+            float tmp = distor(0, 0);
             this->LTable_.emplace_back(
                 LMLOneProber(
                     mylsh.getHashBits(tb, query) 

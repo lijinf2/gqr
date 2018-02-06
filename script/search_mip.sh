@@ -12,34 +12,33 @@ fi
 
 ### search methods
 ## mips
+
+# lmip
+# hash_method="LMIP"
+# query_method="LM"
+# codelength="12b" # 12b 27b 58b
+# num_tables="1tb"
+# metric="product"
+
 # nlmip
 hash_method="NLMIP"
-query_method="NR"
+# query_method="NR"
+query_method="IMIP"
 codelength="12b" # 12b 27b 58b
 num_tables="1tb"
 metric="product"
 
-# lmip
-#hash_method="LMIP"
-#query_method="LM"
-#codelength="12b" # 12b 27b 58b
-#num_tables="1tb"
-#metric="product"
-
-# simpleLSH
-#query_method="HR"
-#codelength="16b" # 16b 32b 64b
-#num_tables="1tb"
-#metric="angular"
-
-# movielens
 dataset="movielens"
-#dataset="movielens_m2a"
-# netflix
 #dataset="netflix"
-#dataset="netflix_m2a"
-#
 
+# # simpleLSH
+# hash_method="SIM"
+# query_method="HR"
+# codelength="16b" # 16b 32b 64b
+# num_tables="1tb"
+# metric="angular"
+# dataset="movielens_m2a"
+# #dataset="netflix_m2a"
 
 base_format="fvecs"
 
