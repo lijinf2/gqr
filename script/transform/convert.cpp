@@ -44,9 +44,13 @@ int main(int argc, char** argv) {
     vector<float* > queryData ;
     int dimension;
     int queryDimension;
+    int m = 3;
+    int U = 0.83;
 
-    dimension = transformer.loadData(inputFile, data, 4);
-    queryDimension = transformer.loadData(inputSampleFile, queryData, 4);
+    int placeholder = 2+2+m;
+
+    dimension = transformer.loadData(inputFile, data, placeholder);
+    queryDimension = transformer.loadData(inputSampleFile, queryData, placeholder);
 
     if(dimension<0 || queryDimension<0 || dimension!=queryDimension) {
         std::cout << "dimension un_compatible" << std::endl
@@ -58,6 +62,7 @@ int main(int argc, char** argv) {
 
     string e2m("e2m");
     string m2a("m2a");
+    string alsh("alsh");
 
     for (int i = transform_arg; i < argc; ++i) {
 
@@ -67,7 +72,10 @@ int main(int argc, char** argv) {
             dimension = transformer.euclidToMIP(data, queryData, dimension);
         } else if (m2a==operation) {
             dimension = transformer.mipToAngular(data, queryData, dimension);
-        } else {
+        } else if (alsh==operation) {
+            dimension = transformer.mipToEuclid(data, queryData, dimension, m, U);
+        }
+        else {
             std::cout << "invalid operation " << operation << std::endl;
         }
     }

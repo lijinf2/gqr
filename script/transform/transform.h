@@ -11,6 +11,7 @@ public:
 
     int mipToAngular(vector<float* >& data, vector<float* >& queryData, int dimension);
 
+    int mipToEuclid(vector<float* >& data, vector<float* >& queryData, int dimension, int m, int U);
     /**
      * load data from fvecs file.
      * @param file
@@ -101,6 +102,42 @@ int Transform::mipToAngular(vector<float* >& data, vector<float* >& queryData, i
     }
 
     int newDimension = dimension + 2;
+
+    return newDimension;
+}
+
+
+int Transform::mipToEuclid(vector<float* >& data, vector<float* >& queryData, int dimension, int m, int U ) {
+
+    float dataMaxNormSquare = calMaxNormSquare(data, dimension);
+
+    for (int i = 0; i < data.size(); ++i) {
+        float * buffer = data[i];
+        float norm_square = calNormSquare(buffer, dimension);
+        for (int j = 0; j < dimension; ++j) {
+            buffer[j] *=  U / dataMaxNormSquare;
+        }
+
+        for (int j = 0; j < m; ++j) {
+            buffer[j+dimension] = pow(norm_square, pow(2, j+1));
+        }
+
+    }
+
+    for (int i = 0; i < queryData.size(); ++i) {
+        float * buffer = queryData[i];
+        float norm_square = calNormSquare(buffer, dimension);
+
+        for (int j = 0; j < dimension; ++j) {
+            buffer[j] /= norm_square;
+        }
+
+        for (int j = 0; j < m; ++j) {
+            buffer[j+dimension] = 0.5f;
+        }
+    }
+
+    int newDimension = dimension + m;
 
     return newDimension;
 }
