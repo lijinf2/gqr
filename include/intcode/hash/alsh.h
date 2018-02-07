@@ -83,6 +83,9 @@ namespace lshbox {
 
         // mean
         this->loadFloatVector(modelFin, modelNumFeature).swap(this->mean);
+        for (unsigned i = 0; i < this->m; ++i) {
+            this->mean.push_back(0);
+        }
 
         // hash functions
         this->pcsAll.resize(modelNumTable);
@@ -127,15 +130,15 @@ namespace lshbox {
     {
 
         //scale to U
-        vector<DATATYPE> normalizedData = this->scale(data, this->mean.size(), 1.0f);
+        vector<DATATYPE> normalizedData = this->scale(data, this->mean.size() - this->m, 1.0f);
+        // transform
+        for (unsigned i = 0; i < this->m; ++i) {
+            normalizedData.push_back(0.5);
+        }
+
         // project
         vector<float> projVector = this->getProjection(normalizedData.data(), this->pcsAll[tableIdx], this->mean);
-        // then plus extra m term's dot product
-        for (int i = 0; i < projVector.size(); ++i) {
-            for (int j = 0; j < this->m; ++j) {
-                projVector[i] += this->pcsAll[tableIdx][i][ this->pcsAll[tableIdx][i].size() - j +1 ] * 0.5f;
-            }
-        }
+
         // shift and chop
         for (int i = 0; i < projVector.size(); ++i) {
             projVector[i] += this->shift[tableIdx][i];

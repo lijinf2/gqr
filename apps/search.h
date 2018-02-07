@@ -21,8 +21,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
 
     int numQueries = bench.getQ();
 
-    std::cout << "HASH TABLE SIZE    : " << mylsh.getTableSize() << std::endl;
-    std::cout << "LARGEST BUCKET SIZE    : " << mylsh.getMaxBucketSize() << std::endl;
+    std::cout << "HASH TABLE SIZE    , " << mylsh.getTableSize() << std::endl;
+    std::cout << "LARGEST BUCKET SIZE    , " << mylsh.getMaxBucketSize() << std::endl;
 
     std::cout << "expected avg items, " << "overall query time, " 
         << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual avg items" << "\n";

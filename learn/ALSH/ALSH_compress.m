@@ -27,6 +27,14 @@ tmp_T = tic;
 
 [Nitems, Nfeatures] = size(dataset);
 normTerm = zeros(Nitems, model.m);
+
+testNorms = sum(dataset.^2, 2).^0.5
+for k=1:Nitems
+    dataset(k, :) = dataset(k, :) ./ testNorms(k);
+end
+
+
+
 for k=1:Nitems
    	for i=1:model.m 
 		normTerm(k, i) = 0.5 ;

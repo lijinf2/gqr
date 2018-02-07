@@ -30,7 +30,7 @@ void search_lm(
                 mylsh);// for non losslookup probers
     }
     construct_time= timer.elapsed();
-    std::cout << "LM constructing time : " << construct_time << "." << std::endl;
+    std::cout << "LM constructing time , " << construct_time <<   std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
@@ -61,7 +61,7 @@ void search_nr(
         );// for non losslookup probers
     }
     construct_time= timer.elapsed();
-    std::cout << "NR constructing time : " << construct_time << "." << std::endl;
+    std::cout << "NR constructing time , " << construct_time <<   std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
@@ -96,7 +96,7 @@ void search_imip(
                 &fvs);// for non losslookup probers
     }
     construct_time= timer.elapsed();
-    std::cout << "NR constructing time : " << construct_time << "." << std::endl;
+    std::cout << "NR constructing time , " << construct_time <<   std::endl;
 
     annQuery(data, query, mylsh, bench, probers, params);
 }
@@ -132,7 +132,7 @@ void search_alsh(
                 mylsh);// for non losslookup probers
     }
     construct_time= timer.elapsed();
-    std::cout << "AlshIntRank constructing time : " << construct_time << "." << std::endl;
+    std::cout << "AlshIntRank constructing time , " << construct_time <<   std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
