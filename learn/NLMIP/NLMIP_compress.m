@@ -41,7 +41,7 @@ for k=1:Nitems
 
 	mask = 1;
 	for bitIndex=1:lengthBits
-		lens(k, lengthBits+1-bitIndex) = bitand(currentLength, mask)>0;
+		lens(k, lengthBits+1-bitIndex) = bitand(uint8(currentLength), uint8(mask))>0;
 		mask = 2 * mask;
     end
 end
