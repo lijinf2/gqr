@@ -32,9 +32,9 @@ tmp_T = tic;
 
 [Nitems, Nfeatures] = size(dataset);
 
-norms = sum(dataset.^2,  2);
-dataset = dataset ./ sqrt(max(norms)) .* U;
-norms = sum(dataset.^2,  2);
+norms = sum(dataset.^2,  2).^0.5;
+dataset = dataset ./ (max(norms)) .* U;
+norms = sum(dataset.^2,  2).^0.5;
 
 normTerm = zeros(Nitems, m);
 for k=1:Nitems
