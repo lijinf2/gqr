@@ -170,7 +170,6 @@ void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& ba
     modelFin.close();
 
     assert(normPrctile.size()-1 == normIntervalCount);
-    assert(hashBitsLen >= normIntervalCount );
 
     // initialized numTotalItems and tables
     this->initBaseHasher(baseBitsFile, numTables, tableNumItems, hashBitsLen+lengthBitsCount);

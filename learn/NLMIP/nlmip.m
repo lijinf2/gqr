@@ -1,17 +1,17 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'movielens';
+dataset = 'netflix';
 
 codelength = 12;
-normInteval = codelength;
+normInteval = 16;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 lengthBits = ceil(log2(normInteval));
 
 method = 'NLMIP';
-baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
-queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
-modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
+baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(normInteval),'i_',num2str(nHashTable),'tb.txt'];              
+queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(normInteval),'i_',num2str(nHashTable),'tb.txt'];
+modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(normInteval),'i_',num2str(nHashTable),'tb.txt'];
         
 % zero-centered dataset
 trainset = double(fvecs_read (['../../data/',dataset,'/',dataset,'_base.fvecs']));
