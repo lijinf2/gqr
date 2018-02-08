@@ -4,6 +4,7 @@
 #include <mips/query/normrank.h>
 #include <lshbox/mip/query/lmprober.h>
 #include "mips/query/normranklookup.h"
+#include "mips/alshrank/alshrankprober.h"
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
@@ -101,12 +102,8 @@ void search_imip(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
-
-
-
-
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
-void search_alsh(
+void search_alshintrank(
 
         const lshbox::Matrix<DATATYPE>& data,
         const lshbox::Matrix<DATATYPE>& query,
@@ -135,9 +132,6 @@ void search_alsh(
     std::cout << "AlshIntRank constructing time , " << construct_time <<   std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
 }
-
-
-
 
 
 template<typename DATATYPE, typename LSHTYPE>
@@ -173,7 +167,6 @@ void search_mip(
     }
 }
 
-
 template<typename DATATYPE, typename LSHTYPE>
 void search_alsh(string method,
                  const lshbox::Matrix<DATATYPE>& data,
@@ -193,9 +186,47 @@ void search_alsh(string method,
     );
 
     if (method == "IntRank") {
-        search_alsh(data, query, mylsh, bench, initScanner, params);
+        search_alshintrank(data, query, mylsh, bench, initScanner, params);
     } else {
         std::cerr << "does not exist method " << method << std::endl;
         assert(false);
     }
+}
+
+template<typename DATATYPE, typename LSHTYPE>
+void search_alshmatchrank(string method,
+                 const lshbox::Matrix<DATATYPE>& data,
+                 const lshbox::Matrix<DATATYPE>& query,
+                 LSHTYPE& mylsh,
+                 const lshbox::Benchmark& bench,
+                 const unordered_map<string, string>& params,
+                 const unsigned TYPE_DIST) {
+
+    // initialize scanner
+    typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
+    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
+    lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
+            accessor,
+            metric,
+            bench.getK()
+    );
+
+    typedef ALSHRankProber<typename lshbox::Matrix<DATATYPE>::Accessor> IR;
+
+    void* raw_memory = operator new[](
+            sizeof(IR) * bench.getQ());
+    IR* probers = static_cast<IR*>(raw_memory);
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
+    for (int i = 0; i < bench.getQ(); ++i) {
+        new(&probers[i]) IR(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh);// for non losslookup probers
+    }
+    construct_time= timer.elapsed();
+    std::cout << "ALSHRankProber constructing time , " << construct_time <<   std::endl;
+    annQuery(data, query, mylsh, bench, probers, params);
 }

@@ -22,6 +22,7 @@
 #include <lshbox/graph/knngraphh.h>
 #include <bits/unordered_map.h>
 #include <lshbox/mip/lmip.h>
+#include <mips/alshrank/alshrankhasher.h>
 
 #include "search.h"
 #include "search_graph.h"
@@ -157,9 +158,14 @@ int main(int argc, const char **argv)
         search_mip(queryMethod, data, query, lmip, bench, params, metric);
 
     } else if (hashMethod == "ALSH") {
-        lshbox::ALSH<DATATYPE > alsh;
+        lshbox::ALSH<DATATYPE> alsh;
         alsh.loadModel(modelFile, baseBitsFile);
         search_alsh(queryMethod, data, query, alsh, bench, params, IP_DIST);
+
+    } else if (hashMethod == "ALSHRank") {
+        lshbox::ALSHRankHasher<DATATYPE > alshrank;
+        alshrank.loadModel(modelFile, baseBitsFile);
+        search_alshmatchrank(queryMethod, data, query, alshrank, bench, params, IP_DIST);
 
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
