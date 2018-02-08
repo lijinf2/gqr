@@ -7,14 +7,14 @@
 # new_dataset="m2a_e2m_audio"
 # operation="m2a"
 
-origin_dataset="netflix"
-new_dataset="m2a_netflix"
+origin_dataset="movielens"
+new_dataset="m2a_${origin_dataset}"
 operation="m2a"
 
 mkdir ../../data/${new_dataset}
 
-GCC_FLAGS="-g"
-# GCC_FLAGS="-O3"
+# GCC_FLAGS="-g"
+GCC_FLAGS="-O3"
 
 g++ -I ../../include --std=c++11 ${GCC_FLAGS} convert.cpp transform.h -o ./convert.bin
 
