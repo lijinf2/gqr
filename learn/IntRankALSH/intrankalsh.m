@@ -1,15 +1,15 @@
 addpath('../../MatlabFunc/Tools')
 % addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'netflix';
-W = 0.5;
-codelength = 16;
+dataset = 'movielens';
+W = 2.5;
+codelength = 64;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 m = 3;
 U = 0.83;
 
-method = 'ALSH'
+method = 'IntRankALSH'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];

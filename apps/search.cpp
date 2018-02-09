@@ -157,10 +157,10 @@ int main(int argc, const char **argv)
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, metric);
 
-    } else if (hashMethod == "ALSH") {
+    } else if (hashMethod == "IntRankALSH") {
         lshbox::ALSH<DATATYPE> alsh;
         alsh.loadModel(modelFile, baseBitsFile);
-        search_alsh(queryMethod, data, query, alsh, bench, params, IP_DIST);
+        search_intrankalsh(queryMethod, data, query, alsh, bench, params, IP_DIST);
 
     } else if (hashMethod == "ALSHRank") {
         lshbox::ALSHRankHasher<DATATYPE > alshrank;
