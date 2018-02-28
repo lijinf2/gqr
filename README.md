@@ -28,7 +28,7 @@ GQR
 
     make search
 
-    cd ../script && sh search.sh
+    cd ../script && bash search.sh
 
 You may refer to folder `./script` for detailed explanations and more instructions.
   
