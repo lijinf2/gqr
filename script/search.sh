@@ -116,9 +116,11 @@ dimension=192
 # cardinality=1000000
 # dimension=256
 
-model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset^^}${codelength}_${num_tables}.txt"
+# dataset_name_upper=${dataset^^} # only work after bash 4.0
+dataset_name_upper=$(tr '[a-z]' '[A-Z]' <<< $dataset)
+model_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}model${dataset_name_upper}${codelength}_${num_tables}.txt"
 base_file="../data/${dataset}/${dataset}_base.fvecs"
-base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset^^}${codelength}_${num_tables}.txt"
+base_bits_file="../learn/${hash_method}/hashingCodeTXT/${hash_method}table${dataset_name_upper}${codelength}_${num_tables}.txt"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 benchmark_file="../data/${dataset}/${dataset}_groundtruth.lshbox"
 
