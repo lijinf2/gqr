@@ -69,7 +69,7 @@ private:
     // triplet (dist, numBitDiff, intervalIdx)
     pair<float, pair<unsigned, unsigned>> triplet_;
 
-    unsigned getCurDist() {
+    float getCurDist() {
         return triplet_.first;
     }
 
