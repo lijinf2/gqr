@@ -22,11 +22,11 @@ public:
         sortedBucket_.reserve((numHashBits+1) * (normIntervals.size()-1));
 
         auto distor = [&](Coord& numBitIntervalPair){
-            return 1.0 /  (numHashBits-numBitIntervalPair.first) / normIntervals[numBitIntervalPair.second];
+            return 1.0 /  (numHashBits-numBitIntervalPair.first) / normIntervals[numBitIntervalPair.second+1];
         };
 
         for (unsigned diffBitNum = 0; diffBitNum < numHashBits + 1; ++diffBitNum) {
-            for (unsigned intervalIndex = 1; intervalIndex < normIntervals.size(); ++intervalIndex) {
+            for (unsigned intervalIndex = 0; intervalIndex < normIntervals.size()-1; ++intervalIndex) {
 
                 Coord data = std::make_pair(diffBitNum, intervalIndex);
                 sortedBucket_.emplace_back(std::make_pair(distor(data), data));
