@@ -4,6 +4,7 @@
 #include <mips/query/normrank.h>
 #include <lshbox/mip/query/lmprober.h>
 #include "mips/query/normranklookup.h"
+#include "mips/query/normrankpresort.h"
 #include "mips/alshrank/alshrankprober.h"
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
@@ -102,6 +103,44 @@ void search_imip(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_pre_sort(
+        const lshbox::Matrix<DATATYPE>& data,
+        const lshbox::Matrix<DATATYPE>& query,
+        LSHTYPE& mylsh,
+        const lshbox::Benchmark& bench,
+        SCANNER initScanner,
+        const unordered_map<string, string>& params) {
+
+    typedef NormRankPreSort<typename lshbox::Matrix<DATATYPE>::Accessor> NRPS;
+
+    void* raw_memory = operator new[](
+            sizeof(NRPS) * bench.getQ());
+    NRPS* probers = static_cast<NRPS*>(raw_memory);
+    FV fvs(mylsh.getHashBitsLen());
+
+    SortedNormRange sortedNormRange(mylsh.getHashBitsLen(), mylsh.getNormIntervals());
+
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
+    for (int i = 0; i < bench.getQ(); ++i) {
+
+        new(&probers[i]) NRPS(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh,
+                &fvs,
+                &sortedNormRange);// for non losslookup probers
+    }
+    construct_time= timer.elapsed();
+    std::cout << "NR constructing time , " << construct_time <<   std::endl;
+
+    annQuery(data, query, mylsh, bench, probers, params);
+}
+
 template<typename DATATYPE, typename LSHTYPE>
 void search_mip(
         string method,
@@ -126,8 +165,12 @@ void search_mip(
     }
     else if (method == "NR") {
         search_nr(data, query, mylsh, bench, initScanner, params);
-    } else if (method == "IMIP") {
+    }
+    else if (method == "IMIP") {
         search_imip(data, query, mylsh, bench, initScanner, params);
+    }
+    else if (method == "PRE_SORT") {
+        search_pre_sort(data, query, mylsh, bench, initScanner, params);
     }
     else {
         std::cerr << "does not exist method " << method << std::endl;

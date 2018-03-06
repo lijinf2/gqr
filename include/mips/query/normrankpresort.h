@@ -3,28 +3,31 @@
 #include <iostream>
 #include "lshbox/query/fv.h"
 #include "base/onetableprober.h"
-#include "base/imisequence.h"
+#include "base/sortedlist.h"
+#include "base/mtableprober.h"
 #include "lshbox/query/prober.h"
+#include "lshbox/mip/lmip.h"
+
 using std::pair;
 
-class LMLOneProber: public OneTableProber<unsigned long long> {
+class PreSortOneProber: public OneTableProber<unsigned long long> {
 public:
     typedef unsigned long long BIDTYPE;
-    LMLOneProber(
-        const vector<bool>& hashBits, 
-        const FV* fvs, 
-        unsigned codelen, 
-        unsigned numInterval, 
-        unsigned numBitLength,
-        const std::function<float(unsigned, unsigned)>& func)
-        : fvs_(fvs), 
-        inforInterval_(numBitLength, numInterval),
-        sequencer_(codelen, numInterval, func) {
+    PreSortOneProber(
+            const vector<bool>& hashBits,
+            const FV* fvs,
+            unsigned codelen,
+            unsigned numInterval,
+            unsigned numBitLength,
+            SortedNormRange* sortedNormRange)
+            : fvs_(fvs),
+              inforInterval_(numBitLength, numInterval),
+              sequencer_(sortedNormRange) {
 
-        hashBits_.resize(codelen);    
+        hashBits_.resize(codelen);
         for (int i = 0; i < codelen; ++i) {
             hashBits_[i] = hashBits[i];
-        } 
+        }
 
         triplet_ = sequencer_.next();
     }
@@ -64,7 +67,7 @@ private:
     unsigned fvsIdx_ = 0;
 
     pair<float, BIDTYPE> next_;
-    IMISequence sequencer_;
+    SortedNormRangeSequence sequencer_;
 
     // triplet (dist, numBitDiff, intervalIdx)
     pair<float, pair<unsigned, unsigned>> triplet_;
@@ -78,7 +81,7 @@ private:
     }
 
     unsigned getCurIntervalIdx() {
-        return inforInterval_.largestIdx_ - triplet_.second.second;
+        return triplet_.second.second;
     }
 
     unsigned long long genBucket(const bool* fv, unsigned intervalIdx) {
@@ -101,46 +104,32 @@ private:
 };
 
 template <typename ACCESSOR>
-class NormRankLookup: public MTableProber<ACCESSOR, unsigned long long> {
+class NormRankPreSort: public MTableProber<ACCESSOR, unsigned long long> {
 public:
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
-    NormRankLookup(
-        const DATATYPE* query,
-        lshbox::Scanner<ACCESSOR>& scanner,
-        lshbox::LMIP<DATATYPE>& mylsh,
-        const FV* fvs) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
+NormRankPreSort(
+            const DATATYPE* query,
+            lshbox::Scanner<ACCESSOR>& scanner,
+            lshbox::LMIP<DATATYPE>& mylsh,
+            const FV* fvs,
+            SortedNormRange* sortedNormRange) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
 
         this->LTable_.reserve(mylsh.tables.size());
         unsigned numBitHash = mylsh.getHashBitsLen();
         unsigned numBitLength = mylsh.getLengthBitsCount();
         const auto& normIntervals = mylsh.getNormIntervals();
-        vector<float> scoreLength(normIntervals.size() - 1);
-        for (unsigned i = 0; i < scoreLength.size(); ++i) {
-            scoreLength[i] = 1 / normIntervals[i + 1];
-        }
-        std::sort(scoreLength.begin(), scoreLength.end());
 
-        vector<float> scoreBit(numBitHash + 1);
-        scoreBit[0] = 2.0;
-        for (unsigned i = 1; i < scoreBit.size(); ++i) {
-            scoreBit[i] = 1.0 / i;
-        }
-        std::sort(scoreBit.begin(), scoreBit.end());
 
         for (int tb = 0; tb < mylsh.tables.size(); ++tb) {
-            auto distor = [numBitHash, numBitLength, scoreBit, scoreLength](unsigned numBitDiff, unsigned intervalIdx) {
-                // unsigned numBitSame = numBitHash - numBitDiff;
-                // float dist = (1.0 / numBitSame) * normIntervals[normIntervals.size() - intervalIdx + 1];
-                float dist = scoreBit[numBitDiff] * scoreLength[intervalIdx];
-                return dist;
-            };
 
-            float tmp = distor(0, 0);
             this->LTable_.emplace_back(
-                LMLOneProber(
-                    mylsh.getHashBits(tb, query) 
-                    , fvs, numBitHash, normIntervals.size() - 1, numBitLength, distor));
+                    PreSortOneProber(
+                            mylsh.getHashBits(tb, query),
+                            fvs,
+                            numBitHash,
+                            normIntervals.size() - 1,
+                            numBitLength, sortedNormRange));
         }
 
         // initialize minHeap
@@ -154,5 +143,5 @@ public:
         return &LTable_[tb];
     }
 private:
-    vector<LMLOneProber> LTable_;
+    vector<PreSortOneProber> LTable_;
 };
