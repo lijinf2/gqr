@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <queue>
 #include "lshbox/query/scoreidxpair.h"
