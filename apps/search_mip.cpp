@@ -1,11 +1,17 @@
 #include "search.h"
 
-#include <mips/normrange/lengthmarkedrank.h>
+#include <mips/normrange/query/lengthmarkedrank.h>
 
-#include <mips/query/normrank.h>
-#include "mips/query/normranklookup.h"
-#include "mips/query/normrankpresort.h"
+
 #include "mips/alshrank/alshrankprober.h"
+
+#include <mips/normrange/normrangehasher.h>
+
+#include <mips/normrange/query/normrankpresort.h>
+#include <mips/normrange/query/normrank.h>
+#include <mips/normrange/query/normranklookup.h>
+#include <mips/normrange/query/lengthmarkedrank.h>
+
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
