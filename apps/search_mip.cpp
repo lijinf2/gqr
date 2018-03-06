@@ -1,8 +1,8 @@
 #include "search.h"
-#include <lshbox/mip/query/lengthmarked.h>
-#include <lshbox/mip/query/normalizedrank.h>
+
+#include <mips/normrange/lengthmarkedrank.h>
+
 #include <mips/query/normrank.h>
-#include <lshbox/mip/query/lmprober.h>
 #include "mips/query/normranklookup.h"
 #include "mips/query/normrankpresort.h"
 #include "mips/alshrank/alshrankprober.h"
@@ -16,7 +16,7 @@ void search_lm(
         SCANNER initScanner,
         const unordered_map<string, string>& params) {
 
-    typedef LengthMarked<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
+    typedef LengthMarkedRank<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
 
     void* raw_memory = operator new[](
             sizeof(LMR) * bench.getQ());

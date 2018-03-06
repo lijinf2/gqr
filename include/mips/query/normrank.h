@@ -8,7 +8,9 @@
 #include <iostream>
 #include <limits>
 #include <lshbox.h>
-#include "lshbox/mip/lmip.h"
+
+
+#include <mips/normrange/normrangehasher.h>
 #include "base/bucketlist.h"
 #include "base/mtableprober.h"
 #include "lshbox/utils.h"
@@ -20,7 +22,7 @@ public:
     typedef unsigned long long BIDTYPE;
     typedef ScoreIdxPair PairT;
 
-    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
+    typedef lshbox::NormRangeHasher<DATATYPE> LSHTYPE;
     NormRank(
             const DATATYPE* domin,
             lshbox::Scanner<ACCESSOR>& scanner,

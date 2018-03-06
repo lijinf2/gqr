@@ -5,6 +5,9 @@
 #include "base/onetableprober.h"
 #include "base/imisequence.h"
 #include "lshbox/query/prober.h"
+
+#include <mips/normrange/normrangehasher.h>
+
 using std::pair;
 
 class LMLOneProber: public OneTableProber<unsigned long long> {
@@ -108,7 +111,7 @@ public:
     NormRankLookup(
         const DATATYPE* query,
         lshbox::Scanner<ACCESSOR>& scanner,
-        lshbox::LMIP<DATATYPE>& mylsh,
+        lshbox::NormRangeHasher<DATATYPE>& mylsh,
         const FV* fvs) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
 
         this->LTable_.reserve(mylsh.tables.size());

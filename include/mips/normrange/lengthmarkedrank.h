@@ -241,14 +241,14 @@ private:
 };
 
 template<typename ACCESSOR>
-class LengthMarked : public Prober<ACCESSOR>{
+class LengthMarkedRank : public Prober<ACCESSOR>{
 public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
 
     typedef lshbox::NormRangeHasher<DATATYPE> LSHTYPE;
-    LengthMarked(
+    LengthMarkedRank(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {

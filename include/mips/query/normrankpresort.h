@@ -6,7 +6,8 @@
 #include "base/sortedlist.h"
 #include "base/mtableprober.h"
 #include "lshbox/query/prober.h"
-#include "lshbox/mip/lmip.h"
+
+#include <mips/normrange/normrangehasher.h>
 
 using std::pair;
 
@@ -111,7 +112,7 @@ public:
 NormRankPreSort(
             const DATATYPE* query,
             lshbox::Scanner<ACCESSOR>& scanner,
-            lshbox::LMIP<DATATYPE>& mylsh,
+            lshbox::NormRangeHasher<DATATYPE>& mylsh,
             const FV* fvs,
             SortedNormRange* sortedNormRange) : MTableProber<ACCESSOR, BIDTYPE>(query, scanner, mylsh) {
 

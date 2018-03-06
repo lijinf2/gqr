@@ -20,8 +20,9 @@
 #include <intcode/hash/alsh.h>
 
 #include <lshbox/graph/knngraphh.h>
-#include <lshbox/mip/lmip.h>
+
 #include <mips/alshrank/alshrankhasher.h>
+#include <mips/normrange/normrangehasher.h>
 
 #include "search.h"
 #include "search_graph.h"
@@ -146,12 +147,12 @@ int main(int argc, const char **argv)
         sim.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, sim, bench, params, metric);
     } else if (hashMethod == "LMIP") {
-        lshbox::LMIP<DATATYPE> lmip;
+        lshbox::NormRangeHasher<DATATYPE> lmip;
         metric = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, metric);
     } else if (hashMethod == "NLMIP") {
-        lshbox::LMIP<DATATYPE> lmip;
+        lshbox::NormRangeHasher<DATATYPE> lmip;
         metric = IP_DIST;
         lmip.loadModel(modelFile, baseBitsFile);
         search_mip(queryMethod, data, query, lmip, bench, params, metric);

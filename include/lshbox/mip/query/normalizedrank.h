@@ -11,7 +11,8 @@
 #include <limits>
 #include <bitset>
 #include <lshbox.h>
-#include "lshbox/mip/lmip.h"
+
+#include <mips/normrange/normrangehasher.h>
 #include "base/bucketlist.h"
 
 class NRTable {
@@ -133,7 +134,7 @@ public:
     // typedef std::pair<float, unsigned > PairT; // <score, tableIdx>
     typedef ScoreIdxPair PairT;
 
-    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
+    typedef lshbox::NormRangeHasher<DATATYPE> LSHTYPE;
     NormalizedRank(
             const DATATYPE* domin,
             lshbox::Scanner<ACCESSOR>& scanner,

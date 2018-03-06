@@ -11,9 +11,11 @@
 #include <limits>
 #include <bitset>
 #include <lshbox.h>
-#include "lshbox/mip/lmip.h"
+
 #include <util/heap_element.h>
 #include <lshbox/query/fv.h>
+
+#include <mips/normrange/normrangehasher.h>
 #include "lshbox/mip/query/inverted_multi_index.h"
 
 template <typename ACCESSOR>
@@ -24,7 +26,7 @@ public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef typename Prober<ACCESSOR>::BIDTYPE BIDTYPE;
-    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
+    typedef lshbox::NormRangeHasher<DATATYPE> LSHTYPE;
 
 
     LengthMarkedLookup(
