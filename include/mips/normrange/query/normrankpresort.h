@@ -3,7 +3,7 @@
 #include <iostream>
 #include "lshbox/query/fv.h"
 #include "base/onetableprober.h"
-#include "base/sortedlist.h"
+#include "mips/normrange/query/util/sortedlist.h"
 #include "base/mtableprober.h"
 #include "lshbox/query/prober.h"
 
