@@ -27,7 +27,7 @@
 #include "search.h"
 #include "search_graph.h"
 #include "search_intcode.h"
-#include "search_mip.cpp"
+#include "search_mip.h"
 
 using std::unordered_map;
 using std::string;
