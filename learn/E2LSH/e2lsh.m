@@ -1,9 +1,9 @@
 addpath('../../MatlabFunc/Tools')
 % addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'audio';
-W = 10000;
-codelength = 12;
+dataset = 'netflix';
+W = 2;
+codelength = 16;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 

@@ -34,10 +34,10 @@ dataset="netflix"
 # metric="product"
 
 
-# simpleLSH
+# # simpleLSH
 # hash_method="SIM"
 # query_method="HR"
-# codelength="64b" # 16b 32b 64b
+# codelength="32b" # 16b 32b 64b
 # num_tables="1tb"
 # metric="angular"
 # dataset="m2a_movielens"
