@@ -21,7 +21,7 @@ namespace lshbox
 {
 
 template<typename DATATYPE = float>
-class LMIP: public Hasher<DATATYPE>
+class NormRangeHasher: public Hasher<DATATYPE>
 {
 
 private:
@@ -62,7 +62,7 @@ public:
 
     typedef typename Hasher<DATATYPE>::BIDTYPE BIDTYPE;
 
-    LMIP() : Hasher<DATATYPE>() {};
+    NormRangeHasher() : Hasher<DATATYPE>() {};
 
     vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
 
@@ -87,7 +87,7 @@ private:
 }
 
 template<typename DATATYPE>
-vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
+vector<float> lshbox::NormRangeHasher<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
 
     vector<float> domin_pc(hashBitsLen + lengthBitsCount, 0);
 
@@ -112,7 +112,7 @@ vector<float> lshbox::LMIP<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::LMIP<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::NormRangeHasher<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
 {
     vector<float> hashFloats = getHashFloats(k, domin);
     vector<bool> hashBits = this->quantization(hashFloats);
@@ -120,7 +120,7 @@ vector<bool> lshbox::LMIP<DATATYPE>::getHashBits(unsigned k, const DATATYPE *dom
 }
 
 template<typename DATATYPE>
-void lshbox::LMIP<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
+void lshbox::NormRangeHasher<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
     string line;
     // initialized statistics and model
     ifstream modelFin(modelFile.c_str());

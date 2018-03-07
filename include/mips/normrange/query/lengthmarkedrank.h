@@ -1,3 +1,4 @@
+#pragma once
 #include <vector>
 #include <unordered_map>
 #include <lshbox/query/prober.h>
@@ -6,7 +7,8 @@
 #include <limits>
 #include <bitset>
 #include <lshbox.h>
-#include "lshbox/mip/lmip.h"
+
+#include <mips/normrange/normrangehasher.h>
 
 
 /**
@@ -240,14 +242,14 @@ private:
 };
 
 template<typename ACCESSOR>
-class LengthMarked : public Prober<ACCESSOR>{
+class LengthMarkedRank : public Prober<ACCESSOR>{
 public:
     typedef typename ACCESSOR::Value value;
     typedef typename ACCESSOR::DATATYPE DATATYPE;
     typedef unsigned long long BIDTYPE;
 
-    typedef lshbox::LMIP<DATATYPE> LSHTYPE;
-    LengthMarked(
+    typedef lshbox::NormRangeHasher<DATATYPE> LSHTYPE;
+    LengthMarkedRank(
         const DATATYPE* domin,
         lshbox::Scanner<ACCESSOR>& scanner,
         LSHTYPE& mylsh) : Prober<ACCESSOR>(domin, scanner, mylsh) {

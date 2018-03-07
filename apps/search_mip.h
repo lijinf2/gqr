@@ -1,10 +1,13 @@
 #include "search.h"
-#include <lshbox/mip/query/lengthmarked.h>
-#include <lshbox/mip/query/normalizedrank.h>
-#include <mips/query/normrank.h>
-#include <lshbox/mip/query/lmprober.h>
-#include "mips/query/normranklookup.h"
 #include "mips/alshrank/alshrankprober.h"
+
+#include <mips/normrange/normrangehasher.h>
+
+#include <mips/normrange/query/normrankpresort.h>
+#include <mips/normrange/query/normrank.h>
+#include <mips/normrange/query/normranklookup.h>
+#include <mips/normrange/query/lengthmarkedrank.h>
+
 
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_lm(
@@ -15,7 +18,7 @@ void search_lm(
         SCANNER initScanner,
         const unordered_map<string, string>& params) {
 
-    typedef LengthMarked<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
+    typedef LengthMarkedRank<typename lshbox::Matrix<DATATYPE>::Accessor> LMR;
 
     void* raw_memory = operator new[](
             sizeof(LMR) * bench.getQ());
@@ -67,7 +70,6 @@ void search_nr(
 }
 
 
-
 template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
 void search_imip(
         const lshbox::Matrix<DATATYPE>& data,
@@ -102,38 +104,44 @@ void search_imip(
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
-template<typename DATATYPE, typename LSHTYPE>
-void search_mip(
-        string method,
+
+template<typename DATATYPE, typename LSHTYPE, typename SCANNER>
+void search_pre_sort(
         const lshbox::Matrix<DATATYPE>& data,
         const lshbox::Matrix<DATATYPE>& query,
         LSHTYPE& mylsh,
         const lshbox::Benchmark& bench,
-        const unordered_map<string, string>& params,
-        const unsigned TYPE_DIST) {
+        SCANNER initScanner,
+        const unordered_map<string, string>& params) {
 
-    // initialize scanner
-    typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
-    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
-    lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
-            accessor,
-            metric,
-            bench.getK()
-    );
+    typedef NormRankPreSort<typename lshbox::Matrix<DATATYPE>::Accessor> NRPS;
 
-    if (method == "LM") {
-        search_lm(data, query, mylsh, bench, initScanner, params);
+    void* raw_memory = operator new[](
+            sizeof(NRPS) * bench.getQ());
+    NRPS* probers = static_cast<NRPS*>(raw_memory);
+    FV fvs(mylsh.getHashBitsLen());
+
+    SortedNormRange sortedNormRange(mylsh.getHashBitsLen(), mylsh.getNormIntervals());
+
+
+    double construct_time = 0;
+    lshbox::timer timer;
+    timer.restart();
+    for (int i = 0; i < bench.getQ(); ++i) {
+
+        new(&probers[i]) NRPS(
+                query[bench.getQuery(i)],
+                initScanner,
+                mylsh,
+                &fvs,
+                &sortedNormRange);// for non losslookup probers
     }
-    else if (method == "NR") {
-        search_nr(data, query, mylsh, bench, initScanner, params);
-    } else if (method == "IMIP") {
-        search_imip(data, query, mylsh, bench, initScanner, params);
-    }
-    else {
-        std::cerr << "does not exist method " << method << std::endl;
-        assert(false);
-    }
+    construct_time= timer.elapsed();
+    std::cout << "NR constructing time , " << construct_time <<   std::endl;
+
+    annQuery(data, query, mylsh, bench, probers, params);
 }
+
 
 template<typename DATATYPE, typename LSHTYPE>
 void search_intrankalsh(string method,
@@ -173,6 +181,7 @@ void search_intrankalsh(string method,
     annQuery(data, query, mylsh, bench, probers, params);
 }
 
+
 template<typename DATATYPE, typename LSHTYPE>
 void search_alshmatchrank(string method,
                  const lshbox::Matrix<DATATYPE>& data,
@@ -209,4 +218,42 @@ void search_alshmatchrank(string method,
     construct_time= timer.elapsed();
     std::cout << "ALSHRankProber constructing time , " << construct_time <<   std::endl;
     annQuery(data, query, mylsh, bench, probers, params);
+}
+
+
+template<typename DATATYPE, typename LSHTYPE>
+void search_mip(
+        string method,
+        const lshbox::Matrix<DATATYPE>& data,
+        const lshbox::Matrix<DATATYPE>& query,
+        LSHTYPE& mylsh,
+        const lshbox::Benchmark& bench,
+        const unordered_map<string, string>& params,
+        const unsigned TYPE_DIST) {
+
+    // initialize scanner
+    typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
+    lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);
+    lshbox::Scanner<typename lshbox::Matrix<DATATYPE>::Accessor> initScanner(
+            accessor,
+            metric,
+            bench.getK()
+    );
+
+    if (method == "LM") {
+        search_lm(data, query, mylsh, bench, initScanner, params);
+    }
+    else if (method == "NR") {
+        search_nr(data, query, mylsh, bench, initScanner, params);
+    }
+    else if (method == "IMIP") {
+        search_imip(data, query, mylsh, bench, initScanner, params);
+    }
+    else if (method == "PRE_SORT") {
+        search_pre_sort(data, query, mylsh, bench, initScanner, params);
+    }
+    else {
+        std::cerr << "does not exist method " << method << std::endl;
+        assert(false);
+    }
 }
