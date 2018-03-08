@@ -29,7 +29,7 @@ lens = zeros(Nitems, lengthBits);
 
 for k=1:Nitems
 	% vector whose norms is not greater than prct[2] belongs to the 0 group
-    foundValue = uint32(find(prct>norms(k), 1))
+    foundValue = uint32(find(prct>norms(k), 1));
 	currentLength = foundValue - 2; 
     if isempty(currentLength)
         currentLength = size(prct, 2) - 2;
