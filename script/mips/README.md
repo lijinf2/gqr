@@ -15,7 +15,7 @@ usage of search_mip
 
     cd ../../
 
--Steo 3: calculate ground-truth
+-Step 3: calculate ground-truth
 
     cd ./script
     vim cal_groundtruth.sh
