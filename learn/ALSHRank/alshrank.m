@@ -1,7 +1,7 @@
 addpath('../../MatlabFunc/Tools')
 % addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'netflix';
+dataset = 'movielens';
 W = 2.5;
 codelength = 64;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns

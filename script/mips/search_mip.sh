@@ -20,37 +20,36 @@ hash_method="NLMIP"
 # query_method="NR"
 # query_method="IMIP"
 query_method="PRE_SORT"
-codelength="16b_64i" # 12b 27b 58b
+codelength="10b_64i" # 12b 27b 58b
 num_tables="1tb"
 metric="product"
-# dataset="movielens"
-dataset="netflix"
+dataset="movielens"
 
-# lmip
+
+# # lmip
 # hash_method="LMIP"
 # query_method="LM"
-# codelength="12b" # 12b 27b 58b
+# codelength="10b" # 12b 27b 58b
 # num_tables="1tb"
 # metric="product"
-
+# dataset="movielens"
 
 # # simpleLSH
 # hash_method="SIM"
 # query_method="HR"
-# codelength="32b" # 16b 32b 64b
+# codelength="16b" # 16b 32b 64b
 # num_tables="1tb"
 # metric="angular"
 # dataset="m2a_movielens"
-# dataset="m2a_netflix"
 
-# # # ALSH
+# # ALSH
 # hash_method="IntRankALSH"
 # hash_method="ALSHRank"
-# codelength="32b" # 16b 32b 64b
+# codelength="16b" # 16b 32b 64b
 # num_tables="1tb"
 # metric="product"
 # dataset="movielens"
-# dataset="netflix"
+
 
 # # E2LSH
 # hash_method="E2LSH"
@@ -58,8 +57,8 @@ dataset="netflix"
 # codelength="16b" # 16b 32b 64b
 # num_tables="1tb"
 # metric="product"
-# # # # dataset="movielens"
-# dataset="netflix"
+# dataset="movielens"
+
 
 base_format="fvecs"
 

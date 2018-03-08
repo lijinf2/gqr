@@ -3,7 +3,7 @@ addpath('../../MatlabFunc/Tools')
 
 dataset = 'movielens';
 W = 2.5;
-codelength = 64;
+codelength = 16;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 m = 3;

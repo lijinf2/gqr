@@ -1,9 +1,9 @@
 addpath('../../MatlabFunc/Tools')
 addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'netflix';
+dataset = 'movielens';
 
-codelength = 16;
+codelength = 10;
 normInteval = 64;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 lengthBits = ceil(log2(normInteval));
