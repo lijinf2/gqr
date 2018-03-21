@@ -100,10 +100,10 @@ public:
         if (count == 0) return -1;
         else return sumError / count;
     }
-private:
-    vector<BenchRecord> nns;
+
     const BenchRecord& getRecord(unsigned qId) const {
         return this->nns[qId];
     }
-
+private:
+    vector<BenchRecord> nns;
 };

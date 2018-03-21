@@ -31,6 +31,8 @@
 #include <vector>
 #include <assert.h>
 #include <string.h>
+#include <cmath>
+#include <iostream>
 namespace lshbox
 {
 /**
@@ -115,13 +117,7 @@ public:
      */
     void load(const std::string &path)
     {
-        std::ifstream is(path.c_str(), std::ios::binary);
-        unsigned header[3];
-        assert(sizeof header == 3 * 4);
-        is.read((char *)header, sizeof(header));
-        reset(header[2], header[1]);
-        is.read((char *)dims, sizeof(T) * dim * N);
-        is.close();
+        loadFvecs((*this), path);
     }
     /**
      * Load the Matrix from std::vector<T>.
@@ -177,6 +173,21 @@ public:
         memcpy(dims, M.getData(), sizeof(T) * dim * N);
         return *this;
     }
+
+    std::vector<float> calNorms() {
+        std::vector<float> results(this->getSize());
+        float norm;
+        for (int i = 0; i < results.size(); ++i) {
+            norm = 0;
+            for (int idx = 0; idx < this->getDim(); ++idx) {
+                norm += (*this)[i][idx] * (*this)[i][idx];
+            }
+            results[i] = sqrt(norm);
+        }
+        return results;
+    }
+
+
     /**
      * An accessor class to be used with LSH index.
      */
@@ -211,5 +222,35 @@ public:
             return matrix_[key];
         }
     };
+
+    template<typename DATATYPE>
+    friend void loadFvecs(Matrix<DATATYPE>& data, const std::string& dataFile) {
+        std::ifstream fin(dataFile.c_str(), std::ios::binary | std::ios::ate);
+        if (!fin) {
+            std::cout << "cannot open file " << dataFile.c_str() << std::endl;
+            assert(false);
+        }
+        unsigned fileSize = fin.tellg();
+        fin.seekg(0, fin.beg);
+        assert(fileSize != 0);
+
+        int dimension;
+        fin.read((char*)&dimension, sizeof(int));
+        unsigned bytesPerRecord = dimension * sizeof(DATATYPE) + 4;
+        assert(fileSize % bytesPerRecord == 0);
+        int cardinality = fileSize / bytesPerRecord;
+
+        data.reset(dimension, cardinality);
+        fin.read((char *)(data.getData()), sizeof(float) * dimension);
+
+        int dim;
+        for (int i = 1; i < cardinality; ++i) {
+            fin.read((char*)&dim, sizeof(int));
+            assert(dim == dimension);
+            fin.read((char *)(data.getData() + i * dimension), sizeof(float) * dimension);
+        }
+        fin.close();
+    }
+
 };
 }
