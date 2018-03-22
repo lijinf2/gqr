@@ -4,7 +4,6 @@
 #include <utility>
 #include <lshbox.h>
 #include <util/stat.h>
-#include <lshbox/utils.h>
 #include <lshbox/bench/bencher.h>
 using namespace std;
 int main(int argc, char** argv) {

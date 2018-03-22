@@ -52,7 +52,7 @@ int Transform::euclidToMIP(vector<float* >& data, vector<float* >& queryData, in
     float dataMaxNormSquare = calMaxNormSquare(data, dimension);
     float queryMaxNormSquare = calMaxNormSquare(queryData, dimension);
     float max_norm_square = std::max(dataMaxNormSquare, queryMaxNormSquare);
-    float scalar = sqrt(max_norm_square) * dimension;
+    float scalar = sqrt(max_norm_square);
 
     scale(data, queryData, dimension, scalar);
 
