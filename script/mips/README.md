@@ -15,7 +15,18 @@ usage of search_mip
 
     cd ../../
 
--Step 3: make app and run
+-Step 3: calculate ground-truth
+
+    cd ./script
+    vim cal_groundtruth.sh
+            # modify cal_groundtruth.sh
+            # 1. metric=product
+            # 2. for dataset in "movielens" (if we use movielens as default)
+
+    bash cal_groundtruth.sh
+    cd ../  # return to gqr/
+
+-Step 4: make app and run
 
     cd ./script/mips/ && bash search_mip.sh
 
