@@ -1,7 +1,10 @@
 GQR
 ==========
-# A General and Efficient Querying Method for Learning to Hash
+# A General and Efficient Querying Method for Learning to Hash (SIGMOD 2018)
 -----------------------------------------------------------------------------------------------------------------
+# Why GQR framework for similarity search
+- Fast Training (Matlab and Automatic Parallelization)
+- Support Multiple Hash Tables (Like k-nn Graph supports k > 1)
 
 # Dependences
 - CMake
