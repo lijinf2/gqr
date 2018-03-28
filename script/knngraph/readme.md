@@ -1,14 +1,13 @@
 This a mini analyzer to analyse KNN graph.
 
-You need an input file: KNN_garph.txt.
+===========================================================================
 
 Usage:
-./KNNGraph_Analyzer ${item_size} ${K}
+bash KNN_graph_analyzer.sh
 
-eg.
-./KNNGraph_Analyzer 10677 20 for dataset movielens.
+You can change input or output file path in KNN_graph_analyzer.sh
 
-The output file is KNN_graph_analysis.txt
+===========================================================================
 
 input format:
 i-th line: item_index NN_1 NN_2 NN_3 ... NN_K
