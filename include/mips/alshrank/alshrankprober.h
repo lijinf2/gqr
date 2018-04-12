@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <queue>
 #include "gqr/util/heap_element.h"
+#include "gqr/util/gqrhash.h"
 #include <base/baseprober.h>
 #include <base/bucketlist.h>
 #include <base/mtableprober.h>
@@ -14,17 +15,18 @@ using std::priority_queue;
 using std::vector;
 using std::pair;
 using std::unordered_map;
+using lshbox::gqrhash;
 
 class ALSHBucketList : public OneTableProber<vector<int>>{
 public:
     typedef vector<int> BIDTYPE;
     ALSHBucketList(
         const BIDTYPE& queryHashInts, 
-        const unordered_map<BIDTYPE, std::vector<unsigned> >& table) {
+        const unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>& table) {
         
         unsigned maxDistance = queryHashInts.size();
         dists.resize(maxDistance + 1);
-        for (typename unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it = table.begin(); it != table.end(); ++it) {
+        for (typename unordered_map<BIDTYPE, std::vector<unsigned>, typename lshbox::gqrhash<BIDTYPE>>::const_iterator it = table.begin(); it != table.end(); ++it) {
             const BIDTYPE& signature = it->first;
             unsigned numMatches = 0;
             assert(signature.size() == queryHashInts.size());

@@ -5,12 +5,15 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
+
+#include "gqr/util/gqrhash.h"
 #include "base/basehasher.h"
 using std::vector;
 using std::unordered_map;
 using std::string;
 using std::ifstream;
 using std::istringstream;
+using lshbox::gqrhash;
 
 namespace lshbox {
 
@@ -75,7 +78,7 @@ void Hasher<DATATYPE>::initBaseHasher(
     int tmp;
     vector<bool> record(codelength);
     int itemIdx = 0;
-    unordered_map<BIDTYPE, vector<unsigned>> curTable;
+    unordered_map<BIDTYPE, vector<unsigned>, gqrhash<BIDTYPE>> curTable;
     while (getline(baseFin, line)) {
         istringstream iss(line);
         for (int i = 0; i < codelength; ++i) {

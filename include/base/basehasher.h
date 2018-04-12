@@ -4,28 +4,31 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <functional>
 #include <unordered_map>
+#include "gqr/util/gqrhash.h"
 #include "gqr/util/io.h"
 using std::vector;
 using std::unordered_map;
 using std::string;
 using std::ifstream;
 using std::istringstream;
+using lshbox::gqrhash;
 
-namespace std {
-template<typename T>
-class hash<std::vector<T>> {
-public:
-    size_t operator()(const std::vector<T>& vec) const {
-        size_t seed = 0;
-        std::hash<T> hasher;
-        for (auto& v : vec) {
-            seed ^= hasher(v);
-        }
-        return seed;
-    }
-};
-}
+// namespace std {
+// template<typename T>
+// class hash<std::vector<T>> {
+// public:
+//     size_t operator()(const std::vector<T>& vec) const {
+//         size_t seed = 0;
+//         std::hash<T> hasher;
+//         for (auto& v : vec) {
+//             seed ^= hasher(v);
+//         }
+//         return seed;
+//     }
+// };
+// }
 
 namespace lshbox {
 
@@ -35,7 +38,8 @@ public:
 
     unsigned numTotalItems;
     unsigned codelength;
-    vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
+    // vector<unordered_map<BIDTYPE, vector<unsigned>>> tables;
+    vector<unordered_map<BIDTYPE, vector<unsigned>, gqrhash<BIDTYPE>>> tables;
 
     BaseHasher() {}
 
@@ -98,7 +102,7 @@ vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllMaxBucketSize() {
     vector<unsigned> vec(tables.size());
     for (int tb = 0; tb < tables.size(); ++tb) {
         unsigned max = 0;
-        typename unordered_map<BIDTYPE, vector<unsigned> >::const_iterator it;
+        typename unordered_map<BIDTYPE, vector<unsigned>, gqrhash<BIDTYPE>>::const_iterator it;
         for (it = tables[tb].begin(); it != tables[tb].end(); ++it) {
             if (it->second.size() > max) {
                 max = it->second.size();
@@ -117,7 +121,7 @@ unsigned BaseHasher<DATATYPE, BIDTYPE>::getTableSize() {
 template<typename DATATYPE, typename BIDTYPE>
 unsigned BaseHasher<DATATYPE, BIDTYPE>::getMaxBucketSize() {
     unsigned max = 0;
-    typename unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it;
+    typename unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>::const_iterator it;
     for (it = tables[0].begin(); it != tables[0].end(); ++it) {
         if (it->second.size() > max) {
             max = it->second.size();

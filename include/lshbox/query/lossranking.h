@@ -2,11 +2,12 @@
 #include <map>
 #include <queue>
 #include <vector>
+#include "gqr/util/gqrhash.h"
 #include "lshbox/query/scoreidxpair.h"
 class LRTable {
 public:
     typedef unsigned long long BIDTYPE;
-    typedef std::unordered_map<BIDTYPE, std::vector<unsigned> > TableT;
+    typedef std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>> TableT;
 
     LRTable(
         BIDTYPE hashVal, 

@@ -4,20 +4,22 @@
 #include <utility>
 #include <string>
 
+#include "gqr/util/gqrhash.h"
 #include "base/onetableprober.h"
 using std::vector;
 using std::pair;
 using std::string;
+using lshbox::gqrhash;
 template<typename BIDTYPE>
 class BucketList : public OneTableProber<BIDTYPE> {
 public:
     BucketList(
-        const unordered_map<BIDTYPE, std::vector<unsigned> >& table,
+        const unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>& table,
         const std::function<float (const BIDTYPE&)>& distor){
         
         sortedBucket_.reserve(table.size());
         // ranking by linear sorting
-        for (typename unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it = table.begin(); it != table.end(); ++it) {
+        for (typename unordered_map<BIDTYPE, std::vector<unsigned>,gqrhash<BIDTYPE>>::const_iterator it = table.begin(); it != table.end(); ++it) {
             const BIDTYPE& signature = it->first;
             float dist = distor(signature);
             sortedBucket_.emplace_back(make_pair(distor(signature), signature));

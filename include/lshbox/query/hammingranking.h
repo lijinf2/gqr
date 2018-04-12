@@ -1,6 +1,8 @@
 #include <vector>
 #include <unordered_map>
+#include "gqr/util/gqrhash.h"
 #include <lshbox/query/prober.h>
+using lshbox::gqrhash;
 
 class HRTable {
 public:
@@ -8,13 +10,13 @@ public:
     HRTable(
             BIDTYPE hashVal, // hash value of query q
             unsigned paramN, // number of bits per binary code
-            const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
+            const std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>& table
            ){
         // ranking by linear sorting
         dstToBks_.resize(paramN + 1); // maximum hamming dist is paramN
         unsigned hamDist;
         BIDTYPE xorVal;
-        for ( std::unordered_map<BIDTYPE, std::vector<unsigned> >::const_iterator it = table.begin(); it != table.end(); ++it) {
+        for ( std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>::const_iterator it = table.begin(); it != table.end(); ++it) {
 
             const BIDTYPE& bucketVal = it->first;
             xorVal = hashVal ^ bucketVal;

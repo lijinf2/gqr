@@ -8,6 +8,7 @@
 #include <bitset>
 #include <lshbox.h>
 
+#include "gqr/util/gqrhash.h"
 #include <mips/normrange/normrangehasher.h>
 
 
@@ -198,7 +199,7 @@ private:
             BIDTYPE hashVal, // hash value of query q
             const unsigned paramN, // number of bits per binary code
             const unsigned lengthBitNum,
-            const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
+            const std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>& table
            )
     {
 
@@ -223,7 +224,7 @@ public:
             BIDTYPE hashVal, // hash value of query q
             const unsigned paramN, // number of bits per binary code
             const unsigned lengthBitNum,
-            const std::unordered_map<BIDTYPE, std::vector<unsigned> >& table
+            const std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>& table
            ) {
 
         lengthMarkedRanking(hashVal, paramN, lengthBitNum, table);

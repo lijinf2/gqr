@@ -3,14 +3,16 @@
 #include <algorithm>
 #include <queue>
 #include <unordered_map>
+#include "gqr/util/gqrhash.h"
 #include <lshbox/query/tree.h>
 #include <lshbox/query/scoreidxpair.h>
 #pragma once
+using lshbox::gqrhash;
 // will ignore the first bucket, i.e. 00000
 class TSTable{
 public:
     typedef unsigned long long BIDTYPE;
-    typedef std::unordered_map<BIDTYPE, std::vector<unsigned> > TableT;
+    typedef std::unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>> TableT;
     TSTable(
         const std::vector<bool>& queryBits,    
         const std::vector<float>& queryloss,
