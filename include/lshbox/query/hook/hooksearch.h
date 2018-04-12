@@ -3,7 +3,7 @@
 #include <queue>
 #include <set>
 #include <utility>
-#include <util/heap_element.h>
+#include "gqr/util/heap_element.h"
 #include "hooker.h"
 using std::vector;
 using std::priority_queue;

@@ -4,7 +4,7 @@
 #include <functional>
 #include <unordered_map>
 #include <queue>
-#include <util/heap_element.h>
+#include "gqr/util/heap_element.h"
 #include <base/baseprober.h>
 #include <base/bucketlist.h>
 #include <base/mtableprober.h>

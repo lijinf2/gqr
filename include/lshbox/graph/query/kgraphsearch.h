@@ -1,5 +1,5 @@
 #include <lshbox/query/prober.h>
-#include <util/heap_element.h>
+#include "gqr/util/heap_element.h"
 #include <queue>
 #include <utility>
 using std::pair;
