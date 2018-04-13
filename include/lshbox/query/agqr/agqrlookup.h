@@ -33,7 +33,7 @@ public:
                 if(cosValue > 1) cosValue = 1;
                 e = halfPI - acos(cosValue);
             }
-            this->handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, &mylsh.tables[t], tree));
+            this->handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, tree));
             this->heap_.push(ScoreIdxPair(this->handlers_[t].getCurScore(), t)); 
         }
     }

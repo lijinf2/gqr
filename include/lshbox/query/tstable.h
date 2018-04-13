@@ -16,12 +16,9 @@ public:
     TSTable(
         const std::vector<bool>& queryBits,    
         const std::vector<float>& queryloss,
-        const TableT* table,
         const Tree* tree) {
 
-        // initialize table_
         queryBits_ = queryBits;
-        table_ = table;
         tree_ = tree;
         upperIdx = tree_->getSize() / 2 - 1;
 
@@ -87,7 +84,6 @@ private:
     // example: 
     // if queryBits = 101, queryFloats = 0.1, -0.05, 0.9 
     // posLossPairs_ = (1, 0.05), (0, 0.1), (2, 0.9)
-    const TableT * table_ = NULL;
     std::vector<bool> queryBits_;
     std::vector<std::pair<unsigned int, float>> posLossPairs_;
 

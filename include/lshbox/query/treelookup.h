@@ -31,7 +31,7 @@ public:
             for (auto& e : hashFloats) {
                 e = fabs(e);
             }
-            handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, &mylsh.tables[t], tree));
+            handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, tree));
             heap_.push(ScoreIdxPair(handlers_[t].getCurScore(), t)); 
         }
 
