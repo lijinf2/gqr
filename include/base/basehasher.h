@@ -46,23 +46,23 @@ public:
     /* variables must be initialized in loadModel*/
     virtual void loadModel(const string& modelFile, const string& baseBitsFile) = 0; 
 
-    virtual BIDTYPE getBuckets(unsigned tb, const DATATYPE *domin) = 0;
+    virtual BIDTYPE getBuckets(unsigned tb, const DATATYPE *domin) const = 0;
 
-    vector<unsigned> getAllTableSize();
+    vector<unsigned> getAllTableSize() const;
 
-    vector<unsigned> getAllMaxBucketSize();
-
-    // when there is only one hash table
-    unsigned getTableSize();
+    vector<unsigned> getAllMaxBucketSize() const;
 
     // when there is only one hash table
-    unsigned getMaxBucketSize();
+    unsigned getTableSize() const;
 
-    unsigned getBaseSize();
+    // when there is only one hash table
+    unsigned getMaxBucketSize() const;
 
-    unsigned getCodeLength();
+    unsigned getBaseSize() const;
 
-    unsigned getNumTables();
+    unsigned getCodeLength() const;
+
+    unsigned getNumTables() const;
 
     template<typename PROBER>
     int probe(unsigned t, BIDTYPE bucketId, PROBER &prober);
@@ -88,7 +88,7 @@ protected:
 
 //--------------------- Implementations ------------------
 template<typename DATATYPE, typename BIDTYPE>
-vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllTableSize() {
+vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllTableSize() const {
     vector<unsigned> vec;
     vec.resize(tables.size());
     for (int i = 0; i < tables.size(); ++i) {
@@ -98,7 +98,7 @@ vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllTableSize() {
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllMaxBucketSize() {
+vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllMaxBucketSize() const {
     vector<unsigned> vec(tables.size());
     for (int tb = 0; tb < tables.size(); ++tb) {
         unsigned max = 0;
@@ -114,12 +114,12 @@ vector<unsigned> BaseHasher<DATATYPE, BIDTYPE>::getAllMaxBucketSize() {
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-unsigned BaseHasher<DATATYPE, BIDTYPE>::getTableSize() {
+unsigned BaseHasher<DATATYPE, BIDTYPE>::getTableSize() const {
     return tables[0].size();
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-unsigned BaseHasher<DATATYPE, BIDTYPE>::getMaxBucketSize() {
+unsigned BaseHasher<DATATYPE, BIDTYPE>::getMaxBucketSize() const {
     unsigned max = 0;
     typename unordered_map<BIDTYPE, std::vector<unsigned>, gqrhash<BIDTYPE>>::const_iterator it;
     for (it = tables[0].begin(); it != tables[0].end(); ++it) {
@@ -131,17 +131,17 @@ unsigned BaseHasher<DATATYPE, BIDTYPE>::getMaxBucketSize() {
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-unsigned BaseHasher<DATATYPE, BIDTYPE>::getBaseSize() {
+unsigned BaseHasher<DATATYPE, BIDTYPE>::getBaseSize() const {
     return this->numTotalItems;
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-unsigned BaseHasher<DATATYPE, BIDTYPE>::getCodeLength() {
+unsigned BaseHasher<DATATYPE, BIDTYPE>::getCodeLength() const {
     return this->codelength;
 }
 
 template<typename DATATYPE, typename BIDTYPE>
-unsigned BaseHasher<DATATYPE, BIDTYPE>::getNumTables() {
+unsigned BaseHasher<DATATYPE, BIDTYPE>::getNumTables() const {
     return this->tables.size();
 }
 

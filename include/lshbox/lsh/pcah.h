@@ -29,9 +29,9 @@ public:
 
     PCAH() : Hasher<DATATYPE>() {};
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
-    vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
@@ -42,7 +42,7 @@ private:
 }
 
 template<typename DATATYPE>
-vector<float> lshbox::PCAH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+vector<float> lshbox::PCAH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) const
 {
     // zero-centered first
     vector<float> domin_pc(pcsAll[k].size());
@@ -57,7 +57,7 @@ vector<float> lshbox::PCAH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::PCAH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::PCAH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const
 {
     vector<float> hashFloats = getHashFloats(k, domin);
     vector<bool> hashBits = this->quantization(hashFloats);

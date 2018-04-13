@@ -31,9 +31,9 @@ namespace lshbox
 
         spectral() : Hasher<DATATYPE>() {};
 
-        vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+        vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
-        vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+        vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
         void loadModel(const string& modelFile, const string& baseBitsFile);
 
@@ -51,7 +51,7 @@ namespace lshbox
 }
 
 template<typename DATATYPE>
-vector<float> lshbox::spectral<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+vector<float> lshbox::spectral<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) const
 {
     // zero-centered first
     vector<float> domin_pc(pcsAll[k].size());
@@ -71,7 +71,7 @@ vector<float> lshbox::spectral<DATATYPE>::getHashFloats(unsigned k, const DATATY
 
     vector<float > u(this->nbits);
     for (int i = 0; i < this->nbits; ++i) {
-        vector<float >& omegai = this->omegas[k][i];
+        const vector<float >& omegai = this->omegas[k][i];
         float yi = 1.0f;
         float  ys = 1;
         for (int j = 0; j < omegai.size(); ++j) {
@@ -110,7 +110,7 @@ void lshbox::spectral<DATATYPE>::initOmegas() {
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::spectral<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::spectral<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const
 {
 
     vector<float> hashFloats = getHashFloats(k, domin);

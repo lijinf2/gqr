@@ -24,7 +24,7 @@ public:
 
     Hasher() : BaseHasher<DATATYPE, BIDTYPE>() {}
 
-    BIDTYPE getBuckets(unsigned tb, const DATATYPE *data) override {
+    BIDTYPE getBuckets(unsigned tb, const DATATYPE *data) const override {
         return getHashVal(tb, data);
     }
     virtual vector<float>  getHashFloats(unsigned k, const DATATYPE* domin) {
@@ -33,9 +33,9 @@ public:
         return vector<float>();
     }; 
 
-    virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) = 0;
+    virtual vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const = 0;
 
-    virtual vector<bool> quantization(const vector<float>& hashFloats);
+    virtual vector<bool> quantization(const vector<float>& hashFloats) const;
 
     void initBaseHasher(
         const string &bitsFile, 
@@ -43,17 +43,17 @@ public:
         int cardinality,
         int codelength);
 
-    BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
+    BIDTYPE getHashVal(unsigned k, const DATATYPE *domin) const;
 
-    BIDTYPE bitsToBucket(const vector<bool>& hashbits); 
+    BIDTYPE bitsToBucket(const vector<bool>& hashbits) const; 
 
-    vector<bool> quantizeByZero(const vector<float>& hashFloats);
+    vector<bool> quantizeByZero(const vector<float>& hashFloats) const;
 
 };
 
 //--------------------- Implementations ------------------
 template<typename DATATYPE>
-vector<bool> Hasher<DATATYPE>::quantization(const vector<float>& hashFloats)
+vector<bool> Hasher<DATATYPE>::quantization(const vector<float>& hashFloats) const
 {
     return  this->quantizeByZero(hashFloats);
 }
@@ -102,13 +102,13 @@ void Hasher<DATATYPE>::initBaseHasher(
 }
 
 template<typename DATATYPE>
-typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin) {
+typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::getHashVal(unsigned k, const DATATYPE *domin) const {
     vector<bool> hashbits = getHashBits(k, domin);
     return bitsToBucket(hashbits);
 }
 
 template<typename DATATYPE>
-typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::bitsToBucket(const vector<bool>& hashbits) {
+typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::bitsToBucket(const vector<bool>& hashbits) const {
      BIDTYPE hashVal = 0;
      for (unsigned i = 0; i != hashbits.size(); ++i)
      {
@@ -122,7 +122,7 @@ typename Hasher<DATATYPE>::BIDTYPE Hasher<DATATYPE>::bitsToBucket(const vector<b
 }
 
 template<typename DATATYPE>
-vector<bool> Hasher<DATATYPE>::quantizeByZero(const vector<float>& hashFloats)
+vector<bool> Hasher<DATATYPE>::quantizeByZero(const vector<float>& hashFloats) const
 {
     vector<bool> hashBits;
     hashBits.resize(hashFloats.size());

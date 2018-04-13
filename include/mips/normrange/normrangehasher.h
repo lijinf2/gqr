@@ -64,9 +64,9 @@ public:
 
     NormRangeHasher() : Hasher<DATATYPE>() {};
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
-    vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
@@ -87,7 +87,7 @@ private:
 }
 
 template<typename DATATYPE>
-vector<float> lshbox::NormRangeHasher<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
+vector<float> lshbox::NormRangeHasher<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) const {
 
     vector<float> domin_pc(hashBitsLen + lengthBitsCount, 0);
 
@@ -112,7 +112,7 @@ vector<float> lshbox::NormRangeHasher<DATATYPE>::getHashFloats(unsigned k, const
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::NormRangeHasher<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::NormRangeHasher<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const
 {
     vector<float> hashFloats = getHashFloats(k, domin);
     vector<bool> hashBits = this->quantization(hashFloats);

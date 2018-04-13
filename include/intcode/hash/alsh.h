@@ -42,20 +42,20 @@ namespace lshbox {
          */
         int m;
 
-        DATATYPE calculateNormSquare(const DATATYPE* data, unsigned long dimension);
+        DATATYPE calculateNormSquare(const DATATYPE* data, unsigned long dimension) const;
 
 
-        DATATYPE calculateNorm(const DATATYPE* data, unsigned long dimension);
+        DATATYPE calculateNorm(const DATATYPE* data, unsigned long dimension) const ;
 
         /**
          * data[i] = data[i] / norm(data) * targetNorm;
          * which make sure that: norm(data) == targetNorm^2
          * @return a new vector stored normalized data, without change origin data.
          */
-        vector<DATATYPE > scale(const DATATYPE* data, unsigned long dimension, DATATYPE targetNorm);
+        vector<DATATYPE > scale(const DATATYPE* data, unsigned long dimension, DATATYPE targetNorm) const ;
     public:
         void loadModel(const string& modelFile, const string& baseBitsFile) override;
-        vector<float> getHashFloats(unsigned k, const DATATYPE *domin) override ;
+        vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const override ;
     };
 
 
@@ -101,7 +101,7 @@ namespace lshbox {
 
 
     template<typename DATATYPE>
-    inline DATATYPE ALSH<DATATYPE>::calculateNormSquare(const DATATYPE* data, unsigned long dimension) {
+    inline DATATYPE ALSH<DATATYPE>::calculateNormSquare(const DATATYPE* data, unsigned long dimension) const {
         DATATYPE normSquare = 0.0;
         for (int i = 0; i < dimension; ++i) {
             normSquare += data[i] * data[i];
@@ -110,12 +110,12 @@ namespace lshbox {
     }
 
     template<typename DATATYPE>
-    inline DATATYPE ALSH<DATATYPE>::calculateNorm(const DATATYPE* data, unsigned long dimension) {
+    inline DATATYPE ALSH<DATATYPE>::calculateNorm(const DATATYPE* data, unsigned long dimension) const {
         return std::sqrt(calculateNormSquare(data, dimension));
     }
 
     template<typename DATATYPE>
-    vector<DATATYPE > ALSH<DATATYPE>::scale(const DATATYPE* data, unsigned long dimension,  DATATYPE targetNorm) {
+    vector<DATATYPE > ALSH<DATATYPE>::scale(const DATATYPE* data, unsigned long dimension,  DATATYPE targetNorm) const {
 
         vector<DATATYPE > result(dimension);
         DATATYPE norm = this->calculateNorm(data, dimension);
@@ -126,7 +126,7 @@ namespace lshbox {
     }
 
     template<typename DATATYPE>
-    vector<float> ALSH<DATATYPE>::getHashFloats(unsigned tableIdx, const DATATYPE *data)
+    vector<float> ALSH<DATATYPE>::getHashFloats(unsigned tableIdx, const DATATYPE *data) const
     {
 
         //scale to U

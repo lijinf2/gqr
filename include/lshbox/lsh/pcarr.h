@@ -20,9 +20,9 @@ public:
 
     PCARR() : Hasher<DATATYPE>() {};
 
-    vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
@@ -32,7 +32,7 @@ private:
     vector<float> mean;
 };
 template<typename DATATYPE>
-vector<float> PCARR<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+vector<float> PCARR<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) const
 {
     vector<float> domin_pc(pcs.size());
     for (unsigned i = 0; i != domin_pc.size(); ++i)
@@ -58,7 +58,7 @@ vector<float> PCARR<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
 }
 
 template<typename DATATYPE>
-vector<bool> PCARR<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
+vector<bool> PCARR<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const {
     vector<float> hashFloats = getHashFloats(k, domin);
     vector<bool> hashBits = this->quantization(hashFloats);
     return hashBits;

@@ -39,9 +39,9 @@ public:
         int cardinality,
         int codelength);
 
-    virtual vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    virtual vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
-    BIDTYPE getBuckets(unsigned k, const DATATYPE *domin);
+    BIDTYPE getBuckets(unsigned k, const DATATYPE *domin) const override;
     // BIDTYPE getHashVal(unsigned k, const DATATYPE *domin);
 
     // virtual vector<int> quantization(const vector<float>& hashFloats);
@@ -122,7 +122,7 @@ void E2LSH<DATATYPE>::initBaseHasher(
 }
 
 template<typename DATATYPE>
-vector<float> E2LSH<DATATYPE>::getHashFloats(unsigned tableIdx, const DATATYPE *data)
+vector<float> E2LSH<DATATYPE>::getHashFloats(unsigned tableIdx, const DATATYPE *data) const
 {
     // project
     vector<float> projVector = this->getProjection(data, pcsAll[tableIdx], mean);
@@ -136,7 +136,7 @@ vector<float> E2LSH<DATATYPE>::getHashFloats(unsigned tableIdx, const DATATYPE *
 }
 
 template<typename DATATYPE>
-vector<int> E2LSH<DATATYPE>::getBuckets(unsigned tableIdx, const DATATYPE *data)
+vector<int> E2LSH<DATATYPE>::getBuckets(unsigned tableIdx, const DATATYPE *data) const
 {
     vector<float> hashFloats = getHashFloats(tableIdx, data);
 

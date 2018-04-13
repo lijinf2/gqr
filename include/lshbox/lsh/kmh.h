@@ -20,13 +20,13 @@ public:
 
     KMH() : Hasher<DATATYPE>() {};
 
-    vector<float> project(const DATATYPE *domin);
+    vector<float> project(const DATATYPE *domin) const ;
 
     vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
-    virtual vector<bool> quantization(const vector<float>& hashFloats) override;
+    virtual vector<bool> quantization(const vector<float>& hashFloats) const override;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
@@ -38,7 +38,7 @@ private:
 };
 
 template<typename DATATYPE>
-vector<float> KMH<DATATYPE>::project(const DATATYPE *domin) {
+vector<float> KMH<DATATYPE>::project(const DATATYPE *domin) const {
     vector<float> projection(d);
     for (unsigned i = 0; i < d; ++i) {
         float tmp = domin[i] - mean[i];
@@ -94,11 +94,11 @@ vector<float> KMH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) {
 }
 
 template<typename DATATYPE>
-vector<bool> KMH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
+vector<bool> KMH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const {
     vector<float> projection = project(domin);
     vector<bool> hashBits(num_bits);
 
-    vector<vector<vector<float> > >& cur_center_tables = center_tables[k];
+    const vector<vector<vector<float> > >& cur_center_tables = center_tables[k];
 
     for (int m = 0; m < num_subspace; ++m) {
         float min_dist_sqr = -1;
@@ -123,7 +123,7 @@ vector<bool> KMH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
 }
 
 template<typename DATATYPE>
-vector<bool> KMH<DATATYPE>::quantization(const vector<float>& hashFloats) {
+vector<bool> KMH<DATATYPE>::quantization(const vector<float>& hashFloats) const {
     std::cout << "quantization not implemented for KMH";
     assert(false);
 }

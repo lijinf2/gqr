@@ -20,9 +20,9 @@ public:
 
     SpH() : Hasher<DATATYPE>() {};
 
-    vector<float> getHashFloats(unsigned k, const DATATYPE *domin);
+    vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const;
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
     void loadModel(const string& modelFile, const string& baseBitsFile); 
 
@@ -31,7 +31,7 @@ private:
     std::vector<std::vector<float>> thresholds;
 };
 template<typename DATATYPE>
-vector<float> SpH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
+vector<float> SpH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin) const
 {
     std::vector<float> hashFloats;
     hashFloats.resize(pivots[k].size());
@@ -51,7 +51,7 @@ vector<float> SpH<DATATYPE>::getHashFloats(unsigned k, const DATATYPE *domin)
 }
 
 template<typename DATATYPE>
-vector<bool> SpH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) {
+vector<bool> SpH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const {
     std::vector<float> hashFloats = getHashFloats(k, domin);
     std::vector<bool> hashBits = this->quantization(hashFloats);
     return hashBits;

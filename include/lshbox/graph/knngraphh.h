@@ -19,7 +19,7 @@ public:
 
     KNNGraphH() : Hasher<DATATYPE>() {};
 
-    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) override;
+    vector<bool> getHashBits(unsigned k, const DATATYPE *domin) const override;
 
     void loadModel(const string& modelFile); 
 
@@ -28,12 +28,12 @@ public:
     }
 
 private:
-    vector<bool> bucketToBits_(BIDTYPE bid);
+    vector<bool> bucketToBits_(BIDTYPE bid) const;
 };
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::KNNGraphH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin)
+vector<bool> lshbox::KNNGraphH<DATATYPE>::getHashBits(unsigned k, const DATATYPE *domin) const
 {
 
     // random sample a point
@@ -76,7 +76,7 @@ void lshbox::KNNGraphH<DATATYPE>::loadModel(const string& modelFile) {
 }
 
 template<typename DATATYPE>
-vector<bool> lshbox::KNNGraphH<DATATYPE>::bucketToBits_(BIDTYPE bid) {
+vector<bool> lshbox::KNNGraphH<DATATYPE>::bucketToBits_(BIDTYPE bid) const {
     vector<bool> vec;
     BIDTYPE mask = 1;
     while(bid) {
