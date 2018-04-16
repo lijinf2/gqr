@@ -98,24 +98,22 @@ static float calInnerProductDist(const vector<float >& query, const vector<float
     return ipDist;
 }
 
+template<typename FeatureType>
 class Query {
     public: 
-        vector<float> content;
+        vector<FeatureType> content;
         TopK topk;
-        std::function<float(const vector<float>&, const vector<float>&)> distor;
+        std::function<float(const vector<FeatureType>&, const vector<FeatureType>&)> distor;
 
-        Query(const vector<float>& cont, int K, std::function<float(const vector<float>&, const vector<float>&)> functor) : topk(K){
+        Query(const vector<FeatureType>& cont, int K, std::function<float(const vector<FeatureType>&, const vector<FeatureType>&)> functor) : topk(K){
             this->content = cont;
             this->distor = functor;
         }
 
-        void evaluate(const vector<float>& item, int itemId) {
+        void evaluate(const vector<FeatureType>& item, int itemId) {
             float distance;
             distance = distor(this->content, item);
             topk.insert(IdAndDstPair(itemId, distance));
-        }
-
-        float calCosDst(const vector<float>& item) {
         }
 
         vector<IdAndDstPair> getTopK() const {
@@ -123,7 +121,8 @@ class Query {
         }
 };
 
-void updateQueries(vector<Query*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
+template<typename FeatureType>
+void updateQueries(vector<Query<FeatureType>*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
     for (auto& query: queries) {
         for (int i = 0; i < itemsPtr->size(); ++i) {
             query->evaluate((*itemsPtr)[i], itemStartIdx + i);
@@ -131,20 +130,21 @@ void updateQueries(vector<Query*> queries, const vector<vector<float>>* itemsPtr
     }
 }
 
-void updateAll(vector<Query>& queries, const vector<vector<float>>& items, int itemStartIdx, int numThreads = 4) {
+template<typename FeatureType>
+void updateAll(vector<Query<FeatureType>>& queries, const vector<vector<float>>& items, int itemStartIdx, int numThreads = 4) {
     vector<thread> threads;
     int numQueriesPerThread = queries.size() / numThreads + 1;
 
     int queryIdx = 0;
-    vector<Query*> queryLinks;
+    vector<Query<FeatureType>*> queryLinks;
     while(queryIdx < queries.size()) {
         queryLinks.push_back(&queries[queryIdx++]);
         if (queryLinks.size() == numQueriesPerThread) {
-            threads.push_back(thread(updateQueries, queryLinks, &items, itemStartIdx));
+            threads.push_back(thread(updateQueries<FeatureType>, queryLinks, &items, itemStartIdx));
             queryLinks.clear();
         }
     }
-    threads.push_back(thread(updateQueries, queryLinks, &items, itemStartIdx));
+    threads.push_back(thread(updateQueries<FeatureType>, queryLinks, &items, itemStartIdx));
     for (int i = 0; i < threads.size(); ++i) {
         threads[i].join();
     }
@@ -152,7 +152,8 @@ void updateAll(vector<Query>& queries, const vector<vector<float>>& items, int i
 
 class GroundWriter {
 public:
-    void writeLSHBOX(const char* lshboxBenchFileName, const vector<Query>& queryObjs, int K) {
+    template<typename FeatureType>
+    void writeLSHBOX(const char* lshboxBenchFileName, const vector<Query<FeatureType>>& queryObjs, int K) {
         // lshbox file
         ofstream lshboxFout(lshboxBenchFileName);
         if (!lshboxFout) {
@@ -172,7 +173,8 @@ public:
         cout << "lshbox groundtruth are written into " << lshboxBenchFileName << endl;
     }
 
-    void writeIVECS(const char* ivecsBenchFileName, const vector<Query>& queryObjs, int K) {
+    template<typename FeatureType>
+    void writeIVECS(const char* ivecsBenchFileName, const vector<Query<FeatureType>>& queryObjs, int K) {
         // ivecs file
         ofstream fout(ivecsBenchFileName, ios::binary);
         if (!fout) {

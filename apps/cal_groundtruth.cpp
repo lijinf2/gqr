@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    // vector<Query> queryObjs(queryVecs.size());
+    typedef Query<float> Query;
     vector<Query> queryObjs;
     for (int i = 0; i < queryVecs.size(); ++i) {
         if (metric == "euclidean") {
