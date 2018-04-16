@@ -1,9 +1,23 @@
 #include <vector>
 #include <string>
 #include <fstream>
-using namespace std;
+#include <climits>
 #include "gqr/util/cal_groundtruth.h"
 using namespace std;
+
+unsigned readFvecs(vector<vector<float>>& fvecs, ifstream& fin, unsigned maxNumRecords = UINT_MAX) {
+    int readNumRecords = 0;
+    int dimension;
+    while(readNumRecords < maxNumRecords && fin.read((char*)&dimension, sizeof(int))) {
+        readNumRecords++;
+        vector<float> vec;
+        vec.resize(dimension);
+        fin.read((char*)&vec[0], sizeof(float) * dimension);
+        fvecs.emplace_back(vec);
+    }
+    return readNumRecords;
+}
+
 int main(int argc, char** argv) {
     if (argc != 7 && argc != 8) {
         cout << "usage: program base_file.fvecs query_file.fvecs K groundtruth_file.lshbox groundtruth_file.ivecs num_threads=4" << endl;
@@ -28,13 +42,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     vector<vector<float>> queryVecs;
-    int dimension;
-    while(queryFin.read((char*)&dimension, sizeof(int))) {
-        vector<float> query;
-        query.resize(dimension);
-        queryFin.read((char*)&query[0], sizeof(float) * dimension);
-        queryVecs.push_back(query);
-    }
+    readFvecs(queryVecs, queryFin);
     queryFin.close();
 
     ifstream baseFin(baseFileName, ios::binary);
@@ -60,25 +68,15 @@ int main(int argc, char** argv) {
     int itemStartIdx = 0;
     vector<vector<float>> items;
     items.reserve(itemBatchSize);
-    int numBatched = 0;
-    while (baseFin.read((char*)&dimension, sizeof(int))) {
-        vector<float> vec;
-        vec.resize(dimension);
-        baseFin.read((char*)&vec[0], sizeof(float) * dimension);
-        items.push_back(vec);
-
-        if (items.size() == itemBatchSize) {
-            updateAll(queryObjs, items, itemStartIdx, numThreads);
-            numBatched++;
-            cout << numBatched * itemBatchSize << " items have been evaluated" << endl;
-
-            itemStartIdx += items.size();
-            items.clear();
+    while (true) {
+        readFvecs(items, baseFin, itemBatchSize);
+        if (items.size() == 0) {
+            break;
         }
-    }
-    if (items.size() != 0) {
+
         updateAll(queryObjs, items, itemStartIdx, numThreads);
         itemStartIdx += items.size();
+        cout << itemStartIdx << " items have been evaluated" << endl;
         items.clear();
     }
 
