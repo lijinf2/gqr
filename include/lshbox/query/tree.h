@@ -94,6 +94,10 @@ public:
         return count_;
     }
 
+    unsigned getFVLength() const {
+        return this->R_;
+    }
+
     ~Tree(){
         delete bits_;
     }

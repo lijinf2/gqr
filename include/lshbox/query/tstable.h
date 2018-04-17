@@ -34,12 +34,14 @@ public:
                 return a.second < b.second;
         });
         
-        minHeap_.push(ScoreIdxPair(posLossPairs_[0].second, 0));
+        minHeap_.emplace(ScoreIdxPair(posLossPairs_[0].second, 0));
     }
 
-    BIDTYPE getCurBucket() const  {
+    BIDTYPE getCurBucket() {
         unsigned idx = minHeap_.top().index_;
-
+        float score = minHeap_.top().score_;
+        shiftAndExpand(idx, score);
+        minHeap_.pop();
         // get flipping vector
         const bool* fv = tree_->getFV(idx);
         return calBucket(fv);
@@ -49,35 +51,12 @@ public:
         return minHeap_.top().score_;
     }
 
-    // here we use relation to apply score computation, save some overhead, 
-    // but result has very little difference from lossranking since accuracy of float number computation
-    // if want to exact the same result, use calScore instead
+    // equals to next bucket exists
     bool moveForward() {
-        const unsigned& idx = minHeap_.top().index_;
-        const float& score = minHeap_.top().score_;
-        const unsigned& lastOnePos = tree_->getLastOne(idx);
-
-        if (idx <= upperIdx) {
-            // shift
-            unsigned shiftIdx = 2 * idx + 1; 
-            const bool* shiftFV = tree_->getFV(shiftIdx);
-            // float shiftScore = calScore(shiftFV);
-            float shiftScore = 
-                score - posLossPairs_[lastOnePos].second + posLossPairs_[lastOnePos + 1].second;
-            minHeap_.push(ScoreIdxPair(shiftScore, shiftIdx));
-
-            // expand
-            unsigned expandIdx = 2 * idx + 2;
-
-            const bool* expandFV = tree_->getFV(expandIdx);
-            // float expandScore = calScore(expandFV);
-            float expandScore = 
-                score + posLossPairs_[lastOnePos + 1].second;
-            minHeap_.push(ScoreIdxPair(expandScore, expandIdx));
-        }
-        minHeap_.pop();
-        
         return !minHeap_.empty();
+        const unsigned& idx = minHeap_.top().index_;
+
+        minHeap_.pop();
     }
 
 private:
@@ -118,9 +97,32 @@ private:
         for (unsigned i = 0; i < newHashBits.size() ; ++i) {
             bucketID <<= 1;
             if (newHashBits[i] == true) {
-                bucketID += 1;
+                bucketID |= 1;
             }
         }
         return bucketID;
+    }
+
+    void shiftAndExpand(unsigned idx, float score) {
+        // update minHeap_
+        if (idx <= upperIdx) {
+            const unsigned& lastOnePos = tree_->getLastOne(idx);
+            // shift
+            unsigned shiftIdx = 2 * idx + 1; 
+            const bool* shiftFV = tree_->getFV(shiftIdx);
+            // float shiftScore = calScore(shiftFV);
+            float shiftScore = 
+                score - posLossPairs_[lastOnePos].second + posLossPairs_[lastOnePos + 1].second;
+            minHeap_.emplace(ScoreIdxPair(shiftScore, shiftIdx));
+
+            // expand
+            unsigned expandIdx = 2 * idx + 2;
+
+            const bool* expandFV = tree_->getFV(expandIdx);
+            // float expandScore = calScore(expandFV);
+            float expandScore = 
+                score + posLossPairs_[lastOnePos + 1].second;
+            minHeap_.emplace(ScoreIdxPair(expandScore, expandIdx));
+        }
     }
 };

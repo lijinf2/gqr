@@ -32,13 +32,13 @@ public:
                 e = fabs(e);
             }
             handlers_.emplace_back(TSTable(this->hashBits_[t], hashFloats, tree));
-            heap_.push(ScoreIdxPair(handlers_[t].getCurScore(), t)); 
+            heap_.emplace(ScoreIdxPair(handlers_[t].getCurScore(), t)); 
         }
 
         // initialize firstBKs_
         firstBK_.reserve(numTables);
         for (unsigned t = 0; t < numTables; ++t) {
-            firstBK_.push_back(mylsh.getHashVal(t, domin));
+            firstBK_.emplace_back(mylsh.getHashVal(t, domin));
         }
     }
 
@@ -55,7 +55,7 @@ public:
         heap_.pop();
         BIDTYPE newBucket = handlers_[tb].getCurBucket();
         if (handlers_[tb].moveForward()){
-            heap_.push(ScoreIdxPair(handlers_[tb].getCurScore(), tb)); 
+            heap_.emplace(ScoreIdxPair(handlers_[tb].getCurScore(), tb)); 
         }
 
         // return value
