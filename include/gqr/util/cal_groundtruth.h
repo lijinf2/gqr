@@ -38,6 +38,7 @@ class TopK {
         TopK(int K) {
             K_ = K; 
         }
+
         void insert(const IdAndDstPair& pair) {
             if (maxHeap_.size() < K_)
                 maxHeap_.push(pair);
@@ -46,6 +47,12 @@ class TopK {
                     maxHeap_.pop();
                     maxHeap_.push(pair);
                 }
+            }
+        }
+
+        void collect(const vector<IdAndDstPair>& pairs) {
+            for(const auto& pair : pairs) {
+                insert(pair);
             }
         }
 
