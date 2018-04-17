@@ -4,6 +4,7 @@
 #include <climits>
 #include "gqr/util/cal_groundtruth.h"
 using namespace std;
+using namespace lshbox;
 
 unsigned readFvecs(vector<vector<float>>& fvecs, ifstream& fin, unsigned maxNumRecords = UINT_MAX) {
     int readNumRecords = 0;

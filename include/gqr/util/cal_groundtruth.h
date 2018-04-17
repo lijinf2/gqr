@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <fstream>
 using namespace std;
+
+namespace lshbox {
 class IdAndDstPair {
     public:
         float distance;
@@ -192,3 +194,4 @@ public:
         cout << "ivecs groundtruth are written into " << ivecsBenchFileName << endl;
      }
 };
+}
