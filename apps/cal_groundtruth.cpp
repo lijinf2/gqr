@@ -52,15 +52,15 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    typedef Query<float> Query;
-    vector<Query> queryObjs;
+    typedef GTQuery<float> GTQuery;
+    vector<GTQuery> queryObjs;
     for (int i = 0; i < queryVecs.size(); ++i) {
         if (metric == "euclidean") {
-            queryObjs.push_back(Query(queryVecs[i], K, calEuclideanDist));
+            queryObjs.push_back(GTQuery(queryVecs[i], K, calEuclideanDist));
         } else if (metric == "angular") {
-            queryObjs.push_back(Query(queryVecs[i], K, calAngularDist));
+            queryObjs.push_back(GTQuery(queryVecs[i], K, calAngularDist));
         } else if (metric == "product") {
-            queryObjs.push_back(Query(queryVecs[i], K, calInnerProductDist));
+            queryObjs.push_back(GTQuery(queryVecs[i], K, calInnerProductDist));
         } else {
             assert(false);
         }

@@ -101,13 +101,13 @@ static float calInnerProductDist(const vector<float >& query, const vector<float
 }
 
 template<typename FeatureType>
-class Query {
+class GTQuery {
     public: 
         vector<FeatureType> content;
         TopK topk;
         std::function<float(const vector<FeatureType>&, const vector<FeatureType>&)> distor;
 
-        Query(const vector<FeatureType>& cont, int K, std::function<float(const vector<FeatureType>&, const vector<FeatureType>&)> functor) : topk(K){
+        GTQuery(const vector<FeatureType>& cont, int K, std::function<float(const vector<FeatureType>&, const vector<FeatureType>&)> functor) : topk(K){
             this->content = cont;
             this->distor = functor;
         }
@@ -124,7 +124,7 @@ class Query {
 };
 
 template<typename FeatureType>
-void updateQueries(vector<Query<FeatureType>*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
+void updateQueries(vector<GTQuery<FeatureType>*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
     for (auto& query: queries) {
         for (int i = 0; i < itemsPtr->size(); ++i) {
             query->evaluate((*itemsPtr)[i], itemStartIdx + i);
@@ -133,12 +133,12 @@ void updateQueries(vector<Query<FeatureType>*> queries, const vector<vector<floa
 }
 
 template<typename FeatureType>
-void updateAll(vector<Query<FeatureType>>& queries, const vector<vector<float>>& items, int itemStartIdx, int numThreads = 4) {
+void updateAll(vector<GTQuery<FeatureType>>& queries, const vector<vector<float>>& items, int itemStartIdx, int numThreads = 4) {
     vector<thread> threads;
     int numQueriesPerThread = queries.size() / numThreads + 1;
 
     int queryIdx = 0;
-    vector<Query<FeatureType>*> queryLinks;
+    vector<GTQuery<FeatureType>*> queryLinks;
     while(queryIdx < queries.size()) {
         queryLinks.push_back(&queries[queryIdx++]);
         if (queryLinks.size() == numQueriesPerThread) {
@@ -155,7 +155,7 @@ void updateAll(vector<Query<FeatureType>>& queries, const vector<vector<float>>&
 class GroundWriter {
 public:
     template<typename FeatureType>
-    void writeLSHBOX(const char* lshboxBenchFileName, const vector<Query<FeatureType>>& queryObjs, int K) {
+    void writeLSHBOX(const char* lshboxBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs, int K) {
         // lshbox file
         ofstream lshboxFout(lshboxBenchFileName);
         if (!lshboxFout) {
@@ -176,7 +176,7 @@ public:
     }
 
     template<typename FeatureType>
-    void writeIVECS(const char* ivecsBenchFileName, const vector<Query<FeatureType>>& queryObjs, int K) {
+    void writeIVECS(const char* ivecsBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs, int K) {
         // ivecs file
         ofstream fout(ivecsBenchFileName, ios::binary);
         if (!fout) {
