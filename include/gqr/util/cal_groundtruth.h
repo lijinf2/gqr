@@ -8,6 +8,7 @@
 #include <thread>
 #include <math.h>
 #include <assert.h>
+#include <utility>
 #include <fstream>
 using namespace std;
 
@@ -53,6 +54,12 @@ class TopK {
         void collect(const vector<IdAndDstPair>& pairs) {
             for(const auto& pair : pairs) {
                 insert(pair);
+            }
+        }
+
+        void collect(const vector<pair<int, float>>& pairs) {
+            for(const auto& pair : pairs) {
+                insert(IdAndDstPair(pair.first, pair.second));
             }
         }
 
