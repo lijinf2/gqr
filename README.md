@@ -4,7 +4,7 @@ GQR
 -----------------------------------------------------------------------------------------------------------------
 # Why GQR framework for similarity search
 - Fast Training (Matlab and Automatic Parallelization)
-- Support Multiple Hash Tables (Like k-nn Graph supports k > 1)
+- Support of Multiple Hash Tables (Like k-nn Graph supports k > 1)
 
 # Dependences
 - CMake
