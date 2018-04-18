@@ -59,6 +59,9 @@ You may refer to folder `./script` for detailed explanations and more instructio
 ## Acknowledgement
 GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 
 
+## More
+[Distribued GQR on general system for similarity search](https://github.com/lijinf2/losha)
+
 ## Reference 
 **[A General and Efficient Querying Method for Learning to Hash (SIGMOD 2018)](http://appsrv.cse.cuhk.edu.hk/~jfli/paper/2018/l2h.pdf)**
 
