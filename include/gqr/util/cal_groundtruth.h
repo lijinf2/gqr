@@ -147,7 +147,7 @@ void updateQueries(vector<GTQuery<FeatureType>*> queries, const vector<vector<fl
 }
 
 template<typename FeatureType>
-void updateAll(vector<GTQuery<FeatureType>>& queries, const vector<vector<float>>& items, int itemStartIdx, int numThreads = 4) {
+void updateAll(vector<GTQuery<FeatureType>>& queries, const vector<vector<FeatureType>>& items, int itemStartIdx, int numThreads = 4) {
     vector<thread> threads;
     int numQueriesPerThread = queries.size() / numThreads + 1;
 
