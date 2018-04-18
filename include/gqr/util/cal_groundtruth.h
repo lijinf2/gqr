@@ -138,7 +138,7 @@ class GTQuery {
 };
 
 template<typename FeatureType>
-void updateQueries(vector<GTQuery<FeatureType>*> queries, const vector<vector<float>>* itemsPtr, int itemStartIdx) {
+void updateQueries(vector<GTQuery<FeatureType>*> queries, const vector<vector<FeatureType>>* itemsPtr, int itemStartIdx) {
     for (auto& query: queries) {
         for (int i = 0; i < itemsPtr->size(); ++i) {
             query->evaluate((*itemsPtr)[i], itemStartIdx + i);
