@@ -131,7 +131,7 @@ class GTQuery {
             this->distor = functor;
         }
 
-        void evaluate(const vector<FeatureType>& item, int itemId) {
+        virtual void evaluate(const vector<FeatureType>& item, int itemId) {
             float distance;
             distance = distor(this->content, item);
             topk.insert(IdAndDstPair(itemId, distance));
