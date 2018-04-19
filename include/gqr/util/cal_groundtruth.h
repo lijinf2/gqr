@@ -73,6 +73,10 @@ class TopK {
             std::sort(results.begin(), results.end(), MaxHeapCMP());
             return results;
         }
+
+        int getK() const {
+            return K_;
+        }
     private:
         int K_;
         priority_queue<IdAndDstPair, vector<IdAndDstPair>, MaxHeapCMP> maxHeap_;
@@ -135,6 +139,10 @@ class GTQuery {
         vector<IdAndDstPair> getTopK() const {
             return this->topk.getTopK();
         }
+
+        int getK() const {
+            return topk.getK();
+        }
 };
 
 template<typename FeatureType>
@@ -169,15 +177,17 @@ void updateAll(vector<GTQuery<FeatureType>>& queries, const vector<vector<Featur
 class GroundWriter {
 public:
     template<typename FeatureType>
-    void writeLSHBOX(const char* lshboxBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs, int K) {
+    void writeLSHBOX(const char* lshboxBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs) {
         // lshbox file
         ofstream lshboxFout(lshboxBenchFileName);
         if (!lshboxFout) {
             cout << "cannot create output file " << lshboxBenchFileName << endl;
             assert(false);
         }
+        int K = queryObjs[0].getK();
         lshboxFout << queryObjs.size() << "\t" << K << endl;
         for (int i = 0; i < queryObjs.size(); ++i) {
+            assert(queryObjs[i].getK() == K);
             lshboxFout << i << "\t";
             vector<IdAndDstPair> topker = queryObjs[i].getTopK();
             for (int idx = 0; idx < topker.size(); ++idx) {
@@ -190,14 +200,16 @@ public:
     }
 
     template<typename FeatureType>
-    void writeIVECS(const char* ivecsBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs, int K) {
+    void writeIVECS(const char* ivecsBenchFileName, const vector<GTQuery<FeatureType>>& queryObjs) {
         // ivecs file
         ofstream fout(ivecsBenchFileName, ios::binary);
         if (!fout) {
             cout << "cannot create output file " << ivecsBenchFileName << endl;
             assert(false);
         }
+        int K = queryObjs[0].getK();
         for (int i = 0; i < queryObjs.size(); ++i) {
+            assert(queryObjs[i].getK() == K);
             fout.write((char*)&K, sizeof(int));
             vector<IdAndDstPair> topker = queryObjs[i].getTopK();
             for (int idx = 0; idx < topker.size(); ++idx) {

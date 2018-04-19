@@ -84,8 +84,8 @@ int main(int argc, char** argv) {
     baseFin.close();
 
     GroundWriter writer;
-    writer.writeLSHBOX(lshboxBenchFileName, queryObjs, K);
+    writer.writeLSHBOX(lshboxBenchFileName, queryObjs);
 
-    writer.writeIVECS(ivecsBenchFileName, queryObjs, K);
+    writer.writeIVECS(ivecsBenchFileName, queryObjs);
     return 0;
 }
