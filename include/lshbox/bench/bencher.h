@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <cmath>
+#include <string>
 #include <utility>
 #include "benchrecord.h"
 using std::vector;
@@ -15,6 +16,7 @@ using std::pair;
 using std::cout;
 using std::endl;
 using std::ifstream;
+using std::string;
 
 class Bencher {
 public:
@@ -25,19 +27,24 @@ public:
             assert(false);
         }
         int numQueries;
-        int K;
+        float threshold; 
 
-        fin >> numQueries >> K;
+        string line;
+        getline(fin, line);
+        istringstream issFirstLine(line);
+        issFirstLine >> numQueries >> threshold;
+
         nns.reserve(numQueries);
-
         unsigned qid;
+        unsigned itemId;
+        float itemDist;
         for (int i = 0; i < numQueries; ++i) {
-            fin >> qid;
-
+            getline(fin, line);
+            istringstream iss(line);
+            iss >> qid;
             vector<pair<unsigned, float>> record;
-            record.resize(K);
-            for (int j = 0; j < K; ++j) {
-                fin >> record[j].first >> record[j].second;
+            while(iss >> itemId >> itemDist) {
+                record.emplace_back(std::make_pair(itemId, itemDist));
             }
             nns.emplace_back(BenchRecord(qid, record, true));
         }

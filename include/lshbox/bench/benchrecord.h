@@ -18,7 +18,7 @@ public:
         } else {
             std::sort(this->knn.begin(), this->knn.end(),
                 [](const pair<unsigned, float>& a, const pair<unsigned, float>& b) {
-                    if (fabs(a.second - b.second) > 0.000001)
+                    if (a.second != b.second)
                         return a.second < b.second;
                     else 
                         return a.first < b.first;
