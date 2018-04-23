@@ -14,4 +14,6 @@ num_queries=1000
 base_file="../data/${dataset}/${dataset}_base.fvecs"
 query_file="../data/${dataset}/${dataset}_query.fvecs"
 
+# query_file="../data/${dataset}/${dataset}_query.idfvecs"
+
 ../build/bin/sample_queries $base_file $num_queries $query_file
