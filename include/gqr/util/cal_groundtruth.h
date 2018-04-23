@@ -28,7 +28,7 @@ class IdAndDstPair {
 class MaxHeapCMP{
     public:
         bool operator()(const IdAndDstPair& a, const IdAndDstPair& b) {
-            if (fabs(a.distance - b.distance) > 0.000001)
+            if (a.distance != b.distance) 
                 return a.distance < b.distance;
             else 
                 return a.id < b.id;
