@@ -3,17 +3,21 @@
 #include <string>
 #include <cstring>
 #include <unordered_map>
+#include <unordered_set>
 #include <fstream>
 #include <utility>
 #include <lshbox.h>
 #include <random>
 #include <thread>
 #include <functional>
+#include <algorithm>
+#include <cstdlib>
 #include <lshbox/matrix.h>
 #pragma once
 using std::vector;
 using std::string;
 using std::unordered_map;
+using std::unordered_set;
 
 /* select k elements of n elements
  * @n: total number of elements 
@@ -52,6 +56,37 @@ vector<bool> selection(unsigned n, unsigned k) {
     }
 
     return selected;
+}
+
+// return k index that are sampled, index ranges from 0 to n - 1
+unordered_set<unsigned> sampleRand(unsigned n, unsigned k, int seed = 0) {
+
+    std::default_random_engine generator(seed);
+    std::uniform_int_distribution<unsigned> distribution(0, n - 1);
+
+    unordered_set<unsigned> s;
+
+    for (int idx = 0; idx < n; ++idx) {
+        // if selected
+        if (distribution(generator) < k) {
+            s.insert(idx);
+        }
+
+        if (s.size() == k) {
+            break;
+        }
+    }
+
+    // if have not selected enough items
+    while (s.size() < k) {
+        unsigned target = distribution(generator);
+        while (s.find(target) != s.end()) {
+            target = distribution(generator);
+        }
+        s.insert(target);
+    }
+
+    return s;
 }
 
 template<typename ScannerT, typename AnswerT>
