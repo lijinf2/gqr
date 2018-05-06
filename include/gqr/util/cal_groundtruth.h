@@ -75,6 +75,23 @@ class TopK {
             return results;
         }
 
+        vector<pair<int, float>> getTopKPairs() const {
+            priority_queue<IdAndDstPair, vector<IdAndDstPair>, MaxHeapCMP> heap = maxHeap_;
+            vector<pair<int, float>> results;
+            while (!heap.empty()) {
+                results.push_back(std::make_pair(heap.top().id, heap.top().distance));
+                heap.pop();
+            }
+            std::sort(
+                results.begin(),
+                results.end(), 
+                [](const pair<int, float>& a, const pair<int, float>& b) {
+                    if (a.second != b.second) {return a.second < b.second;}
+                    else return a.first < b.first;
+            });
+            return results;
+        }
+
         int getK() const {
             return K_;
         }
