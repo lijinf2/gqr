@@ -52,6 +52,10 @@ class TopK {
             }
         }
 
+        void insert(const pair<int, float>& p) {
+            insert(IdAndDstPair(p.first, p.second));
+        }
+
         void collect(const vector<IdAndDstPair>& pairs) {
             for(const auto& pair : pairs) {
                 insert(pair);
