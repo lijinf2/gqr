@@ -23,7 +23,7 @@ tmp_T = tic;
 
 lens = zeros(Nitems, lengthBits);
 max_norm = max(norms);
-scale = 2^lengthBits / max_norm;
+%scale = 2^lengthBits / max_norm;
 
 % put vector norm(length) in lens matrix in binary form
 for k=1:Nitems
@@ -61,9 +61,7 @@ for k=1:Nitems
 end
 
 Normalized_A = [A normTerm];
-first_U = normrnd(0, 1, Nfeatures, maxbits);
-lastbit_U = normrnd(0, 1, 1, maxbits);
-U = [first_U; lastbit_U];
+U = normrnd(0, 1, Nfeatures + 1, maxbits);
 Z = Normalized_A * U;
 
 B = (Z > 0);
