@@ -1,7 +1,7 @@
-function [model, V, elapse] = NRALSH_learn(dataset, maxbits, w, m, U, normInteval, norms, prct)
+function [model, V, elapse] = NRALSH_learn(dataset, maxbits, w, m, U, normInteval, norms, prct, lengthBits)
 
 tmp_T = tic;
-
+[NormIndex] = NRALSH_interval(norms, prct);
 [Nitems, Nfeatures] = size(dataset);
 
 % normalize by scaling factor
@@ -17,8 +17,9 @@ end
 % add normTerm in the end
 normTerm = zeros(Nitems, m);
 for k=1:Nitems
+    newNorm = sum(dataset(k, :).^2).^0.5;
    	for i=1:m 
-		normTerm(k, i) = norms(k)^(2^i);
+		normTerm(k, i) = newNorm^(2^i);
     end
 end
 
@@ -33,10 +34,6 @@ expandedB = repmat(model.B, size(normalized_data, 1), 1);
 Ym = (normalized_data * model.A + expandedB) / w ;
 V = floor(Ym);
 
-% tha above is original ALSH, below adds lengthIndex
-
-[lens] = NRALSH_interval(norms, prct);
-
-V = [V lens];
+V = [V NormIndex];
 elapse = toc(tmp_T);
 end
