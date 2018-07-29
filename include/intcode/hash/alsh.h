@@ -54,7 +54,7 @@ namespace lshbox {
          */
         vector<DATATYPE > scale(const DATATYPE* data, unsigned long dimension, DATATYPE targetNorm) const ;
     public:
-        void loadModel(const string& modelFile, const string& baseBitsFile) override;
+        virtual void loadModel(const string& modelFile, const string& baseBitsFile) override;
         vector<float> getHashFloats(unsigned k, const DATATYPE *domin) const override ;
     };
 

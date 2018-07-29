@@ -26,18 +26,15 @@ numQueries = size(testset, 1)
 
 % cal multiple scaling factors
 l2norms = sum(trainset.^2,  2).^0.5;
-prct = prctile(l2norms, linspace(0, 100, normInteval+1));
+prct = prctile(l2norms, linspace(0, 100, normInteval));
 prct(end) = max(l2norms);
 
 % write data statistics into model file
 modelFid = fopen(modelFile,'wt');
 % #of tables, dimension, codelength, #data points, #num queries
 fprintf(modelFid,'%d %d %d %d %d\n' , nHashTable, dimension, codelength, cardinality, numQueries);
-% m and U in alsh 
-fprintf(modelFid, '%f %d %f\n', W, m, U);
-
-% added for subdatasets
-fprintf(modelFid,'%d\n' , normInteval);
+% model parameters
+fprintf(modelFid, '%f %d %f %d\n', W, m, U, normInteval);
 fprintf(modelFid, '%f ', prct);
 fprintf(modelFid, '\n');
 
@@ -72,4 +69,4 @@ end
 fclose(modelFid)
 fclose(baseCodeFid);
 fclose(queryCodeFid);
-disp('==============================');
+disp('===========finished===================');

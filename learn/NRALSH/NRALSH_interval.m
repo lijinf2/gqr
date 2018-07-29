@@ -4,7 +4,7 @@ numItems = size(norms, 1)
 lens = zeros(numItems, 1);
 
 for k=1:numItems
-    index = find(prct>=norms(k), 1) - 2;
+    index = find(prct>=norms(k), 1) - 1;
     lens(k) = index;     
 end
 end

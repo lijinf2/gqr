@@ -15,13 +15,15 @@
 #include <lshbox/lsh/isoh.h>
 #include <lshbox/lsh/kmh.h>
 #include <lshbox/lsh/spectral.h>
-#include <lshbox/lsh/sim.h>
 #include <intcode/hash/e2lsh.h>
-#include <intcode/hash/alsh.h>
 
 #include <lshbox/graph/knngraphh.h>
 
+// for maximum inner product search
+#include <intcode/hash/alsh.h>
 #include <mips/alshrank/alshrankhasher.h>
+#include <mips/nralsh/nralshhasher.h>
+#include <lshbox/lsh/sim.h>
 #include <mips/normrange/normrangehasher.h>
 
 #include "search.h"
@@ -167,6 +169,11 @@ int main(int argc, const char **argv)
         lshbox::ALSHRankHasher<DATATYPE > alshrank;
         alshrank.loadModel(modelFile, baseBitsFile);
         search_alshmatchrank(queryMethod, data, query, alshrank, bench, params, IP_DIST);
+
+    } else if (hashMethod == "NRALSH") {
+        lshbox::NRALSHHasher<DATATYPE > nralsh;
+        nralsh.loadModel(modelFile, baseBitsFile);
+        search_nralshmatchrank(queryMethod, data, query, nralsh, bench, params, IP_DIST);
 
     } else if (hashMethod == "KNNGraph") { // graph method
         lshbox::KNNGraphH<DATATYPE> kgraphhasher; 
