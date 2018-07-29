@@ -12,6 +12,8 @@
 #include <base/mtableprober.h>
 #include <base/onetableprober.h>
 #include "mips/nralsh/nralshhasher.h"
+#include "mips/nralsh/nritemlist.h"
+
 using std::priority_queue;
 using std::vector;
 using std::pair;
@@ -54,7 +56,7 @@ public:
             };
 
             this->LTable_.emplace_back(
-                BucketList<BIDTYPE>(mylsh.tables[tb], distor));
+                NRItemList(mylsh.tables[tb], distor));
         }
 
         // initialize minHeap
@@ -68,7 +70,7 @@ public:
         return &LTable_[tb];
     }
 private:
-    vector<BucketList<BIDTYPE>> LTable_;
+    vector<NRItemList> LTable_;
 };
 
 }

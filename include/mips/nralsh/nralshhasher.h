@@ -1,15 +1,17 @@
 #pragma once
+#include <iostream>
 #include <vector>
 #include <utility>
 
-#include "intcode/hash/alsh.h"
+// #include "intcode/hash/alsh.h"
+#include "mips/alshrank/alshrankhasher.h"
 using std::pair;
 using std::vector;
 
 namespace lshbox {
 
 template<typename DATATYPE>
-class NRALSHHasher : public ALSH<DATATYPE> {
+class NRALSHHasher : public ALSHRankHasher<DATATYPE> {
 public:
     int numIntervals = -1;
     vector<float> scalers;
@@ -22,6 +24,7 @@ public:
 
 template<typename DATATYPE>
 void NRALSHHasher<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
+    std::cout << "load models ...";
     string line;
     // initialized statistics and model
     ifstream modelFin(modelFile.c_str());
@@ -59,6 +62,7 @@ void NRALSHHasher<DATATYPE>::loadModel(const string& modelFile, const string& ba
 
     // initialized numTotalItems and tables, modelCodelen + 1 (index of scaling factor)
     this->initBaseHasher(baseBitsFile, modelNumTable, modelNumItem, modelCodelen + 1);
+    std::cout << " finished " << std::endl;
 }
 
 }
