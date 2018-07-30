@@ -232,6 +232,7 @@ void search_nralshmatchrank(string method,
                  const unordered_map<string, string>& params,
                  const unsigned TYPE_DIST) {
 
+    std::cout << "NRALSHProber constructing ... " << std::endl;
     // initialize scanner
     typename lshbox::Matrix<DATATYPE>::Accessor accessor(data);
     lshbox::Metric<DATATYPE> metric(data.getDim(), TYPE_DIST);

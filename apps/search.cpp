@@ -107,7 +107,7 @@ int main(int argc, const char **argv)
     }
 
     // load lshbox type data and query
-    std::cout << "load data and query..." << std::endl;
+    std::cout << "load data and query...";
     if (baseFormat != "fvecs") {
         std::cout << "GQR currently only supports FVECS" << endl;
         assert(false);
@@ -115,6 +115,7 @@ int main(int argc, const char **argv)
     }
     lshbox::Matrix<DATATYPE> data(dataFile);
     lshbox::Matrix<DATATYPE> query(queryFile);
+    std::cout << " finished." << std::endl;
     
     // load model
     if (hashMethod == "PCAH") {

@@ -24,7 +24,8 @@ public:
 
 template<typename DATATYPE>
 void NRALSHHasher<DATATYPE>::loadModel(const string& modelFile, const string& baseBitsFile) {
-    std::cout << "load models ...";
+    std::cout << "load models and initilize hash tables ...";
+
     string line;
     // initialized statistics and model
     ifstream modelFin(modelFile.c_str());

@@ -1,14 +1,14 @@
 addpath('../../MatlabFunc/Tools')
 % addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
-dataset = 'netflix';
+dataset = 'imagenet';
 W = 2.5;
-codelength = 32;
+codelength = 26;
 nHashTable = 1; % multiple hash tables do not help accuracy, but only slow down anns
 
 m = 3;
 U = 0.83;
-normInteval = 32; % number of intervals
+normInteval = 64; % number of intervals
 
 method = 'NRALSH'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(normInteval),'i_',num2str(nHashTable),'tb.txt'];              

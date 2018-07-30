@@ -103,14 +103,13 @@ void E2LSH<DATATYPE>::initBaseHasher(
     vector<int> hashVal(codelength);
     int itemIdx = 0;
     unordered_map<BIDTYPE, vector<unsigned>, gqrhash<BIDTYPE>> curTable;
+    curTable.reserve(2 * cardinality);
     while (getline(baseFin, line)) {
         istringstream iss(line);
         for (int i = 0; i < codelength; ++i) {
             iss >> hashVal[i];
         }
-        if (curTable.find(hashVal) == curTable.end())
-            curTable[hashVal] = vector<unsigned>();
-        curTable[hashVal].push_back(itemIdx);
+        curTable[hashVal].emplace_back(itemIdx);
         itemIdx++;
         if (itemIdx == cardinality) {
             itemIdx = 0;
