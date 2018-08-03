@@ -3,10 +3,10 @@ addpath('../../MatlabFunc/ANNS/Hashing/Unsupervised')
 
 % single PCA and multiple rotations
 dataset = 'audio';
-method = 'ITQ'
 codelength = 12;            
 nHashTable = 1;
     
+method = 'ITQ'
 baseCodeFile = ['./hashingCodeTXT/',method,'table',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];              
 queryCodeFile = ['./hashingCodeTXT/',method,'query',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
 modelFile = ['./hashingCodeTXT/',method,'model',upper(dataset),num2str(codelength),'b_',num2str(nHashTable),'tb.txt'];
