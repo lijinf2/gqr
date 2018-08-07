@@ -21,7 +21,7 @@ GQR
 
     cd learn/PCAH
 
-    mkdir hashingCodeTXT && matlab < pcah.m
+    mkdir hashingCodeTXT && bash run.sh
 
     cd ../../
 
@@ -34,6 +34,15 @@ GQR
     cd ../script && bash search.sh
 
 You may refer to folder `./script` for detailed explanations and more instructions.
+
+# Reproduce results in the SIGMOD paper
+    cd reproduce
+
+    bash prepareData
+
+    ./runExperiment.sh PCAH GQR 12 1 cifar60k
+
+    bash ./runMainExperiments
   
 # Support
 ## Hashing Algorithms
