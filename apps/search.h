@@ -24,9 +24,10 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
     std::cout << "HASH TABLE SIZE    , " << mylsh.getTableSize() << std::endl;
     std::cout << "LARGEST BUCKET SIZE    , " << mylsh.getMaxBucketSize() << std::endl;
 
-    std::cout << "expected avg items, " << "overall query time, " 
-        << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual avg items" << "\n";
+    // std::cout << "expected avg items, " << "overall query time, " 
+    //     << "avg recall, " << "avg precision, " << "avg error ratio, " << "actual avg items" << "\n";
 
+    std::cout << "# retrieved items, " << "overall query time, " << "avg recall" << "\n";
     double runtime = 0;
     lshbox::timer timer;
     int numAllItems = data.getSize();
@@ -65,11 +66,8 @@ void annQuery(const lshbox::Matrix<DATATYPE>& data, const lshbox::Matrix<DATATYP
             }
             benchResult.emplace_back(dst);
         }
-        std::cout << numItems << ", " << runtime <<", "
-            << cal_avg_recall(opqBencher, benchResult, true) << ", "
-            << cal_avg_precision(opqBencher, benchResult, numItemProbed, true) << ", " 
-            << cal_avg_error(opqBencher, benchResult, true) << ", " 
-            << cal_avg(numItemProbed) <<"\n";
+        std::cout << cal_avg(numItemProbed) << ", " << runtime <<", "
+            << cal_avg_recall(opqBencher, benchResult, true) << std::endl;
 
 
         if (numItems == numAllItems)
