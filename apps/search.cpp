@@ -122,7 +122,7 @@ int main(int argc, const char **argv)
         lshbox::PCAH<DATATYPE> pcah;
         pcah.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, pcah, bench, params, metric);
-    } else if (hashMethod == "ITQ") {
+    } else if (hashMethod == "ITQH") {
         lshbox::ITQ<DATATYPE> itq;
         itq.loadModel(modelFile, baseBitsFile);
         search(queryMethod, data, query, itq, bench, params, metric);
