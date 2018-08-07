@@ -13,7 +13,7 @@ make search 2>&1 | tee ../reproduce/log.txt
 cd ../reproduce
 
 # for dataset in "cifar60k" "gist" 
-for dataset in "audio" "cifar60k" 
+for dataset in "cifar60k" "gist" "tiny5m" "sift10m"
 do
 
 # get dataset
