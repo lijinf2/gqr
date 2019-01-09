@@ -230,7 +230,7 @@ public:
             std::cout << "cannot open file " << dataFile.c_str() << std::endl;
             assert(false);
         }
-        unsigned fileSize = fin.tellg();
+        unsigned long long fileSize = fin.tellg();
         fin.seekg(0, fin.beg);
         assert(fileSize != 0);
 
