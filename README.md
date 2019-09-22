@@ -73,7 +73,7 @@ GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/L
 ## More
 [Datasets](http://www.cse.cuhk.edu.hk/systems/hash/gqr/datasets.html)
 
-[Distribued GQR on general system for similarity search](https://github.com/lijinf2/losha)
+[Distribued GQR on general system for similarity search](https://github.com/lijinf2/losha/tree/master/apps/gqr)
 
 ## Reference 
 **[A General and Efficient Querying Method for Learning to Hash (SIGMOD 2018)](http://appsrv.cse.cuhk.edu.hk/~jfli/paper/2018/l2h.pdf)**
