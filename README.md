@@ -72,6 +72,7 @@ GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/L
 
 ## More
 [Datasets](http://www.cse.cuhk.edu.hk/systems/hash/gqr/datasets.html)
+
 [Distribued GQR on general system for similarity search](https://github.com/lijinf2/losha)
 
 ## Reference 
