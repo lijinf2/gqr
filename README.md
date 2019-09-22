@@ -3,8 +3,10 @@ GQR
 # A General and Efficient Querying Method for Learning to Hash (SIGMOD 2018)
 -----------------------------------------------------------------------------------------------------------------
 # Why GQR framework for similarity search
-- Fast Training (Matlab and Automatic Parallelization)
-- Support of Multiple Hash Tables (Like k-nn Graph supports k > 1)
+- Train fast (Matlab and Automatic Parallelization)
+- Support Multiple Hash Tables (Like k-nn Graph with k > 1)
+- 10+ Datasets
+
 
 # Dependences
 - CMake
@@ -69,6 +71,7 @@ You may refer to folder `./script` for detailed explanations and more instructio
 GQR project is developed based on LSHBOX (https://github.com/RSIA-LIESMARS-WHU/LSHBOX) and MatlabFunc (https://github.com/dengcai78/MatlabFunc). Great appreciation to the contributors of LSHBOX and MatlabFunc. 
 
 ## More
+[Datasets](http://www.cse.cuhk.edu.hk/systems/hash/gqr/datasets.html)
 [Distribued GQR on general system for similarity search](https://github.com/lijinf2/losha)
 
 ## Reference 
